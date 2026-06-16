@@ -157,6 +157,7 @@ function Shell() {
           <Outlet />
         </main>
       </div>
+      <MobileBottomNav />
       {settings.showAiFab && <AIChatFab />}
       <Toaster position="bottom-right" theme="dark" richColors />
     </>
