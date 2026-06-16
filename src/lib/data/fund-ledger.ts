@@ -3,23 +3,44 @@ import { useCallback, useEffect, useState } from "react";
 /* ------------------------------------------------------------------ *
  * Manual fund & resource-gap ledger.
  *
- * The Google Form captures school WASH conditions, not money. So funds
- * collected and resource gaps are recorded here by the team — each entry
- * notes who gave the fund, when, the purpose and the district. This is a
- * clean balance-sheet style tracker that lives alongside the live survey
- * data without ever fabricating numbers.
+ * Every financial number in the platform is derived from entries here —
+ * Funds Collected (with source), Required Resources (gaps), Capital vs
+ * Operational tagging, optional school/UDISE attribution. No synthetic
+ * numbers anywhere; the Fund Ledger IS the source of truth.
  * ------------------------------------------------------------------ */
 
 export type LedgerKind = "fund" | "gap";
+export type CostType = "capital" | "opex";
+
+export const CAPITAL_CATEGORIES = [
+  "water", "sanitation", "hygiene", "environment", "riskReduction", "technology", "education",
+] as const;
+export const OPEX_CATEGORIES = [
+  "maintenance", "repairs", "cleaning", "consumables", "utilities",
+] as const;
+export const SOURCE_OPTIONS = [
+  "unicef", "government", "csr", "panchayat", "ngo", "community", "others",
+] as const;
+
+export type CapitalCategory = typeof CAPITAL_CATEGORIES[number];
+export type OpexCategory = typeof OPEX_CATEGORIES[number];
+export type SourceOption = typeof SOURCE_OPTIONS[number];
 
 export type LedgerEntry = {
   id: string;
   kind: LedgerKind;          // money collected vs. funding still required
-  source: string;            // who gave / who needs it (e.g. UNICEF, CSR, Govt)
+  source: SourceOption | string; // contributor / requester
   amount: number;            // ₹
-  date: string;              // ISO date string (yyyy-mm-dd)
-  purpose: string;          // what the fund is for
-  district: string;          // Odisha district (or "Statewide")
+  date: string;              // ISO date (yyyy-mm-dd)
+  purpose: string;
+  district: string;          // Odisha district or "Statewide"
+  // — Extended attributes (all optional; older entries gracefully default) —
+  costType?: CostType;       // capital vs operational
+  category?: CapitalCategory | OpexCategory; // sector within cost type
+  udise?: string;            // school UDISE if attributable
+  schoolName?: string;       // school name if attributable
+  block?: string;            // block within district
+  utilized?: boolean;        // funds already spent vs only mobilized
   note?: string;
 };
 
@@ -40,7 +61,6 @@ function read(): LedgerEntry[] {
 function write(entries: LedgerEntry[]) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(KEY, JSON.stringify(entries));
-  // Notify other components in the same tab.
   window.dispatchEvent(new CustomEvent("crsap-ledger-change"));
 }
 
@@ -83,7 +103,7 @@ export function ledgerTotals(entries: LedgerEntry[]) {
   return {
     collected,
     gap,
-    balance: collected - gap, // positive = surplus, negative = shortfall
+    balance: collected - gap,
     coverage: gap > 0 ? Math.round((collected / gap) * 100) : collected > 0 ? 100 : 0,
   };
 }
