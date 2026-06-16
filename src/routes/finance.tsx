@@ -118,8 +118,9 @@ function dlCsv(name: string, rows: Record<string, unknown>[]) {
 function Macro({ fins }: { fins: SchoolFinance[] }) {
   const { t } = useI18n();
   const state = useMemo(() => aggregateState(fins), [fins]);
+  const { entries: ledger } = useFundLedger();
   const dist = useMemo(() => aggregateFinanceByDistrict(fins), [fins]);
-  const months = useMemo(() => monthlyTrend(state), [state]);
+  const months = useMemo(() => monthlyTrendFromLedger(ledger), [ledger]);
   const term = useMemo(() => termStatus(state), [state]);
   const ai = useMemo(() => stateAiSummary(state, dist), [state, dist]);
 
