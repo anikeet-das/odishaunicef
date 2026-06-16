@@ -7,11 +7,12 @@ import { FundLedgerPanel } from "@/components/cr-sap/FundLedgerPanel";
 import { useViewMode } from "@/components/layout/view-mode";
 import { useI18n } from "@/lib/i18n";
 import {
-  useFinance, aggregateState, aggregateFinanceByDistrict, monthlyTrend, termStatus,
-  stateAiSummary, schoolAiSummary, inr, inrFull, statusFor, STATUS_COLOR,
+  useFinance, aggregateState, aggregateFinanceByDistrict, monthlyTrendFromLedger, termStatus,
+  stateAiSummary, schoolAiSummary, inr, inrFull, STATUS_COLOR,
   CAPITAL_KEYS, OPEX_KEYS, SOURCE_KEYS, CAPITAL_LABELS, OPEX_LABELS, SOURCE_LABELS,
   type SchoolFinance, type CapitalKey, type OpexKey, type SourceKey,
 } from "@/lib/data/finance";
+import { useFundLedger } from "@/lib/data/fund-ledger";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, Legend,
   AreaChart, Area, LineChart, Line, PieChart, Pie, RadialBarChart, RadialBar,
