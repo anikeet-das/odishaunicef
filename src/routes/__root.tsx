@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { Sidebar, useSidebarWidth } from "@/components/layout/Sidebar";
 import { SectionTabs } from "@/components/layout/SectionTabs";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { ViewModeProvider } from "@/components/layout/view-mode";
 import { AIChatFab } from "@/components/ai/AIChatFab";
 import { SettingsProvider, useSettings } from "@/components/layout/settings-provider";
