@@ -9,38 +9,568 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WashRouteImport } from './routes/wash'
+import { Route as TruthCheckRouteImport } from './routes/truth-check'
+import { Route as ThemeRouteImport } from './routes/theme'
+import { Route as TechRouteImport } from './routes/tech'
+import { Route as SustainabilityRouteImport } from './routes/sustainability'
+import { Route as SimulationRouteImport } from './routes/simulation'
+import { Route as ShvrRouteImport } from './routes/shvr'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ScorecardRouteImport } from './routes/scorecard'
+import { Route as SchoolsRouteImport } from './routes/schools'
+import { Route as RiskRouteImport } from './routes/risk'
+import { Route as ResourcesRouteImport } from './routes/resources'
+import { Route as ReportsRouteImport } from './routes/reports'
+import { Route as PersonalizeRouteImport } from './routes/personalize'
+import { Route as MissionLifeRouteImport } from './routes/mission-life'
+import { Route as MapRouteImport } from './routes/map'
+import { Route as GoogleFormRouteImport } from './routes/google-form'
+import { Route as FinanceSumRouteImport } from './routes/finance-sum'
+import { Route as FinanceRouteImport } from './routes/finance'
+import { Route as FeedbackRouteImport } from './routes/feedback'
+import { Route as DistrictsRouteImport } from './routes/districts'
+import { Route as CompareRouteImport } from './routes/compare'
+import { Route as AlertsRouteImport } from './routes/alerts'
+import { Route as AiRecommendationsRouteImport } from './routes/ai-recommendations'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicSheetRouteImport } from './routes/api/public/sheet'
+import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 
+const WashRoute = WashRouteImport.update({
+  id: '/wash',
+  path: '/wash',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TruthCheckRoute = TruthCheckRouteImport.update({
+  id: '/truth-check',
+  path: '/truth-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ThemeRoute = ThemeRouteImport.update({
+  id: '/theme',
+  path: '/theme',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TechRoute = TechRouteImport.update({
+  id: '/tech',
+  path: '/tech',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SustainabilityRoute = SustainabilityRouteImport.update({
+  id: '/sustainability',
+  path: '/sustainability',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SimulationRoute = SimulationRouteImport.update({
+  id: '/simulation',
+  path: '/simulation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShvrRoute = ShvrRouteImport.update({
+  id: '/shvr',
+  path: '/shvr',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ScorecardRoute = ScorecardRouteImport.update({
+  id: '/scorecard',
+  path: '/scorecard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SchoolsRoute = SchoolsRouteImport.update({
+  id: '/schools',
+  path: '/schools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RiskRoute = RiskRouteImport.update({
+  id: '/risk',
+  path: '/risk',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResourcesRoute = ResourcesRouteImport.update({
+  id: '/resources',
+  path: '/resources',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportsRoute = ReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PersonalizeRoute = PersonalizeRouteImport.update({
+  id: '/personalize',
+  path: '/personalize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MissionLifeRoute = MissionLifeRouteImport.update({
+  id: '/mission-life',
+  path: '/mission-life',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MapRoute = MapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GoogleFormRoute = GoogleFormRouteImport.update({
+  id: '/google-form',
+  path: '/google-form',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceSumRoute = FinanceSumRouteImport.update({
+  id: '/finance-sum',
+  path: '/finance-sum',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FinanceRoute = FinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FeedbackRoute = FeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DistrictsRoute = DistrictsRouteImport.update({
+  id: '/districts',
+  path: '/districts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareRoute = CompareRouteImport.update({
+  id: '/compare',
+  path: '/compare',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlertsRoute = AlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiRecommendationsRoute = AiRecommendationsRouteImport.update({
+  id: '/ai-recommendations',
+  path: '/ai-recommendations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSheetRoute = ApiPublicSheetRouteImport.update({
+  id: '/api/public/sheet',
+  path: '/api/public/sheet',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiChatRoute = ApiAiChatRouteImport.update({
+  id: '/api/ai/chat',
+  path: '/api/ai/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/ai-recommendations': typeof AiRecommendationsRoute
+  '/alerts': typeof AlertsRoute
+  '/compare': typeof CompareRoute
+  '/districts': typeof DistrictsRoute
+  '/feedback': typeof FeedbackRoute
+  '/finance': typeof FinanceRoute
+  '/finance-sum': typeof FinanceSumRoute
+  '/google-form': typeof GoogleFormRoute
+  '/map': typeof MapRoute
+  '/mission-life': typeof MissionLifeRoute
+  '/personalize': typeof PersonalizeRoute
+  '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
+  '/risk': typeof RiskRoute
+  '/schools': typeof SchoolsRoute
+  '/scorecard': typeof ScorecardRoute
+  '/settings': typeof SettingsRoute
+  '/shvr': typeof ShvrRoute
+  '/simulation': typeof SimulationRoute
+  '/sustainability': typeof SustainabilityRoute
+  '/tech': typeof TechRoute
+  '/theme': typeof ThemeRoute
+  '/truth-check': typeof TruthCheckRoute
+  '/wash': typeof WashRoute
+  '/api/ai/chat': typeof ApiAiChatRoute
+  '/api/public/sheet': typeof ApiPublicSheetRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/ai-recommendations': typeof AiRecommendationsRoute
+  '/alerts': typeof AlertsRoute
+  '/compare': typeof CompareRoute
+  '/districts': typeof DistrictsRoute
+  '/feedback': typeof FeedbackRoute
+  '/finance': typeof FinanceRoute
+  '/finance-sum': typeof FinanceSumRoute
+  '/google-form': typeof GoogleFormRoute
+  '/map': typeof MapRoute
+  '/mission-life': typeof MissionLifeRoute
+  '/personalize': typeof PersonalizeRoute
+  '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
+  '/risk': typeof RiskRoute
+  '/schools': typeof SchoolsRoute
+  '/scorecard': typeof ScorecardRoute
+  '/settings': typeof SettingsRoute
+  '/shvr': typeof ShvrRoute
+  '/simulation': typeof SimulationRoute
+  '/sustainability': typeof SustainabilityRoute
+  '/tech': typeof TechRoute
+  '/theme': typeof ThemeRoute
+  '/truth-check': typeof TruthCheckRoute
+  '/wash': typeof WashRoute
+  '/api/ai/chat': typeof ApiAiChatRoute
+  '/api/public/sheet': typeof ApiPublicSheetRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/ai-recommendations': typeof AiRecommendationsRoute
+  '/alerts': typeof AlertsRoute
+  '/compare': typeof CompareRoute
+  '/districts': typeof DistrictsRoute
+  '/feedback': typeof FeedbackRoute
+  '/finance': typeof FinanceRoute
+  '/finance-sum': typeof FinanceSumRoute
+  '/google-form': typeof GoogleFormRoute
+  '/map': typeof MapRoute
+  '/mission-life': typeof MissionLifeRoute
+  '/personalize': typeof PersonalizeRoute
+  '/reports': typeof ReportsRoute
+  '/resources': typeof ResourcesRoute
+  '/risk': typeof RiskRoute
+  '/schools': typeof SchoolsRoute
+  '/scorecard': typeof ScorecardRoute
+  '/settings': typeof SettingsRoute
+  '/shvr': typeof ShvrRoute
+  '/simulation': typeof SimulationRoute
+  '/sustainability': typeof SustainabilityRoute
+  '/tech': typeof TechRoute
+  '/theme': typeof ThemeRoute
+  '/truth-check': typeof TruthCheckRoute
+  '/wash': typeof WashRoute
+  '/api/ai/chat': typeof ApiAiChatRoute
+  '/api/public/sheet': typeof ApiPublicSheetRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/ai-recommendations'
+    | '/alerts'
+    | '/compare'
+    | '/districts'
+    | '/feedback'
+    | '/finance'
+    | '/finance-sum'
+    | '/google-form'
+    | '/map'
+    | '/mission-life'
+    | '/personalize'
+    | '/reports'
+    | '/resources'
+    | '/risk'
+    | '/schools'
+    | '/scorecard'
+    | '/settings'
+    | '/shvr'
+    | '/simulation'
+    | '/sustainability'
+    | '/tech'
+    | '/theme'
+    | '/truth-check'
+    | '/wash'
+    | '/api/ai/chat'
+    | '/api/public/sheet'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/ai-recommendations'
+    | '/alerts'
+    | '/compare'
+    | '/districts'
+    | '/feedback'
+    | '/finance'
+    | '/finance-sum'
+    | '/google-form'
+    | '/map'
+    | '/mission-life'
+    | '/personalize'
+    | '/reports'
+    | '/resources'
+    | '/risk'
+    | '/schools'
+    | '/scorecard'
+    | '/settings'
+    | '/shvr'
+    | '/simulation'
+    | '/sustainability'
+    | '/tech'
+    | '/theme'
+    | '/truth-check'
+    | '/wash'
+    | '/api/ai/chat'
+    | '/api/public/sheet'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/ai-recommendations'
+    | '/alerts'
+    | '/compare'
+    | '/districts'
+    | '/feedback'
+    | '/finance'
+    | '/finance-sum'
+    | '/google-form'
+    | '/map'
+    | '/mission-life'
+    | '/personalize'
+    | '/reports'
+    | '/resources'
+    | '/risk'
+    | '/schools'
+    | '/scorecard'
+    | '/settings'
+    | '/shvr'
+    | '/simulation'
+    | '/sustainability'
+    | '/tech'
+    | '/theme'
+    | '/truth-check'
+    | '/wash'
+    | '/api/ai/chat'
+    | '/api/public/sheet'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  AiRecommendationsRoute: typeof AiRecommendationsRoute
+  AlertsRoute: typeof AlertsRoute
+  CompareRoute: typeof CompareRoute
+  DistrictsRoute: typeof DistrictsRoute
+  FeedbackRoute: typeof FeedbackRoute
+  FinanceRoute: typeof FinanceRoute
+  FinanceSumRoute: typeof FinanceSumRoute
+  GoogleFormRoute: typeof GoogleFormRoute
+  MapRoute: typeof MapRoute
+  MissionLifeRoute: typeof MissionLifeRoute
+  PersonalizeRoute: typeof PersonalizeRoute
+  ReportsRoute: typeof ReportsRoute
+  ResourcesRoute: typeof ResourcesRoute
+  RiskRoute: typeof RiskRoute
+  SchoolsRoute: typeof SchoolsRoute
+  ScorecardRoute: typeof ScorecardRoute
+  SettingsRoute: typeof SettingsRoute
+  ShvrRoute: typeof ShvrRoute
+  SimulationRoute: typeof SimulationRoute
+  SustainabilityRoute: typeof SustainabilityRoute
+  TechRoute: typeof TechRoute
+  ThemeRoute: typeof ThemeRoute
+  TruthCheckRoute: typeof TruthCheckRoute
+  WashRoute: typeof WashRoute
+  ApiAiChatRoute: typeof ApiAiChatRoute
+  ApiPublicSheetRoute: typeof ApiPublicSheetRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/wash': {
+      id: '/wash'
+      path: '/wash'
+      fullPath: '/wash'
+      preLoaderRoute: typeof WashRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/truth-check': {
+      id: '/truth-check'
+      path: '/truth-check'
+      fullPath: '/truth-check'
+      preLoaderRoute: typeof TruthCheckRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/theme': {
+      id: '/theme'
+      path: '/theme'
+      fullPath: '/theme'
+      preLoaderRoute: typeof ThemeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tech': {
+      id: '/tech'
+      path: '/tech'
+      fullPath: '/tech'
+      preLoaderRoute: typeof TechRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sustainability': {
+      id: '/sustainability'
+      path: '/sustainability'
+      fullPath: '/sustainability'
+      preLoaderRoute: typeof SustainabilityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/simulation': {
+      id: '/simulation'
+      path: '/simulation'
+      fullPath: '/simulation'
+      preLoaderRoute: typeof SimulationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shvr': {
+      id: '/shvr'
+      path: '/shvr'
+      fullPath: '/shvr'
+      preLoaderRoute: typeof ShvrRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/scorecard': {
+      id: '/scorecard'
+      path: '/scorecard'
+      fullPath: '/scorecard'
+      preLoaderRoute: typeof ScorecardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/schools': {
+      id: '/schools'
+      path: '/schools'
+      fullPath: '/schools'
+      preLoaderRoute: typeof SchoolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/risk': {
+      id: '/risk'
+      path: '/risk'
+      fullPath: '/risk'
+      preLoaderRoute: typeof RiskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/resources': {
+      id: '/resources'
+      path: '/resources'
+      fullPath: '/resources'
+      preLoaderRoute: typeof ResourcesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reports': {
+      id: '/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof ReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/personalize': {
+      id: '/personalize'
+      path: '/personalize'
+      fullPath: '/personalize'
+      preLoaderRoute: typeof PersonalizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mission-life': {
+      id: '/mission-life'
+      path: '/mission-life'
+      fullPath: '/mission-life'
+      preLoaderRoute: typeof MissionLifeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/map': {
+      id: '/map'
+      path: '/map'
+      fullPath: '/map'
+      preLoaderRoute: typeof MapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/google-form': {
+      id: '/google-form'
+      path: '/google-form'
+      fullPath: '/google-form'
+      preLoaderRoute: typeof GoogleFormRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/finance-sum': {
+      id: '/finance-sum'
+      path: '/finance-sum'
+      fullPath: '/finance-sum'
+      preLoaderRoute: typeof FinanceSumRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/finance': {
+      id: '/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof FinanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/feedback': {
+      id: '/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof FeedbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/districts': {
+      id: '/districts'
+      path: '/districts'
+      fullPath: '/districts'
+      preLoaderRoute: typeof DistrictsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare': {
+      id: '/compare'
+      path: '/compare'
+      fullPath: '/compare'
+      preLoaderRoute: typeof CompareRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/alerts': {
+      id: '/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AlertsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-recommendations': {
+      id: '/ai-recommendations'
+      path: '/ai-recommendations'
+      fullPath: '/ai-recommendations'
+      preLoaderRoute: typeof AiRecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +578,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/sheet': {
+      id: '/api/public/sheet'
+      path: '/api/public/sheet'
+      fullPath: '/api/public/sheet'
+      preLoaderRoute: typeof ApiPublicSheetRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/chat': {
+      id: '/api/ai/chat'
+      path: '/api/ai/chat'
+      fullPath: '/api/ai/chat'
+      preLoaderRoute: typeof ApiAiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  AiRecommendationsRoute: AiRecommendationsRoute,
+  AlertsRoute: AlertsRoute,
+  CompareRoute: CompareRoute,
+  DistrictsRoute: DistrictsRoute,
+  FeedbackRoute: FeedbackRoute,
+  FinanceRoute: FinanceRoute,
+  FinanceSumRoute: FinanceSumRoute,
+  GoogleFormRoute: GoogleFormRoute,
+  MapRoute: MapRoute,
+  MissionLifeRoute: MissionLifeRoute,
+  PersonalizeRoute: PersonalizeRoute,
+  ReportsRoute: ReportsRoute,
+  ResourcesRoute: ResourcesRoute,
+  RiskRoute: RiskRoute,
+  SchoolsRoute: SchoolsRoute,
+  ScorecardRoute: ScorecardRoute,
+  SettingsRoute: SettingsRoute,
+  ShvrRoute: ShvrRoute,
+  SimulationRoute: SimulationRoute,
+  SustainabilityRoute: SustainabilityRoute,
+  TechRoute: TechRoute,
+  ThemeRoute: ThemeRoute,
+  TruthCheckRoute: TruthCheckRoute,
+  WashRoute: WashRoute,
+  ApiAiChatRoute: ApiAiChatRoute,
+  ApiPublicSheetRoute: ApiPublicSheetRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

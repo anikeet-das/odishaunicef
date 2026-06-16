@@ -7,10 +7,17 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Sidebar, useSidebarWidth } from "@/components/layout/Sidebar";
+import { SectionTabs } from "@/components/layout/SectionTabs";
+import { ViewModeProvider } from "@/components/layout/view-mode";
+import { AIChatFab } from "@/components/ai/AIChatFab";
+import { SettingsProvider, useSettings } from "@/components/layout/settings-provider";
+import { Toaster } from "@/components/ui/sonner";
+import { I18nProvider } from "@/lib/i18n";
+import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { AdminSessionProvider } from "@/lib/admin/session";
 
 function NotFoundComponent() {
   return (
@@ -37,9 +44,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -77,14 +81,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "UNICEF WASH by ANIKET" },
+      { name: "description", content: "Futuristic AI command center for climate-resilient WASH & sustainable schools across Odisha." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "UNICEF WASH by ANIKET" },
+      { property: "og:description", content: "Futuristic AI command center for climate-resilient WASH & sustainable schools across Odisha." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "UNICEF WASH by ANIKET" },
+      { name: "twitter:description", content: "Futuristic AI command center for climate-resilient WASH & sustainable schools across Odisha." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lC3zIBYxHxcHQuVu6MiYsrKGMnW2/social-images/social-1780818505793-ChatGPT_Image_Jun_7,_2026,_01_17_56_PM.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lC3zIBYxHxcHQuVu6MiYsrKGMnW2/social-images/social-1780818505793-ChatGPT_Image_Jun_7,_2026,_01_17_56_PM.webp" },
     ],
     links: [
       {
@@ -99,7 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-function RootShell({ children }: { children: ReactNode }) {
+function RootShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
@@ -118,8 +126,38 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <ThemeProvider>
+        <I18nProvider>
+          <AdminSessionProvider>
+            <SettingsProvider>
+              <ViewModeProvider>
+                <Shell />
+              </ViewModeProvider>
+            </SettingsProvider>
+          </AdminSessionProvider>
+        </I18nProvider>
+      </ThemeProvider>
     </QueryClientProvider>
+  );
+}
+
+function Shell() {
+  const { settings } = useSettings();
+  const sw = useSidebarWidth();
+  return (
+    <>
+      <div className="app-shell relative">
+        <Sidebar />
+        <main
+          className="app-main min-w-0"
+          style={{ ["--sw" as any]: `${sw}px` }}
+        >
+          <SectionTabs />
+          <Outlet />
+        </main>
+      </div>
+      {settings.showAiFab && <AIChatFab />}
+      <Toaster position="bottom-right" theme="dark" richColors />
+    </>
   );
 }
