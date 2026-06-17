@@ -312,3 +312,42 @@ function Detail({ f, onClose, t }: { f: SchoolFinance; onClose: () => void; t: (
     </div>
   );
 }
+
+/* ============================ LEDGER NOTEBOOK ============================ */
+function LedgerNotebook() {
+  const [open, setOpen] = useState(true);
+  return (
+    <div className="glass rounded-2xl overflow-hidden">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center justify-between gap-3 px-5 py-3 hover:bg-white/[0.03] transition"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="h-9 w-9 rounded-xl grid place-items-center bg-[oklch(0.85_0.2_195/0.12)] border border-[oklch(0.85_0.2_195/0.35)] shrink-0">
+            <NotebookPen className="h-4 w-4 text-[var(--cyan)]" />
+          </div>
+          <div className="min-w-0 text-left">
+            <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">UNICEF Financial Notebook</div>
+            <div className="text-sm font-semibold truncate">
+              Manual fund &amp; resource entries — capital, opex &amp; source-wise convergence
+            </div>
+          </div>
+        </div>
+        <span className="text-xs px-2.5 py-1 rounded-full glass-soft text-muted-foreground shrink-0">
+          {open ? "Hide" : "Open"}
+        </span>
+      </button>
+      {open && (
+        <div className="px-3 pb-4 pt-1 border-t border-border/40">
+          <p className="text-[11px] text-muted-foreground px-2 py-2 leading-relaxed">
+            Every entry recorded here streams in real time into <b>Finance Sum</b> and the
+            <b> Financial Intelligence</b> dashboard. Attach a <b>UDISE</b> to overlay a specific
+            school; leave it blank to log district / state-wide convergence.
+          </p>
+          <FundLedgerPanel />
+        </div>
+      )}
+    </div>
+  );
+}
+
