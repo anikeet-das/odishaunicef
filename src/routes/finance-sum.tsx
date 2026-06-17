@@ -182,6 +182,8 @@ function Micro({ fins }: { fins: SchoolFinance[] }) {
     <div className="flex flex-col min-h-full">
       <Topbar title={t("fsum.title")} subtitle={t("fsum.microSub")} />
       <div className="p-3 space-y-3">
+        <LedgerNotebook />
+
         <div className="glass rounded-2xl p-3 flex items-center gap-2 flex-wrap">
           <Filter className="h-4 w-4 text-[var(--cyan)]" />
           <div className="relative flex-1 min-w-[200px] max-w-sm">
