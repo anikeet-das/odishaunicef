@@ -42,14 +42,9 @@ export const TAB_CONFIG: Record<string, TabConfig> = {
     view: true,
   },
   "/alerts": { view: true },
-  "/finance": {
-    upload: { tab: "Financial Intelligence", cols: ["UDISE", "School_Name", "District", "Capital_Required", "Operational_Cost", "UNICEF", "Government", "CSR", "Panchayat", "Community", "Utilized"] },
-    view: true,
-  },
-  "/finance-sum": {
-    upload: { tab: "Finance Summary", cols: ["UDISE", "School_Name", "District", "Required", "Mobilized", "Utilized", "Gap"] },
-    view: true,
-  },
+  // Finance pages: upload disabled — all financial data flows through the manual Fund Ledger
+  "/finance": { view: true },
+  "/finance-sum": { view: true },
   "/compare": { view: false },
   "/tech": { view: true },
 

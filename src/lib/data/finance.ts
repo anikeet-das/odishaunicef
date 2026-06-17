@@ -1,6 +1,13 @@
 import { useMemo } from "react";
 import { ODISHA_DISTRICTS, hashCode } from "./odisha";
 import { useSchools, aggregateByDistrict, type School, type DistrictAgg } from "./cces";
+import {
+  useFundLedger,
+  type LedgerEntry,
+  type CapitalCategory,
+  type OpexCategory,
+  type SourceOption,
+} from "./fund-ledger";
 
 /* ------------------------------------------------------------------ *
  * Financial Intelligence & Resource Convergence model.
@@ -167,10 +174,114 @@ export function computeAllFinance(schools: School[]): SchoolFinance[] {
 
 export function useFinance() {
   const { data } = useSchools();
-  return useMemo(() => (data ? computeAllFinance(data) : null), [data]);
+  const { entries } = useFundLedger();
+  return useMemo(() => {
+    if (!data) return null;
+    const base = computeAllFinance(data);
+    return applyLedgerOverlay(base, entries);
+  }, [data, entries]);
 }
 
-/* ----------------------------- Aggregations ----------------------------- */
+/* ----- Ledger overlay: makes manual Fund Ledger entries flow into every
+   chart, KPI and leaderboard in real time across Finance pages. ----- */
+
+const CAPITAL_KEY_OF: Record<CapitalCategory, CapitalKey> = {
+  water: "water", sanitation: "sanitation", hygiene: "hygiene",
+  environment: "environment", riskReduction: "riskReduction",
+  technology: "technology", education: "education",
+};
+const OPEX_KEY_OF: Record<OpexCategory, OpexKey> = {
+  maintenance: "maintenance", repairs: "repairs", cleaning: "cleaning",
+  consumables: "consumables", utilities: "utilities",
+};
+const SOURCE_KEY_OF: Record<string, SourceKey> = {
+  unicef: "unicef", government: "government", csr: "csr", panchayat: "panchayat",
+  ngo: "ngo", community: "community", others: "others",
+};
+
+function recompute(f: SchoolFinance): SchoolFinance {
+  const capitalTotal = CAPITAL_KEYS.reduce((a, k) => a + f.capital[k], 0);
+  const opexTotal = OPEX_KEYS.reduce((a, k) => a + f.opex[k], 0);
+  const required = capitalTotal + opexTotal;
+  const mobilized = SOURCE_KEYS.reduce((a, k) => a + f.sources[k], 0);
+  const utilized = f.utilized;
+  const gap = Math.max(0, required - mobilized);
+  const convergence = required ? Math.round((mobilized / required) * 100) : 0;
+  const utilization = Math.round((utilized / Math.max(1, mobilized)) * 100);
+  const healthScore = Math.max(0, Math.min(100, Math.round(
+    convergence * 0.45 + utilization * 0.3 + 50 * 0.15 + 5,
+  )));
+  const efficiencyScore = Math.max(0, Math.min(100, Math.round(
+    Math.min(100, convergence) * 0.6 + utilization * 0.4,
+  )));
+  return {
+    ...f, capitalTotal, opexTotal, required, mobilized, utilized, gap,
+    convergence, utilization, healthScore, efficiencyScore,
+    status: statusFor(healthScore),
+  };
+}
+
+function applyEntryToSchool(f: SchoolFinance, e: LedgerEntry) {
+  if (e.kind === "gap") {
+    if (e.costType === "opex" && e.category && OPEX_KEY_OF[e.category as OpexCategory]) {
+      f.opex[OPEX_KEY_OF[e.category as OpexCategory]] += e.amount;
+    } else if (e.category && CAPITAL_KEY_OF[e.category as CapitalCategory]) {
+      f.capital[CAPITAL_KEY_OF[e.category as CapitalCategory]] += e.amount;
+    } else {
+      // default capital bucket if unspecified
+      f.capital.water += e.amount;
+    }
+  } else {
+    const sk = SOURCE_KEY_OF[String(e.source).toLowerCase()] ?? "others";
+    f.sources[sk] += e.amount;
+    if (e.utilized) f.utilized += e.amount;
+  }
+}
+
+function makeGhost(e: LedgerEntry): SchoolFinance {
+  const district = e.district || "Statewide";
+  const dist = ODISHA_DISTRICTS.find((d) => d.name === district);
+  const empty = <T extends string>(keys: readonly T[]) =>
+    Object.fromEntries(keys.map((k) => [k, 0])) as Record<T, number>;
+  const f: SchoolFinance = {
+    udise: `LEDGER-${e.id}`,
+    name: e.schoolName || `Ledger · ${e.purpose || (e.kind === "fund" ? "Funds collected" : "Resource gap")}`,
+    district,
+    districtId: dist?.id ?? -1,
+    block: e.block || district,
+    location: district,
+    capital: empty(CAPITAL_KEYS),
+    opex: empty(OPEX_KEYS),
+    sources: empty(SOURCE_KEYS),
+    capitalTotal: 0, opexTotal: 0, required: 0, mobilized: 0, utilized: 0, gap: 0,
+    convergence: 0, utilization: 0, healthScore: 0, efficiencyScore: 0,
+    status: "Moderate",
+  };
+  applyEntryToSchool(f, e);
+  return recompute(f);
+}
+
+export function applyLedgerOverlay(fins: SchoolFinance[], entries: LedgerEntry[]): SchoolFinance[] {
+  if (!entries.length) return fins;
+  const map = new Map<string, SchoolFinance>();
+  for (const f of fins) {
+    map.set(f.udise, {
+      ...f,
+      capital: { ...f.capital },
+      opex: { ...f.opex },
+      sources: { ...f.sources },
+    });
+  }
+  const ghosts: SchoolFinance[] = [];
+  for (const e of entries) {
+    const matched = e.udise ? map.get(e.udise) : undefined;
+    if (matched) applyEntryToSchool(matched, e);
+    else ghosts.push(makeGhost(e));
+  }
+  const out: SchoolFinance[] = [];
+  for (const f of map.values()) out.push(recompute(f));
+  return out.concat(ghosts);
+}
 
 export type DistrictFinance = {
   districtId: number;
