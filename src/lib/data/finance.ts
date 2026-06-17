@@ -1,6 +1,13 @@
 import { useMemo } from "react";
 import { ODISHA_DISTRICTS, hashCode } from "./odisha";
 import { useSchools, aggregateByDistrict, type School, type DistrictAgg } from "./cces";
+import {
+  useFundLedger,
+  type LedgerEntry,
+  type CapitalCategory,
+  type OpexCategory,
+  type SourceOption,
+} from "./fund-ledger";
 
 /* ------------------------------------------------------------------ *
  * Financial Intelligence & Resource Convergence model.
