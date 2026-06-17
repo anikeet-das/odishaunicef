@@ -2,21 +2,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { LoadingShell } from "@/components/data/LoadingShell";
-import { AwaitingData } from "@/components/data/AwaitingData";
-import { FundLedgerPanel } from "@/components/cr-sap/FundLedgerPanel";
 import { useViewMode } from "@/components/layout/view-mode";
 import { useI18n } from "@/lib/i18n";
 import {
-  useFinance, aggregateState, aggregateFinanceByDistrict, monthlyTrendFromLedger, termStatus,
-  stateAiSummary, schoolAiSummary, inr, inrFull, STATUS_COLOR,
+  useFinance, aggregateState, aggregateFinanceByDistrict, monthlyTrend, termStatus,
+  stateAiSummary, schoolAiSummary, inr, inrFull, statusFor, STATUS_COLOR,
   CAPITAL_KEYS, OPEX_KEYS, SOURCE_KEYS, CAPITAL_LABELS, OPEX_LABELS, SOURCE_LABELS,
   type SchoolFinance, type CapitalKey, type OpexKey, type SourceKey,
 } from "@/lib/data/finance";
-import { useFundLedger } from "@/lib/data/fund-ledger";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, Legend,
   AreaChart, Area, LineChart, Line, PieChart, Pie, RadialBarChart, RadialBar,
-  PolarAngleAxis, Treemap, ScatterChart, Scatter, ZAxis, CartesianGrid, LabelList,
+  PolarAngleAxis, Treemap, ScatterChart, Scatter, ZAxis,
 } from "recharts";
 import { motion } from "framer-motion";
 import {
@@ -38,19 +35,6 @@ function Page() {
   const fins = useFinance();
   const { mode } = useViewMode();
   if (!fins) return <LoadingShell title="Financial Intelligence" subtitle="Resource Convergence" />;
-  if (fins.length === 0)
-    return (
-      <div className="flex flex-col min-h-full">
-        <Topbar title="Financial Intelligence" subtitle="Resource Convergence · Fund & gap tracker" />
-        <div className="p-3 space-y-3">
-          <FundLedgerPanel />
-          <div className="glass rounded-2xl p-4 text-xs text-muted-foreground leading-relaxed">
-            School-level cost data flows in automatically from the live survey as soon as cost fields are submitted.
-            Until then, track collected funds and resource gaps above — who gave, when and for what purpose.
-          </div>
-        </div>
-      </div>
-    );
   return mode === "macro" ? <Macro fins={fins} /> : <Micro fins={fins} />;
 }
 
@@ -118,9 +102,8 @@ function dlCsv(name: string, rows: Record<string, unknown>[]) {
 function Macro({ fins }: { fins: SchoolFinance[] }) {
   const { t } = useI18n();
   const state = useMemo(() => aggregateState(fins), [fins]);
-  const { entries: ledger } = useFundLedger();
   const dist = useMemo(() => aggregateFinanceByDistrict(fins), [fins]);
-  const months = useMemo(() => monthlyTrendFromLedger(ledger), [ledger]);
+  const months = useMemo(() => monthlyTrend(state), [state]);
   const term = useMemo(() => termStatus(state), [state]);
   const ai = useMemo(() => stateAiSummary(state, dist), [state, dist]);
 
@@ -131,18 +114,7 @@ function Macro({ fins }: { fins: SchoolFinance[] }) {
     gap: [...dist].sort((a, b) => b.gap - a.gap)[0],
   };
 
-  const treemap = dist.map((d) => ({ name: d.district, size: Math.max(1, d.required), conv: d.convergence }));
-
-  // Dynamic, padded axis domains so the scatter never collapses into one spot.
-  const padDomain = (vals: number[], pad: number, hardMax: number): [number, number] => {
-    if (!vals.length) return [0, hardMax];
-    const lo = Math.min(...vals), hi = Math.max(...vals);
-    if (lo === hi) return [Math.max(0, lo - pad), Math.min(hardMax + pad, hi + pad)];
-    const span = hi - lo;
-    return [Math.max(0, Math.floor(lo - span * 0.15 - 2)), Math.ceil(hi + span * 0.15 + 2)];
-  };
-  const convDomain = padDomain(dist.map((d) => d.convergence), 10, 120);
-  const effDomain = padDomain(dist.map((d) => d.efficiency), 10, 100);
+  const treemap = dist.map((d) => ({ name: d.district, size: d.required, conv: d.convergence }));
   const overall = [
     { name: "Convergence", value: state.convergence, fill: COLORS[0] },
     { name: "Utilisation", value: Math.round((state.utilized / Math.max(1, state.mobilized)) * 100), fill: COLORS[1] },
@@ -154,8 +126,6 @@ function Macro({ fins }: { fins: SchoolFinance[] }) {
     <div className="flex flex-col min-h-full">
       <Topbar title={t("fin.title")} subtitle={t("fin.macroSub")} />
       <div className="p-3 space-y-3">
-        {/* Manual fund & resource-gap ledger */}
-        <FundLedgerPanel />
         {/* SECTION 1 — state overview KPIs */}
         <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <KpiCard icon={<Wallet className="h-4 w-4" />} label={t("fin.capital")} value={<Counter value={state.capitalTotal} />} sub={t("fin.capitalSub")} accent={COLORS[0]} />
@@ -250,27 +220,21 @@ function Macro({ fins }: { fins: SchoolFinance[] }) {
           <Section title={t("fin.treemap")} icon={<Layers className="h-4 w-4 text-[var(--indigo-glow)]" />} note={t("fin.byRequirement")}>
             <div className="h-[320px]">
               <ResponsiveContainer>
-                <Treemap data={treemap} dataKey="size" nameKey="name" aspectRatio={4 / 3}
-                  isAnimationActive={false} stroke="oklch(0.98 0.01 240)" content={<TreemapCell />} />
+                <Treemap data={treemap} dataKey="size" nameKey="name" stroke="oklch(0.16 0.03 260)"
+                  content={<TreemapCell />} />
               </ResponsiveContainer>
             </div>
           </Section>
           <Section title={t("fin.bubble")} icon={<Target className="h-4 w-4 text-[var(--cyan)]" />} note={t("fin.bubbleNote")}>
             <div className="h-[320px]">
               <ResponsiveContainer>
-                <ScatterChart margin={{ top: 10, right: 20, left: 10, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.5 0.05 260 / 0.18)" />
-                  <XAxis type="number" dataKey="convergence" name="Convergence" unit="%" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} domain={convDomain} allowDecimals={false}
-                    label={{ value: "Convergence %", position: "insideBottom", offset: -10, fontSize: 11, fill: "var(--muted-foreground)" }} />
-                  <YAxis type="number" dataKey="efficiency" name="Efficiency" unit="%" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} domain={effDomain} allowDecimals={false}
-                    label={{ value: "Efficiency %", angle: -90, position: "insideLeft", fontSize: 11, fill: "var(--muted-foreground)" }} />
-                  <ZAxis type="number" dataKey="required" range={[80, 600]} name="Required" />
-                  <Tooltip formatter={(v: number, n: string) => n === "Required" ? inrFull(v) : `${v}%`}
-                    labelFormatter={() => ""}
-                    cursor={{ strokeDasharray: "3 3" }} />
-                  <Scatter data={dist} isAnimationActive={false}>
-                    {dist.map((d, i) => <Cell key={d.districtId} fill={COLORS[i % COLORS.length]} fillOpacity={0.78} />)}
-                    <LabelList dataKey="district" position="top" style={{ fontSize: 9, fill: "var(--muted-foreground)" }} />
+                <ScatterChart margin={{ left: 10, bottom: 10 }}>
+                  <XAxis type="number" dataKey="convergence" name="Convergence" unit="%" tick={{ fontSize: 10 }} domain={[0, 120]} />
+                  <YAxis type="number" dataKey="efficiency" name="Efficiency" unit="%" tick={{ fontSize: 10 }} domain={[0, 100]} />
+                  <ZAxis type="number" dataKey="required" range={[60, 700]} />
+                  <Tooltip formatter={(v: number, n: string) => n === "required" ? inrFull(v) : `${v}%`} cursor={{ strokeDasharray: "3 3" }} />
+                  <Scatter data={dist} >
+                    {dist.map((d, i) => <Cell key={d.districtId} fill={COLORS[i % COLORS.length]} fillOpacity={0.7} />)}
                   </Scatter>
                 </ScatterChart>
               </ResponsiveContainer>
@@ -384,21 +348,16 @@ function Macro({ fins }: { fins: SchoolFinance[] }) {
 
 function TreemapCell(props: any) {
   const { x, y, width, height, name, conv } = props;
-  if (!(width > 0) || !(height > 0)) return null;
-  // Blue palette — darker blue = stronger convergence. White text for contrast.
-  const cv = typeof conv === "number" ? conv : 0;
-  const c = cv >= 80 ? "oklch(0.42 0.17 255)"
-    : cv >= 60 ? "oklch(0.52 0.18 250)"
-    : cv >= 40 ? "oklch(0.62 0.17 245)"
-    : "oklch(0.72 0.13 240)";
+  if (width < 1 || height < 1) return null;
+  const c = conv >= 80 ? "oklch(0.7 0.17 160)" : conv >= 60 ? "oklch(0.82 0.19 175)" : conv >= 40 ? "oklch(0.85 0.18 75)" : "oklch(0.68 0.24 22)";
   return (
     <g>
-      <rect x={x} y={y} width={width} height={height} fill={c} fillOpacity={0.95} stroke="oklch(0.98 0.01 240)" strokeWidth={1} />
-      {width > 54 && height > 26 && (
-        <text x={x + 6} y={y + 17} fontSize={11} fill="#ffffff" fontWeight={700}>{name}</text>
+      <rect x={x} y={y} width={width} height={height} fill={c} fillOpacity={0.55} stroke="oklch(0.16 0.03 260)" />
+      {width > 60 && height > 28 && (
+        <text x={x + 6} y={y + 18} fontSize={11} fill="white" fontWeight={600}>{name}</text>
       )}
-      {width > 54 && height > 42 && (
-        <text x={x + 6} y={y + 32} fontSize={10} fill="#ffffff" fillOpacity={0.92}>{cv}%</text>
+      {width > 60 && height > 44 && (
+        <text x={x + 6} y={y + 33} fontSize={10} fill="white" fillOpacity={0.85}>{conv}%</text>
       )}
     </g>
   );

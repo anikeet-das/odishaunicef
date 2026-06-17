@@ -2,8 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { LoadingShell } from "@/components/data/LoadingShell";
-import { AwaitingData } from "@/components/data/AwaitingData";
-import { FundLedgerPanel } from "@/components/cr-sap/FundLedgerPanel";
 import { useViewMode } from "@/components/layout/view-mode";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -40,19 +38,6 @@ function Page() {
   const fins = useFinance();
   const { mode } = useViewMode();
   if (!fins) return <LoadingShell title="Finance Sum" subtitle="Consolidated money summary" />;
-  if (fins.length === 0)
-    return (
-      <div className="flex flex-col min-h-full">
-        <Topbar title="Finance Sum" subtitle="Consolidated money summary · Fund ledger" />
-        <div className="p-3 space-y-3">
-          <FundLedgerPanel />
-          <div className="glass rounded-2xl p-4 text-xs text-muted-foreground leading-relaxed">
-            Every fund entry above records who gave the money, when, the district and the purpose — a clean balance
-            sheet of collected funds versus resource gaps. School cost data joins automatically from the live survey.
-          </div>
-        </div>
-      </div>
-    );
   return mode === "macro" ? <Macro fins={fins} /> : <Micro fins={fins} />;
 }
 
@@ -85,8 +70,6 @@ function Macro({ fins }: { fins: SchoolFinance[] }) {
     <div className="flex flex-col min-h-full">
       <Topbar title={t("fsum.title")} subtitle={t("fsum.macroSub")} />
       <div className="p-3 space-y-3">
-        {/* Manual fund & resource-gap ledger */}
-        <FundLedgerPanel />
         {/* Odisha as a whole */}
         <div className="glass rounded-2xl p-4">
           <h3 className="font-semibold flex items-center gap-2 mb-3"><Sigma className="h-4 w-4 text-[var(--cyan)]" /> {t("fsum.odishaWhole")}</h3>
