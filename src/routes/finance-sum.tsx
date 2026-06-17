@@ -71,6 +71,8 @@ function Macro({ fins }: { fins: SchoolFinance[] }) {
     <div className="flex flex-col min-h-full">
       <Topbar title={t("fsum.title")} subtitle={t("fsum.macroSub")} />
       <div className="p-3 space-y-3">
+        <LedgerNotebook />
+
         {/* Odisha as a whole */}
         <div className="glass rounded-2xl p-4">
           <h3 className="font-semibold flex items-center gap-2 mb-3"><Sigma className="h-4 w-4 text-[var(--cyan)]" /> {t("fsum.odishaWhole")}</h3>
