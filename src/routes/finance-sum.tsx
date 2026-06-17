@@ -16,8 +16,9 @@ import {
 import { motion } from "framer-motion";
 import {
   Sigma, Search, Download, Filter, Plane, Wallet, Coins, TrendingUp, AlertTriangle,
-  Sparkles, Gauge, Building2,
+  Sparkles, Gauge, Building2, NotebookPen,
 } from "lucide-react";
+import { FundLedgerPanel } from "@/components/cr-sap/FundLedgerPanel";
 
 export const Route = createFileRoute("/finance-sum")({
   head: () => ({
