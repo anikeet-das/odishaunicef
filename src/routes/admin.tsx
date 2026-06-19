@@ -6,7 +6,7 @@ import {
   Building2, Users, GraduationCap, RefreshCw, CloudLightning, Sigma,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
-import { ADMIN_KEY } from "@/lib/data/reset";
+import { useAdminSession } from "@/lib/admin/session";
 import { useAdminSession } from "@/lib/admin/session";
 import { DataUploadPanel } from "@/components/admin/DataUploadPanel";
 import { RespondsPanel } from "@/components/admin/RespondsPanel";
