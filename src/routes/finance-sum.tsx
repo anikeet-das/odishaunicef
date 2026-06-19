@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { LoadingShell } from "@/components/data/LoadingShell";
 import { useViewMode } from "@/components/layout/view-mode";
 import { useI18n } from "@/lib/i18n";
+import { useAdminSession } from "@/lib/admin/session";
 import {
   useFinance, aggregateState, aggregateFinanceByDistrict,
   schoolAiSummary, inr, inrFull, STATUS_COLOR,
@@ -19,6 +20,7 @@ import {
   Sparkles, Gauge, Building2, NotebookPen,
 } from "lucide-react";
 import { FundLedgerPanel } from "@/components/cr-sap/FundLedgerPanel";
+import { NotesPanel } from "@/components/finance/NotesPanel";
 
 export const Route = createFileRoute("/finance-sum")({
   head: () => ({
@@ -36,10 +38,22 @@ const COLORS = [
 ];
 
 function Page() {
+  // Finance Sum is now an admin-only module. Without an unlocked admin
+  // session we bounce the visitor to the admin panel where they can
+  // authenticate and pick the Finance Sum tab.
+  const { unlocked } = useAdminSession();
+  if (!unlocked) return <Navigate to="/admin" replace />;
+  return <FinanceSumBody />;
+}
+
+/** Body used both for the standalone route and the embedded admin tab. */
+export function FinanceSumBody({ embedded = false }: { embedded?: boolean }) {
   const fins = useFinance();
   const { mode } = useViewMode();
   if (!fins) return <LoadingShell title="Finance Sum" subtitle="Consolidated money summary" />;
-  return mode === "macro" ? <Macro fins={fins} /> : <Micro fins={fins} />;
+  return mode === "macro"
+    ? <Macro fins={fins} embedded={embedded} />
+    : <Micro fins={fins} embedded={embedded} />;
 }
 
 function dlCsv(name: string, rows: Record<string, unknown>[]) {
