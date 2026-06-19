@@ -1,74 +1,44 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Settings } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { NAV_GROUPS, groupForPath } from "./nav-config";
+import { groupForPath } from "./nav-config";
 
 /**
- * Secondary navigation rendered inside the page area. The sidebar only shows
- * top-level categories — the sub-tabs of the active category live here as a
- * horizontal topbar. On mobile (sidebar hidden) the category switcher is also
- * surfaced here so every section stays reachable.
+ * Secondary navigation rendered inside the page area.
+ * Sidebar (desktop) and bottom nav (mobile/tablet) handle category switching;
+ * this strip only surfaces the SUB-TABS of the active category and stays
+ * hidden when there's only a single item.
  */
 export function SectionTabs() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { t } = useI18n();
   const activeGroup = groupForPath(pathname);
 
+  if (!activeGroup || activeGroup.items.length <= 1) {
+    return <div className="px-3 pt-3" />;
+  }
+
   return (
-    <div className="px-3 pt-3 space-y-2">
-      {/* Category switcher — mobile only (sidebar covers desktop) */}
-      <div className="lg:hidden flex gap-1.5 overflow-x-auto scroll-invisible pb-1">
-        {NAV_GROUPS.map((g) => {
-          const active = activeGroup?.id === g.id;
-          const Icon = g.icon;
+    <div className="px-3 pt-3">
+      <div className="glass-soft rounded-2xl p-1.5 flex gap-1 overflow-x-auto scroll-invisible">
+        {activeGroup.items.map((it) => {
+          const active = pathname === it.to;
+          const Icon = it.icon;
           return (
             <Link
-              key={g.id}
-              to={g.items[0].to}
-              className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition ${
-                active ? "bg-primary/20 text-foreground neon-ring" : "glass-soft text-muted-foreground"
+              key={it.to}
+              to={it.to}
+              className={`shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm transition-all ${
+                active
+                  ? "bg-[oklch(0.85_0.2_195/0.12)] text-foreground neon-ring"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
               }`}
             >
-              <Icon className="h-3.5 w-3.5" />
-              {t(g.labelKey)}
+              <Icon className={`h-4 w-4 shrink-0 ${active ? "text-[var(--cyan)]" : ""}`} />
+              <span className="whitespace-nowrap font-medium">{t(it.labelKey)}</span>
             </Link>
           );
         })}
-        <Link
-          to="/settings"
-          className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs transition ${
-            pathname === "/settings" ? "bg-primary/20 text-foreground neon-ring" : "glass-soft text-muted-foreground"
-          }`}
-        >
-          <Settings className="h-3.5 w-3.5" />
-          {t("nav.settings")}
-        </Link>
       </div>
-
-
-      {/* Sub-tabs of the active category */}
-      {activeGroup && activeGroup.items.length > 1 && (
-        <div className="glass-soft rounded-2xl p-1.5 flex gap-1 overflow-x-auto scroll-invisible">
-          {activeGroup.items.map((it) => {
-            const active = pathname === it.to;
-            const Icon = it.icon;
-            return (
-              <Link
-                key={it.to}
-                to={it.to}
-                className={`shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm transition-all ${
-                  active
-                    ? "bg-[oklch(0.85_0.2_195/0.12)] text-foreground neon-ring"
-                    : "text-muted-foreground hover:text-foreground hover:bg-white/5"
-                }`}
-              >
-                <Icon className={`h-4 w-4 ${active ? "text-[var(--cyan)]" : ""}`} />
-                <span className="whitespace-nowrap font-medium">{t(it.labelKey)}</span>
-              </Link>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }

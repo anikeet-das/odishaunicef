@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, Globe2, Building2, School, Gauge, ShieldAlert, Star,
   FileBarChart2, BookOpen, ClipboardList,
-  Lock, Droplets, Award, GitCompare, MessageCircle, Palette, Wallet, Sigma,
+  Lock, Droplets, Award, GitCompare, MessageCircle, Palette, Wallet,
   Brain, FolderKanban, Network,
 } from "lucide-react";
 
@@ -34,7 +34,6 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/shvr", labelKey: "nav.shvr", icon: Star },
       { to: "/wash", labelKey: "nav.wash", icon: Droplets },
       { to: "/finance", labelKey: "nav.finance", icon: Wallet },
-      { to: "/finance-sum", labelKey: "nav.financeSum", icon: Sigma },
       { to: "/compare", labelKey: "nav.compare", icon: GitCompare },
     ],
   },
