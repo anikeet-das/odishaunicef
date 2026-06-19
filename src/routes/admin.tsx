@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Lock, Database, Table2, ShieldCheck, Activity, Sparkles, Wand2, FlaskConical,
-  Building2, Users, GraduationCap, RefreshCw, CloudLightning,
+  Building2, Users, GraduationCap, RefreshCw, CloudLightning, Sigma,
 } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { ADMIN_KEY } from "@/lib/data/reset";
+import { useAdminSession } from "@/lib/admin/session";
 import { DataUploadPanel } from "@/components/admin/DataUploadPanel";
 import { RespondsPanel } from "@/components/admin/RespondsPanel";
 import { useSchools, platformKpis, aggregateByDistrict } from "@/lib/data/cces";
@@ -15,6 +16,7 @@ import { PersonalizeBody } from "@/routes/personalize";
 import { TruthCheckBody } from "@/routes/truth-check";
 import { SimulationBody } from "@/routes/simulation";
 import { ClimateAlertsPage } from "@/components/cr-sap/climate/ClimateAlertsPage";
+import { FinanceSumBody } from "@/routes/finance-sum";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -26,7 +28,7 @@ export const Route = createFileRoute("/admin")({
   component: Page,
 });
 
-type Tab = "overview" | "data-upload" | "responds" | "climate" | "ai-recommendations" | "personalize" | "truth-check" | "simulation";
+type Tab = "overview" | "data-upload" | "responds" | "climate" | "finance-sum" | "ai-recommendations" | "personalize" | "truth-check" | "simulation";
 
 const AI_TABS = [
   { id: "ai-recommendations" as const, label: "Recommendations", icon: Sparkles },
@@ -37,14 +39,17 @@ const AI_TABS = [
 
 
 function Page() {
-  const [unlocked, setUnlocked] = useState(false);
+  const { unlocked, tryUnlock } = useAdminSession();
   const [pw, setPw] = useState("");
   const [err, setErr] = useState(false);
   const [tab, setTab] = useState<Tab>("overview");
 
+  // Keep local error state in sync if the user re-unlocks elsewhere.
+  useEffect(() => { if (unlocked) setErr(false); }, [unlocked]);
+
   function unlock(e: React.FormEvent) {
     e.preventDefault();
-    if (pw === ADMIN_KEY) { setUnlocked(true); setErr(false); }
+    if (tryUnlock(pw)) { setErr(false); }
     else setErr(true);
   }
 
