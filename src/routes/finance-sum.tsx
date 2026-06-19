@@ -76,14 +76,14 @@ function SumCard({ icon, label, value, accent }: { icon: React.ReactNode; label:
 }
 
 /* ============================== MACRO ============================== */
-function Macro({ fins }: { fins: SchoolFinance[] }) {
+function Macro({ fins, embedded }: { fins: SchoolFinance[]; embedded?: boolean }) {
   const { t } = useI18n();
   const state = useMemo(() => aggregateState(fins), [fins]);
   const dist = useMemo(() => aggregateFinanceByDistrict(fins).sort((a, b) => b.required - a.required), [fins]);
 
   return (
     <div className="flex flex-col min-h-full">
-      <Topbar title={t("fsum.title")} subtitle={t("fsum.macroSub")} />
+      {!embedded && <Topbar title={t("fsum.title")} subtitle={t("fsum.macroSub")} />}
       <div className="p-3 space-y-3">
         <LedgerNotebook />
 
@@ -176,7 +176,7 @@ function Macro({ fins }: { fins: SchoolFinance[] }) {
 }
 
 /* ============================== MICRO ============================== */
-function Micro({ fins }: { fins: SchoolFinance[] }) {
+function Micro({ fins, embedded }: { fins: SchoolFinance[]; embedded?: boolean }) {
   const { t } = useI18n();
   const [q, setQ] = useState("");
   const [district, setDistrict] = useState("all");
@@ -194,7 +194,7 @@ function Micro({ fins }: { fins: SchoolFinance[] }) {
 
   return (
     <div className="flex flex-col min-h-full">
-      <Topbar title={t("fsum.title")} subtitle={t("fsum.microSub")} />
+      {!embedded && <Topbar title={t("fsum.title")} subtitle={t("fsum.microSub")} />}
       <div className="p-3 space-y-3">
         <LedgerNotebook />
 
