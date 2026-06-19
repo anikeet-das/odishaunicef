@@ -86,6 +86,7 @@ function Macro({ fins, embedded }: { fins: SchoolFinance[]; embedded?: boolean }
       {!embedded && <Topbar title={t("fsum.title")} subtitle={t("fsum.macroSub")} />}
       <div className="p-3 space-y-3">
         <LedgerNotebook />
+        <NotesPanel />
 
         {/* Odisha as a whole */}
         <div className="glass rounded-2xl p-4">
@@ -197,6 +198,7 @@ function Micro({ fins, embedded }: { fins: SchoolFinance[]; embedded?: boolean }
       {!embedded && <Topbar title={t("fsum.title")} subtitle={t("fsum.microSub")} />}
       <div className="p-3 space-y-3">
         <LedgerNotebook />
+        <NotesPanel />
 
         <div className="glass rounded-2xl p-3 flex items-center gap-2 flex-wrap">
           <Filter className="h-4 w-4 text-[var(--cyan)]" />
