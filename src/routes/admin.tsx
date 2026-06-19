@@ -99,6 +99,7 @@ function Page() {
                   { id: "data-upload", label: "Data Upload", icon: Database },
                   { id: "responds", label: "Responds", icon: Table2 },
                   { id: "climate", label: "Climate", icon: CloudLightning },
+                  { id: "finance-sum", label: "Finance Sum", icon: Sigma },
                 ] as { id: Tab; label: string; icon: typeof Lock }[]).map((t) => {
                   const Icon = t.icon;
                   const active = tab === t.id;
@@ -155,6 +156,7 @@ function Page() {
                 {tab === "data-upload" && <DataUploadPanel />}
                 {tab === "responds" && <RespondsPanel />}
                 {tab === "climate" && <ClimateAlertsPage />}
+                {tab === "finance-sum" && <FinanceSumBody embedded />}
                 {tab === "ai-recommendations" && <AiRecommendationsBody />}
                 {tab === "personalize" && <PersonalizeBody embedded />}
                 {tab === "truth-check" && <TruthCheckBody />}
