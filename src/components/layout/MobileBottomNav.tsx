@@ -4,16 +4,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain, Network, Award, ClipboardList,
   LayoutDashboard, Globe2, Building2, School,
-  Gauge, ShieldAlert, Star, Droplets, Wallet, Sigma, GitCompare,
-  X, ChevronUp,
+  Gauge, ShieldAlert, Star, Droplets, Wallet, GitCompare,
+  X, ChevronUp, Settings,
 } from "lucide-react";
 import unicefLogo from "@/assets/unicef-logo.png";
 
 /**
  * Apple-style frosted glass bottom navigation for tablet & mobile.
  * 5 controls: Intelligence · Analytics · UNICEF (admin) · Evaluation · Form.
- * Side groups open a bottom sheet picker; the centre UNICEF disc is the
- * brand mark and routes to /admin.
+ * A small Settings disc floats top-right for live config.
  */
 
 type GroupItem = { to: string; label: string; icon: typeof Brain };
@@ -37,7 +36,6 @@ const GROUPS: Group[] = [
       { to: "/shvr", label: "SHVR", icon: Star },
       { to: "/wash", label: "WASH", icon: Droplets },
       { to: "/finance", label: "Financial Intelligence", icon: Wallet },
-      { to: "/finance-sum", label: "Finance Sum", icon: Sigma },
       { to: "/compare", label: "Compare", icon: GitCompare },
     ],
   },
@@ -72,6 +70,24 @@ export function MobileBottomNav() {
     <>
       {/* Spacer so page content never sits under the bar */}
       <div className="lg:hidden h-[96px]" aria-hidden />
+
+      {/* Floating Settings disc (top-right, mobile/tablet only) */}
+      <Link
+        to="/settings"
+        aria-label="Settings"
+        className="lg:hidden fixed top-3 right-3 z-[55] h-10 w-10 grid place-items-center rounded-full transition active:scale-95"
+        style={{
+          background: "color-mix(in oklab, var(--background) 70%, transparent)",
+          backdropFilter: "blur(18px) saturate(160%)",
+          WebkitBackdropFilter: "blur(18px) saturate(160%)",
+          border: "1px solid color-mix(in oklab, var(--foreground) 14%, transparent)",
+          boxShadow: "0 10px 24px -10px rgba(0,0,0,0.45)",
+          color: pathname === "/settings" ? "var(--cyan)" : "var(--muted-foreground)",
+        }}
+      >
+        <Settings className="h-4 w-4" />
+      </Link>
+
 
       {/* Sheet */}
       <AnimatePresence>

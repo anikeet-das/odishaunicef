@@ -123,9 +123,10 @@ function Kpi({ icon, label, value, bar, accent }: {
   accent: string;
 }) {
   return (
-    <div className="glass-soft rounded-xl px-3 py-2.5">
-      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
-        <span style={{ color: accent }}>{icon}</span>{label}
+    <div className="glass-soft rounded-xl px-2.5 py-2 min-w-0">
+      <div className="flex items-center gap-1 text-[9px] uppercase tracking-[0.08em] text-muted-foreground leading-tight">
+        <span className="shrink-0" style={{ color: accent }}>{icon}</span>
+        <span className="truncate">{label}</span>
       </div>
       <div className="text-sm font-bold mt-1 truncate">{value}</div>
       {bar !== undefined && (
