@@ -7,7 +7,6 @@ import {
 } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { useAdminSession } from "@/lib/admin/session";
-import { useAdminSession } from "@/lib/admin/session";
 import { DataUploadPanel } from "@/components/admin/DataUploadPanel";
 import { RespondsPanel } from "@/components/admin/RespondsPanel";
 import { useSchools, platformKpis, aggregateByDistrict } from "@/lib/data/cces";
