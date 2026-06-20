@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
-import { useSchools, platformKpis, hazardBreakdown, aggregateByDistrict } from "@/lib/data/cces";
+import { useSchools, platformKpis, shvrDistribution, type School } from "@/lib/data/cces";
 import { useSettings } from "@/components/layout/settings-provider";
-import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from "recharts";
+import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart, Pie, Legend } from "recharts";
 import { Activity, Droplets, Leaf, ShieldAlert, School as SchoolIcon, Star } from "lucide-react";
 import unicefLogo from "@/assets/unicef-logo.png";
 import { AwaitingData } from "@/components/data/AwaitingData";
@@ -54,10 +54,8 @@ function Index() {
   }
 
   const kpi = platformKpis(schools);
-  const hz = hazardBreakdown(schools).slice(0, 8);
-  const districts = aggregateByDistrict(schools).sort((a, b) => b.avgSust - a.avgSust);
-  const topD = districts.slice(0, 5);
-  const bottomD = [...districts].sort((a, b) => a.avgSust - b.avgSust).slice(0, 5);
+  const shvr = shvrDistribution(schools);
+  const hyg = hygieneAnalytics(schools);
 
   return (
     <div className="flex flex-col min-h-full">
@@ -86,81 +84,62 @@ function Index() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-3">
-          {/* Hazards */}
-          <div className="glass rounded-2xl p-5 lg:col-span-2">
+        <div className="grid lg:grid-cols-2 gap-3">
+          {/* SHVR star rating distribution 2025-26 */}
+          <div className="glass rounded-2xl p-5">
             <div className="flex items-baseline justify-between mb-3">
-              <h3 className="font-semibold">Top climate hazards exposing schools</h3>
-              <Link to="/risk" className="text-xs text-accent hover:underline">Open Risk Analytics →</Link>
+              <h3 className="font-semibold">Star rating distribution · 2025-26 (SHVR)</h3>
+              <Link to="/shvr" className="text-xs text-accent hover:underline">Open SHVR →</Link>
             </div>
             <div className="h-[260px]">
               <ResponsiveContainer>
-                <BarChart data={hz}>
-                  <XAxis dataKey="hazard" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} interval={0} angle={-20} textAnchor="end" height={60} />
-                  <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                <BarChart data={shvr}>
+                  <XAxis dataKey="label" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
+                  <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} allowDecimals={false} />
                   <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12 }} />
-                  <Bar dataKey="exposed" radius={[6, 6, 0, 0]}>
-                    {hz.map((_, i) => <Cell key={i} fill={`oklch(0.78 0.18 ${(220 + i * 18) % 360})`} />)}
+                  <Bar dataKey="count" radius={[6, 6, 0, 0]}>
+                    {shvr.map((_, i) => <Cell key={i} fill={`oklch(0.78 0.18 ${(40 + i * 35) % 360})`} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
-          {/* Plans adoption */}
+          {/* Hygiene analytics */}
           <div className="glass rounded-2xl p-5">
-            <h3 className="font-semibold mb-3">Plan adoption</h3>
-            <Stat label="CR-SAP plans" pct={kpi.crsapPct} />
-            <Stat label="Green / Sustainable plan" pct={kpi.greenPct} />
-            <Stat label="School Disaster Mgmt Plan" pct={kpi.sdmpPct} />
-            <Stat label="Regular mock drills" pct={kpi.drillsPct} />
+            <div className="flex items-baseline justify-between mb-3">
+              <h3 className="font-semibold">Hygiene Analytics</h3>
+              <Link to="/wash" className="text-xs text-accent hover:underline">Open WASH →</Link>
+            </div>
+            <div className="h-[260px]">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie data={hyg} dataKey="value" nameKey="name" innerRadius={55} outerRadius={95} paddingAngle={2}>
+                    {hyg.map((_, i) => <Cell key={i} fill={`oklch(0.78 0.18 ${(180 + i * 40) % 360})`} />)}
+                  </Pie>
+                  <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12 }}
+                    formatter={(v: number) => `${v}% of schools`} />
+                  <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
-
-        <div className="grid lg:grid-cols-2 gap-3">
-          <DistrictBoard title="Top 5 sustainable districts" data={topD} positive />
-          <DistrictBoard title="Bottom 5 — need urgent intervention" data={bottomD} />
-        </div>
       </div>
     </div>
   );
 }
 
-function Stat({ label, pct }: { label: string; pct: number }) {
-  return (
-    <div className="py-2">
-      <div className="flex items-center justify-between text-sm mb-1.5">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-semibold tabular-nums">{pct}%</span>
-      </div>
-      <div className="h-2 rounded-full bg-secondary/60 overflow-hidden">
-        <div className="h-full" style={{ width: `${pct}%`, background: "var(--gradient-aurora)" }} />
-      </div>
-    </div>
-  );
+function hygieneAnalytics(schools: School[]) {
+  const n = schools.length || 1;
+  const pct = (filter: (s: School) => boolean) => Math.round((schools.filter(filter).length / n) * 100);
+  return [
+    { name: "WASH ≥ 70%", value: pct((s) => s.washScore >= 70) },
+    { name: "WASH 40-69%", value: pct((s) => s.washScore >= 40 && s.washScore < 70) },
+    { name: "WASH < 40%", value: pct((s) => s.washScore < 40) },
+  ];
 }
 
-function DistrictBoard({ title, data, positive }: { title: string; data: ReturnType<typeof aggregateByDistrict>; positive?: boolean }) {
-  return (
-    <div className="glass rounded-2xl p-5">
-      <h3 className="font-semibold mb-3">{title}</h3>
-      <div className="space-y-2">
-        {data.map((d) => (
-          <Link to="/districts" key={d.districtId} className="flex items-center justify-between glass-soft rounded-xl px-4 py-3 hover:neon-ring transition">
-            <div>
-              <div className="font-medium">{d.district}</div>
-              <div className="text-[11px] text-muted-foreground">{d.schools} schools · {d.students.toLocaleString()} students · top hazard: {d.topHazard ?? "—"}</div>
-            </div>
-            <div className="text-right">
-              <div className="text-lg font-bold tabular-nums" style={{ color: positive ? "oklch(0.84 0.2 155)" : "oklch(0.78 0.2 30)" }}>{d.avgSust}%</div>
-              <div className="text-[11px] text-muted-foreground">★ {d.avgShvr.toFixed(2)}</div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function Loading() {
   return (

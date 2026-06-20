@@ -236,7 +236,14 @@ function MicroView({ schools }: { schools: School[] }) {
                       </button>
                     </td>
                     {HAZARDS.map((h) => {
-                      const v = r[h] as number;
+                      const v = r[h] as number | null;
+                      if (v === null || v === undefined) {
+                        return (
+                          <td key={h} className="px-1 py-1 text-center">
+                            <div className="rounded-md mx-auto h-8 min-w-[40px] grid place-items-center text-muted-foreground/70 text-xs">—</div>
+                          </td>
+                        );
+                      }
                       const color = cellColor(v);
                       return (
                         <td key={h} className="px-1 py-1 text-center"
@@ -319,11 +326,18 @@ function buildMatrix(schools: School[]) {
   const districts = Array.from(new Set(schools.map((s) => s.district))).sort();
   return districts.map((name) => {
     const list = schools.filter((s) => s.district === name);
-    const row: Record<string, number | string> = { name };
+    const row: Record<string, number | string | null> = { name, _count: list.length };
     for (const h of HAZARDS) {
-      row[h] = list.length ? Math.round((list.filter((s) => s.hazards[h] > 0).length / list.length) * 100) : 0;
+      // If the district has no submitted entries with hazard data, surface
+      // "—" rather than misleading 0% / 100% percentages.
+      const hazardSamples = list.filter((s) => Number.isFinite(s.hazards[h]));
+      if (!list.length || hazardSamples.length === 0) {
+        row[h] = null;
+      } else {
+        row[h] = Math.round((list.filter((s) => s.hazards[h] > 0).length / list.length) * 100);
+      }
     }
-    return row as { name: string } & Record<string, number>;
+    return row as { name: string; _count: number } & Record<string, number | null>;
   });
 }
 

@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Globe2, Building2, School, Gauge, ShieldAlert, Star,
   FileBarChart2, BookOpen, ClipboardList,
   Lock, Droplets, Award, GitCompare, MessageCircle, Palette, Wallet,
-  Brain, FolderKanban, Network,
+  Brain, FolderKanban, Network, Sparkles,
 } from "lucide-react";
 
 export type NavItem = { to: string; labelKey: string; icon: any };
@@ -34,6 +34,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/shvr", labelKey: "nav.shvr", icon: Star },
       { to: "/wash", labelKey: "nav.wash", icon: Droplets },
       { to: "/finance", labelKey: "nav.finance", icon: Wallet },
+      { to: "/ai-notes", labelKey: "nav.ainotes", icon: Sparkles },
       { to: "/compare", labelKey: "nav.compare", icon: GitCompare },
     ],
   },
