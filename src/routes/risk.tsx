@@ -319,11 +319,18 @@ function buildMatrix(schools: School[]) {
   const districts = Array.from(new Set(schools.map((s) => s.district))).sort();
   return districts.map((name) => {
     const list = schools.filter((s) => s.district === name);
-    const row: Record<string, number | string> = { name };
+    const row: Record<string, number | string | null> = { name, _count: list.length };
     for (const h of HAZARDS) {
-      row[h] = list.length ? Math.round((list.filter((s) => s.hazards[h] > 0).length / list.length) * 100) : 0;
+      // If the district has no submitted entries with hazard data, surface
+      // "—" rather than misleading 0% / 100% percentages.
+      const hazardSamples = list.filter((s) => Number.isFinite(s.hazards[h]));
+      if (!list.length || hazardSamples.length === 0) {
+        row[h] = null;
+      } else {
+        row[h] = Math.round((list.filter((s) => s.hazards[h] > 0).length / list.length) * 100);
+      }
     }
-    return row as { name: string } & Record<string, number>;
+    return row as { name: string; _count: number } & Record<string, number | null>;
   });
 }
 
