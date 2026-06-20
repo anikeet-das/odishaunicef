@@ -140,41 +140,6 @@ function hygieneAnalytics(schools: School[]) {
   ];
 }
 
-function Stat({ label, pct }: { label: string; pct: number }) {
-  return (
-    <div className="py-2">
-      <div className="flex items-center justify-between text-sm mb-1.5">
-        <span className="text-muted-foreground">{label}</span>
-        <span className="font-semibold tabular-nums">{pct}%</span>
-      </div>
-      <div className="h-2 rounded-full bg-secondary/60 overflow-hidden">
-        <div className="h-full" style={{ width: `${pct}%`, background: "var(--gradient-aurora)" }} />
-      </div>
-    </div>
-  );
-}
-
-function DistrictBoard({ title, data, positive }: { title: string; data: ReturnType<typeof aggregateByDistrict>; positive?: boolean }) {
-  return (
-    <div className="glass rounded-2xl p-5">
-      <h3 className="font-semibold mb-3">{title}</h3>
-      <div className="space-y-2">
-        {data.map((d) => (
-          <Link to="/districts" key={d.districtId} className="flex items-center justify-between glass-soft rounded-xl px-4 py-3 hover:neon-ring transition">
-            <div>
-              <div className="font-medium">{d.district}</div>
-              <div className="text-[11px] text-muted-foreground">{d.schools} schools · {d.students.toLocaleString()} students · top hazard: {d.topHazard ?? "—"}</div>
-            </div>
-            <div className="text-right">
-              <div className="text-lg font-bold tabular-nums" style={{ color: positive ? "oklch(0.84 0.2 155)" : "oklch(0.78 0.2 30)" }}>{d.avgSust}%</div>
-              <div className="text-[11px] text-muted-foreground">★ {d.avgShvr.toFixed(2)}</div>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 function Loading() {
   return (
