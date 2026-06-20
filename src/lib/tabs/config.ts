@@ -45,6 +45,7 @@ export const TAB_CONFIG: Record<string, TabConfig> = {
   // Finance pages: upload disabled — all financial data flows through the manual Fund Ledger
   "/finance": { view: true },
   "/finance-sum": { view: true },
+  "/ai-notes": { view: true },
   "/compare": { view: false },
   "/tech": { view: true },
 
