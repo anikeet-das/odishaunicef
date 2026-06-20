@@ -34,6 +34,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { to: "/shvr", labelKey: "nav.shvr", icon: Star },
       { to: "/wash", labelKey: "nav.wash", icon: Droplets },
       { to: "/finance", labelKey: "nav.finance", icon: Wallet },
+      { to: "/ai-notes", labelKey: "nav.ainotes", icon: Sparkles },
       { to: "/compare", labelKey: "nav.compare", icon: GitCompare },
     ],
   },
