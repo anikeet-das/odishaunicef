@@ -236,7 +236,14 @@ function MicroView({ schools }: { schools: School[] }) {
                       </button>
                     </td>
                     {HAZARDS.map((h) => {
-                      const v = r[h] as number;
+                      const v = r[h] as number | null;
+                      if (v === null || v === undefined) {
+                        return (
+                          <td key={h} className="px-1 py-1 text-center">
+                            <div className="rounded-md mx-auto h-8 min-w-[40px] grid place-items-center text-muted-foreground/70 text-xs">—</div>
+                          </td>
+                        );
+                      }
                       const color = cellColor(v);
                       return (
                         <td key={h} className="px-1 py-1 text-center"
