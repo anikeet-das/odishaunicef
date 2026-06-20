@@ -1,63 +1,228 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
 import { LoadingShell } from "@/components/data/LoadingShell";
-import { useViewMode } from "@/components/layout/view-mode";
-import { useI18n } from "@/lib/i18n";
-import {
-  useFinance, aggregateState, aggregateFinanceByDistrict, monthlyTrend, termStatus,
-  stateAiSummary, schoolAiSummary, inr, inrFull, statusFor, STATUS_COLOR,
-  CAPITAL_KEYS, OPEX_KEYS, SOURCE_KEYS, CAPITAL_LABELS, OPEX_LABELS, SOURCE_LABELS,
-  type SchoolFinance, type CapitalKey, type OpexKey, type SourceKey,
-} from "@/lib/data/finance";
+import { AwaitingData } from "@/components/data/AwaitingData";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell, Legend,
-  AreaChart, Area, LineChart, Line, PieChart, Pie, RadialBarChart, RadialBar,
-  PolarAngleAxis, Treemap, ScatterChart, Scatter, ZAxis,
+  PieChart, Pie, LineChart, Line, CartesianGrid,
 } from "recharts";
-import { motion } from "framer-motion";
 import {
-  Wallet, TrendingUp, Coins, AlertTriangle, Sparkles, Search, Download, Filter,
-  Building2, Trophy, Target, ArrowDownRight, Gauge, Layers, Plane,
+  Wallet, Coins, TrendingUp, AlertTriangle, Sparkles, Search, Download,
+  Building2, Target, Gauge, FileSpreadsheet, FileText, ShieldCheck,
+  ArrowDownRight, Layers, BadgeAlert, Clock,
 } from "lucide-react";
+import {
+  useRealFinance, inr, inrFull, exportCsv, exportExcel, schoolsToCsvRows,
+  CAPITAL_FIELDS, OPEX_FIELDS, FIELD_LABEL,
+  type SchoolFin,
+} from "@/lib/data/real-finance";
 
 export const Route = createFileRoute("/finance")({
   head: () => ({
     meta: [
       { title: "Financial Intelligence · CR-SAP Odisha" },
-      { name: "description", content: "Capital, operational cost & resource convergence monitoring across Odisha schools." },
+      { name: "description", content: "Real-time capital, operational cost & resource convergence from live Google Form responses." },
     ],
   }),
   component: Page,
 });
 
-function Page() {
-  const fins = useFinance();
-  const { mode } = useViewMode();
-  if (!fins) return <LoadingShell title="Financial Intelligence" subtitle="Resource Convergence" />;
-  return mode === "macro" ? <Macro fins={fins} /> : <Micro fins={fins} />;
-}
-
-/* ============================== shared bits ============================== */
 const COLORS = [
   "oklch(0.72 0.21 255)", "oklch(0.82 0.19 175)", "oklch(0.84 0.2 155)",
   "oklch(0.62 0.22 285)", "oklch(0.85 0.18 75)", "oklch(0.68 0.24 22)", "oklch(0.86 0.16 200)",
 ];
 
-function Counter({ value, format = inr }: { value: number; format?: (v: number) => string }) {
+function Page() {
+  const fin = useRealFinance();
+  if (!fin) return <LoadingShell title="Financial Intelligence" subtitle="Live Form Responses" />;
+  if (fin.schools.length === 0) {
+    return (
+      <div className="flex flex-col min-h-full">
+        <Topbar title="Financial Intelligence" subtitle="Awaiting form submissions" />
+        <AwaitingData />
+      </div>
+    );
+  }
+  return <Dashboard fin={fin} />;
+}
+
+function Dashboard({ fin }: { fin: NonNullable<ReturnType<typeof useRealFinance>> }) {
+  const { totals, audit, districts } = fin;
+  const accuracyGood = audit.accuracyPct >= 95;
+
   return (
-    <motion.span
-      key={value}
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="tabular-nums"
-    >
-      {format(value)}
-    </motion.span>
+    <div className="flex flex-col min-h-full">
+      <Topbar
+        title="Financial Intelligence"
+        subtitle="Live · sourced from Google Form responses"
+      />
+      <div className="p-3 space-y-3">
+        {/* Data integrity banner */}
+        <div className="glass rounded-2xl p-4 flex flex-wrap items-center gap-3">
+          <ShieldCheck className={`h-5 w-5 ${accuracyGood ? "text-[var(--aurora)]" : "text-[var(--warn)]"}`} />
+          <div className="flex-1 min-w-[200px]">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Data Integrity</div>
+            <div className="text-sm">
+              <span className="font-semibold">{audit.validFieldCells.toLocaleString()}</span>
+              <span className="text-muted-foreground"> of </span>
+              <span className="font-semibold">{audit.totalFieldCells.toLocaleString()}</span>
+              <span className="text-muted-foreground"> cost cells parsed cleanly · </span>
+              <span className={`font-bold ${accuracyGood ? "text-[var(--aurora)]" : "text-[var(--warn)]"}`}>{audit.accuracyPct}%</span>
+              <span className="text-muted-foreground"> accuracy</span>
+            </div>
+          </div>
+          {audit.mismatchSchools > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-full bg-[oklch(0.85_0.18_75/0.18)] text-[var(--warn)]">
+              <BadgeAlert className="h-3.5 w-3.5" /> {audit.mismatchSchools} school(s) with capital+opex / mobilized mismatch
+            </span>
+          )}
+          <Link to="/ai-notes" className="inline-flex items-center gap-1.5 text-[11px] px-3 py-1.5 rounded-full glass-soft hover:neon-ring">
+            <Sparkles className="h-3.5 w-3.5 text-[var(--aurora)]" /> {fin.notes.length} AI Notes
+          </Link>
+        </div>
+
+        {/* KPI cards */}
+        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          <Kpi icon={<Wallet className="h-4 w-4" />} label="Capital Cost" value={inr(totals.capitalTotal)} sub={`Toilets + Water + Infra · ${fin.schools.length} schools`} accent={COLORS[0]} />
+          <Kpi icon={<Coins className="h-4 w-4" />} label="Operational Cost" value={inr(totals.opexTotal)} sub="Maintenance + Cleaning + Repairs" accent={COLORS[1]} />
+          <Kpi icon={<Target className="h-4 w-4" />} label="Required Budget" value={inr(totals.required)} sub="Capital + Operational" accent={COLORS[6]} />
+          <Kpi icon={<TrendingUp className="h-4 w-4" />} label="Resource Mobilized" value={inr(totals.mobilized)} sub={`${totals.convergence}% of required`} accent={COLORS[2]} ring={totals.convergence} />
+        </div>
+        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
+          <Kpi icon={<AlertTriangle className="h-4 w-4" />} label="Resource Gap" value={inr(totals.gap)} sub={totals.required ? `${Math.round((totals.gap / totals.required) * 100)}% short` : "—"} accent={COLORS[5]} />
+          <Kpi icon={<Building2 className="h-4 w-4" />} label="Schools Covered" value={audit.totalSchools.toString()} sub={`${districts.length} districts`} accent={COLORS[3]} />
+          <Kpi icon={<BadgeAlert className="h-4 w-4" />} label="Invalid Entries" value={fin.notes.length.toString()} sub={`${audit.invalidRecords} fully blank · ${audit.partiallyValid} partial`} accent={COLORS[5]} />
+          <Kpi icon={<Gauge className="h-4 w-4" />} label="Data Accuracy" value={`${audit.accuracyPct}%`} sub={accuracyGood ? "Within target ≥ 95%" : "Below 95% target"} accent={accuracyGood ? COLORS[2] : COLORS[4]} ring={audit.accuracyPct} />
+        </div>
+
+        {/* Required vs Mobilized vs Gap */}
+        <div className="grid lg:grid-cols-2 gap-3">
+          <Section title="Required vs Mobilized vs Gap" icon={<ArrowDownRight className="h-4 w-4 text-[var(--danger)]" />} note="From live cells">
+            <div className="h-[280px]">
+              <ResponsiveContainer>
+                <BarChart data={[
+                  { name: "Required", v: totals.required, fill: COLORS[6] },
+                  { name: "Mobilized", v: totals.mobilized, fill: COLORS[2] },
+                  { name: "Gap", v: totals.gap, fill: COLORS[5] },
+                ]}>
+                  <CartesianGrid strokeDasharray="3 6" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                  <YAxis tickFormatter={(v) => inr(v)} tick={{ fontSize: 10 }} width={70} />
+                  <Tooltip formatter={(v: number) => inrFull(v)} />
+                  <Bar dataKey="v" radius={[6, 6, 0, 0]}>
+                    {[COLORS[6], COLORS[2], COLORS[5]].map((c, i) => <Cell key={i} fill={c} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Section>
+
+          {/* Capital + Opex split */}
+          <Section title="Capital vs Operational composition" icon={<Layers className="h-4 w-4 text-[var(--cyan)]" />}>
+            <div className="h-[280px]">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie data={[
+                    ...CAPITAL_FIELDS.map((f) => ({ name: `Capital · ${FIELD_LABEL[f]}`, value: totals.capitalByField[f] })),
+                    ...OPEX_FIELDS.map((f) => ({ name: `Opex · ${FIELD_LABEL[f]}`, value: totals.opexByField[f] })),
+                  ].filter((d) => d.value > 0)} dataKey="value" nameKey="name" innerRadius={55} outerRadius={95} paddingAngle={2}>
+                    {[0, 1, 2, 3, 4, 5].map((i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Pie>
+                  <Tooltip formatter={(v: number) => inrFull(v)} />
+                  <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Section>
+        </div>
+
+        {/* Sources + urgency */}
+        <div className="grid lg:grid-cols-2 gap-3">
+          <Section title="Resource Mobilization · Source breakdown" icon={<Layers className="h-4 w-4 text-[var(--aurora)]" />} note="From “Funding source suggested”">
+            {totals.sourceBreakdown.length === 0 ? (
+              <div className="text-xs text-muted-foreground p-6 text-center">No funding source data submitted yet.</div>
+            ) : (
+              <div className="space-y-2">
+                {totals.sourceBreakdown.map((s, i) => {
+                  const tot = totals.sourceBreakdown.reduce((a, b) => a + b.value, 0) || 1;
+                  const pct = Math.round((s.value / tot) * 100);
+                  return (
+                    <div key={s.source}>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="truncate pr-2">{s.source}</span>
+                        <span className="font-semibold tabular-nums">{inr(s.value)} · {pct}%</span>
+                      </div>
+                      <div className="h-2.5 rounded-full overflow-hidden bg-white/10">
+                        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: COLORS[i % COLORS.length] }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Section>
+
+          <Section title="Budget urgency distribution" icon={<Clock className="h-4 w-4 text-[var(--warn)]" />} note="From “Budget urgency”">
+            {totals.urgencyBreakdown.length === 0 ? (
+              <div className="text-xs text-muted-foreground p-6 text-center">No urgency data submitted yet.</div>
+            ) : (
+              <div className="h-[260px]">
+                <ResponsiveContainer>
+                  <BarChart data={totals.urgencyBreakdown} layout="vertical" margin={{ left: 30 }}>
+                    <XAxis type="number" tick={{ fontSize: 10 }} />
+                    <YAxis dataKey="urgency" type="category" tick={{ fontSize: 10 }} width={140} />
+                    <Tooltip />
+                    <Bar dataKey="count" radius={[0, 6, 6, 0]}>
+                      {totals.urgencyBreakdown.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </Section>
+        </div>
+
+        {/* District leaderboard */}
+        <Section title="District-wise budget map" icon={<Building2 className="h-4 w-4 text-[var(--cyan)]" />} note={`${districts.length} districts`}>
+          {districts.length === 0 ? <div className="text-xs text-muted-foreground p-4">—</div> : (
+            <div className="h-[320px]">
+              <ResponsiveContainer>
+                <BarChart data={districts.slice(0, 15)}>
+                  <CartesianGrid strokeDasharray="3 6" />
+                  <XAxis dataKey="district" tick={{ fontSize: 10 }} angle={-25} textAnchor="end" height={70} interval={0} />
+                  <YAxis tickFormatter={(v) => inr(v)} tick={{ fontSize: 10 }} width={70} />
+                  <Tooltip formatter={(v: number) => inrFull(v)} />
+                  <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />
+                  <Bar dataKey="capitalTotal" name="Capital" stackId="a" fill={COLORS[0]} />
+                  <Bar dataKey="opexTotal" name="Operational" stackId="a" fill={COLORS[1]} />
+                  <Line type="monotone" dataKey="mobilized" stroke={COLORS[2]} strokeWidth={2} dot={false} name="Mobilized" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </Section>
+
+        {/* Top schools */}
+        <div className="grid lg:grid-cols-3 gap-3">
+          <RankList title="Top 10 highest budget schools" data={fin.topByRequired} valueOf={(s) => s.required} />
+          <RankList title="Top 10 largest infrastructure cost" data={fin.topByCapital} valueOf={(s) => s.capital.infrastructure ?? 0} hideZero />
+          <RankList title="Top 10 highest operational burden" data={fin.topByOpex} valueOf={(s) => s.opexTotal} />
+        </div>
+
+        {/* AI insights */}
+        <AiInsights fin={fin} />
+
+        {/* School-level table */}
+        <SchoolTable schools={fin.schools} />
+      </div>
+    </div>
   );
 }
 
-function KpiCard({ icon, label, value, sub, accent, ring }: {
+/* --------------------------- Subcomponents --------------------------- */
+
+function Kpi({ icon, label, value, sub, accent, ring }: {
   icon: React.ReactNode; label: string; value: React.ReactNode; sub?: string; accent: string; ring?: number;
 }) {
   return (
@@ -66,11 +231,11 @@ function KpiCard({ icon, label, value, sub, accent, ring }: {
       <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
         <span style={{ color: accent }}>{icon}</span>{label}
       </div>
-      <div className="text-2xl font-bold mt-2" style={{ color: accent }}>{value}</div>
+      <div className="text-2xl font-bold mt-2 tabular-nums" style={{ color: accent }}>{value}</div>
       {sub && <div className="text-[11px] text-muted-foreground mt-1">{sub}</div>}
       {ring !== undefined && (
         <div className="mt-2 h-1.5 rounded-full overflow-hidden bg-white/10">
-          <div className="h-full rounded-full" style={{ width: `${Math.min(100, ring)}%`, background: accent, boxShadow: `0 0 8px ${accent}` }} />
+          <div className="h-full rounded-full" style={{ width: `${Math.min(100, ring)}%`, background: accent }} />
         </div>
       )}
     </div>
@@ -89,484 +254,200 @@ function Section({ title, note, icon, children }: { title: string; note?: string
   );
 }
 
-function dlCsv(name: string, rows: Record<string, unknown>[]) {
-  if (!rows.length) return;
-  const headers = Object.keys(rows[0]);
-  const csv = [headers.join(","), ...rows.map((r) => headers.map((h) => JSON.stringify(r[h] ?? "")).join(","))].join("\n");
-  const b = new Blob([csv], { type: "text/csv" });
-  const u = URL.createObjectURL(b);
-  const a = document.createElement("a"); a.href = u; a.download = name; a.click(); URL.revokeObjectURL(u);
-}
-
-/* ================================ MACRO ================================ */
-function Macro({ fins }: { fins: SchoolFinance[] }) {
-  const { t } = useI18n();
-  const state = useMemo(() => aggregateState(fins), [fins]);
-  const dist = useMemo(() => aggregateFinanceByDistrict(fins), [fins]);
-  const months = useMemo(() => monthlyTrend(state), [state]);
-  const term = useMemo(() => termStatus(state), [state]);
-  const ai = useMemo(() => stateAiSummary(state, dist), [state, dist]);
-
-  const leaders = {
-    invest: [...dist].sort((a, b) => b.required - a.required)[0],
-    converge: [...dist].sort((a, b) => b.convergence - a.convergence)[0],
-    efficient: [...dist].sort((a, b) => b.efficiency - a.efficiency)[0],
-    gap: [...dist].sort((a, b) => b.gap - a.gap)[0],
-  };
-
-  const treemap = dist.map((d) => ({ name: d.district, size: d.required, conv: d.convergence }));
-  const overall = [
-    { name: "Convergence", value: state.convergence, fill: COLORS[0] },
-    { name: "Utilisation", value: Math.round((state.utilized / Math.max(1, state.mobilized)) * 100), fill: COLORS[1] },
-    { name: "Health", value: state.health, fill: COLORS[2] },
-    { name: "Efficiency", value: state.efficiency, fill: COLORS[3] },
-  ];
-
+function RankList({ title, data, valueOf, hideZero }: { title: string; data: SchoolFin[]; valueOf: (s: SchoolFin) => number; hideZero?: boolean }) {
+  const rows = hideZero ? data.filter((s) => valueOf(s) > 0) : data;
   return (
-    <div className="flex flex-col min-h-full">
-      <Topbar title={t("fin.title")} subtitle={t("fin.macroSub")} />
-      <div className="p-3 space-y-3">
-        {/* SECTION 1 — state overview KPIs */}
-        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          <KpiCard icon={<Wallet className="h-4 w-4" />} label={t("fin.capital")} value={<Counter value={state.capitalTotal} />} sub={t("fin.capitalSub")} accent={COLORS[0]} />
-          <KpiCard icon={<Coins className="h-4 w-4" />} label={t("fin.opex")} value={<Counter value={state.opexTotal} />} sub={t("fin.opexSub")} accent={COLORS[1]} />
-          <KpiCard icon={<TrendingUp className="h-4 w-4" />} label={t("fin.mobilized")} value={<Counter value={state.mobilized} />} sub={`${state.convergence}% ${t("fin.ofRequired")}`} accent={COLORS[2]} ring={state.convergence} />
-          <KpiCard icon={<AlertTriangle className="h-4 w-4" />} label={t("fin.gap")} value={<Counter value={state.gap} />} sub={`${t("fin.required")}: ${inr(state.required)}`} accent={COLORS[5]} ring={Math.round((state.gap / Math.max(1, state.required)) * 100)} />
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-3">
-          {/* Waterfall-style required vs mobilized vs gap */}
-          <Section title={t("fin.deficit")} icon={<ArrowDownRight className="h-4 w-4 text-[var(--danger)]" />} note={t("live.now")}>
-            <div className="h-[300px]">
-              <ResponsiveContainer>
-                <BarChart data={[
-                  { name: t("fin.required"), v: state.required, fill: COLORS[6] },
-                  { name: t("fin.mobilized"), v: state.mobilized, fill: COLORS[2] },
-                  { name: t("fin.utilized"), v: state.utilized, fill: COLORS[1] },
-                  { name: t("fin.gap"), v: state.gap, fill: COLORS[5] },
-                ]}>
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis tickFormatter={(v) => inr(v)} tick={{ fontSize: 10 }} width={70} />
-                  <Tooltip formatter={(v: number) => inrFull(v)} />
-                  <Bar dataKey="v" radius={[6, 6, 0, 0]}>
-                    {[COLORS[6], COLORS[2], COLORS[1], COLORS[5]].map((c, i) => <Cell key={i} fill={c} />)}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </Section>
-
-          {/* Convergence pulse radial */}
-          <Section title={t("fin.pulse")} icon={<Gauge className="h-4 w-4 text-[var(--cyan)]" />}>
-            <div className="h-[300px]">
-              <ResponsiveContainer>
-                <RadialBarChart innerRadius="25%" outerRadius="100%" data={overall} startAngle={210} endAngle={-30}>
-                  <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-                  <RadialBar background dataKey="value" cornerRadius={10} />
-                  <Tooltip formatter={(v: number) => `${v}%`} />
-                  <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                </RadialBarChart>
-              </ResponsiveContainer>
-            </div>
-          </Section>
-        </div>
-
-        {/* SECTION 2 — resource convergence: source flow + sunburst-ish */}
-        <div className="grid lg:grid-cols-2 gap-3">
-          <Section title={t("fin.sources")} icon={<Layers className="h-4 w-4 text-[var(--aurora)]" />} note={t("fin.flow")}>
-            <div className="space-y-2">
-              {state.bySource.sort((a, b) => b.value - a.value).map((s, i) => {
-                const pct = Math.round((s.value / state.mobilized) * 100);
-                return (
-                  <div key={s.key}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span>{SOURCE_LABELS[s.key as SourceKey]}</span>
-                      <span className="font-semibold tabular-nums">{inr(s.value)} · {pct}%</span>
-                    </div>
-                    <div className="h-2.5 rounded-full overflow-hidden bg-white/10">
-                      <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ delay: i * 0.05 }}
-                        className="h-full rounded-full" style={{ background: COLORS[i % COLORS.length], boxShadow: `0 0 8px ${COLORS[i % COLORS.length]}` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Section>
-
-          <Section title={t("fin.capitalSplit")} icon={<Wallet className="h-4 w-4 text-[var(--cyan)]" />}>
-            <div className="h-[280px]">
-              <ResponsiveContainer>
-                <PieChart>
-                  <Pie data={state.byCapital} dataKey="value" nameKey="label" innerRadius={55} outerRadius={95} paddingAngle={2}>
-                    {state.byCapital.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip formatter={(v: number) => inrFull(v)} />
-                  <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </Section>
-        </div>
-
-        {/* SECTION 3 — district leaderboard + treemap + bubble */}
-        <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          <Leader icon={<Building2 className="h-4 w-4" />} label={t("fin.topInvest")} name={leaders.invest?.district} value={inr(leaders.invest?.required ?? 0)} accent={COLORS[0]} />
-          <Leader icon={<Trophy className="h-4 w-4" />} label={t("fin.topConverge")} name={leaders.converge?.district} value={`${leaders.converge?.convergence ?? 0}%`} accent={COLORS[2]} />
-          <Leader icon={<Target className="h-4 w-4" />} label={t("fin.mostEff")} name={leaders.efficient?.district} value={`${leaders.efficient?.efficiency ?? 0}%`} accent={COLORS[1]} />
-          <Leader icon={<AlertTriangle className="h-4 w-4" />} label={t("fin.largestGap")} name={leaders.gap?.district} value={inr(leaders.gap?.gap ?? 0)} accent={COLORS[5]} />
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-3">
-          <Section title={t("fin.treemap")} icon={<Layers className="h-4 w-4 text-[var(--indigo-glow)]" />} note={t("fin.byRequirement")}>
-            <div className="h-[320px]">
-              <ResponsiveContainer>
-                <Treemap data={treemap} dataKey="size" nameKey="name" stroke="oklch(0.16 0.03 260)"
-                  content={<TreemapCell />} />
-              </ResponsiveContainer>
-            </div>
-          </Section>
-          <Section title={t("fin.bubble")} icon={<Target className="h-4 w-4 text-[var(--cyan)]" />} note={t("fin.bubbleNote")}>
-            <div className="h-[320px]">
-              <ResponsiveContainer>
-                <ScatterChart margin={{ left: 10, bottom: 10 }}>
-                  <XAxis type="number" dataKey="convergence" name="Convergence" unit="%" tick={{ fontSize: 10 }} domain={[0, 120]} />
-                  <YAxis type="number" dataKey="efficiency" name="Efficiency" unit="%" tick={{ fontSize: 10 }} domain={[0, 100]} />
-                  <ZAxis type="number" dataKey="required" range={[60, 700]} />
-                  <Tooltip formatter={(v: number, n: string) => n === "required" ? inrFull(v) : `${v}%`} cursor={{ strokeDasharray: "3 3" }} />
-                  <Scatter data={dist} >
-                    {dist.map((d, i) => <Cell key={d.districtId} fill={COLORS[i % COLORS.length]} fillOpacity={0.7} />)}
-                  </Scatter>
-                </ScatterChart>
-              </ResponsiveContainer>
-            </div>
-          </Section>
-        </div>
-
-        {/* full leaderboard table */}
-        <Section title={t("fin.districtLeaderboard")} icon={<Trophy className="h-4 w-4 text-[var(--warn)]" />}
-          note={`${dist.length} ${t("fin.districts")}`}>
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs">
-              <thead className="text-muted-foreground uppercase tracking-wider text-[10px]">
-                <tr className="text-left border-b border-border/50">
-                  <th className="py-2 pr-3">{t("fin.district")}</th>
-                  <th className="py-2 px-2 text-right">{t("fin.capital")}</th>
-                  <th className="py-2 px-2 text-right">{t("fin.opex")}</th>
-                  <th className="py-2 px-2 text-right">{t("fin.mobilized")}</th>
-                  <th className="py-2 px-2 text-right">{t("fin.gap")}</th>
-                  <th className="py-2 px-2 text-right">{t("fin.convergence")}</th>
-                  <th className="py-2 pl-2">{t("fin.status")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[...dist].sort((a, b) => b.required - a.required).map((d) => (
-                  <tr key={d.districtId} className="border-b border-border/30 hover:bg-white/[0.03]">
-                    <td className="py-2 pr-3 font-medium">{d.district}</td>
-                    <td className="py-2 px-2 text-right tabular-nums">{inr(d.capitalTotal)}</td>
-                    <td className="py-2 px-2 text-right tabular-nums">{inr(d.opexTotal)}</td>
-                    <td className="py-2 px-2 text-right tabular-nums">{inr(d.mobilized)}</td>
-                    <td className="py-2 px-2 text-right tabular-nums text-[var(--danger)]">{inr(d.gap)}</td>
-                    <td className="py-2 px-2 text-right tabular-nums">{d.convergence}%</td>
-                    <td className="py-2 pl-2"><StatusPill status={d.status} /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Section>
-
-        {/* SECTION 4 — monthly trends */}
-        <Section title={t("fin.monthly")} icon={<TrendingUp className="h-4 w-4 text-[var(--aurora)]" />} note={t("fin.fiscalYear")}>
-          <div className="h-[320px]">
-            <ResponsiveContainer>
-              <AreaChart data={months}>
-                <defs>
-                  <linearGradient id="gMob" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={COLORS[2]} stopOpacity={0.5} /><stop offset="100%" stopColor={COLORS[2]} stopOpacity={0} /></linearGradient>
-                  <linearGradient id="gUtil" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={COLORS[1]} stopOpacity={0.5} /><stop offset="100%" stopColor={COLORS[1]} stopOpacity={0} /></linearGradient>
-                </defs>
-                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                <YAxis tickFormatter={(v) => inr(v)} tick={{ fontSize: 10 }} width={66} />
-                <Tooltip formatter={(v: number) => inrFull(v)} />
-                <Legend iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                <Area type="monotone" dataKey="mobilized" name={t("fin.mobilized")} stroke={COLORS[2]} fill="url(#gMob)" />
-                <Area type="monotone" dataKey="utilized" name={t("fin.utilized")} stroke={COLORS[1]} fill="url(#gUtil)" />
-                <Line type="monotone" dataKey="capital" name={t("fin.capital")} stroke={COLORS[0]} dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="opex" name={t("fin.opex")} stroke={COLORS[3]} dot={false} strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </Section>
-
-        {/* SECTION 5 — mid/final term tracker */}
-        <div className="grid lg:grid-cols-2 gap-3">
-          {([["mid", t("fin.midTerm")], ["final", t("fin.finalTerm")]] as const).map(([k, label]) => {
-            const ts = term[k];
-            const rows: [string, number][] = [
-              [t("fin.planned"), ts.planned], [t("fin.allocated"), ts.allocated],
-              [t("fin.mobilized"), ts.mobilized], [t("fin.utilized"), ts.utilized],
-            ];
-            return (
-              <Section key={k} title={label} icon={<Target className="h-4 w-4 text-[var(--cyan)]" />}>
-                <div className="space-y-3">
-                  {rows.map(([rl, v], i) => (
-                    <div key={rl}>
-                      <div className="flex justify-between text-xs mb-1"><span>{rl}</span><span className="font-semibold tabular-nums">{inr(v)}</span></div>
-                      <div className="h-2 rounded-full overflow-hidden bg-white/10">
-                        <div className="h-full rounded-full" style={{ width: `${Math.round((v / ts.planned) * 100)}%`, background: COLORS[i] }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-            );
-          })}
-        </div>
-
-        {/* SECTION 6 — AI summary + export */}
-        <div className="glass rounded-2xl p-5 relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl opacity-20" style={{ background: COLORS[3] }} />
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4 text-[var(--aurora)]" /> {t("fin.aiSummary")}</h3>
-            <button onClick={() => dlCsv("odisha-financial-intelligence.csv", dist as any)}
-              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full glass-soft hover:neon-ring transition">
-              <Download className="h-3.5 w-3.5" /> {t("fin.export")}
-            </button>
-          </div>
-          <ul className="space-y-2">
-            {ai.map((line, i) => (
-              <li key={i} className="text-sm leading-relaxed flex gap-2">
-                <span className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
-                <span>{line}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function TreemapCell(props: any) {
-  const { x, y, width, height, name, conv } = props;
-  if (width < 1 || height < 1) return null;
-  const c = conv >= 80 ? "oklch(0.7 0.17 160)" : conv >= 60 ? "oklch(0.82 0.19 175)" : conv >= 40 ? "oklch(0.85 0.18 75)" : "oklch(0.68 0.24 22)";
-  return (
-    <g>
-      <rect x={x} y={y} width={width} height={height} fill={c} fillOpacity={0.55} stroke="oklch(0.16 0.03 260)" />
-      {width > 60 && height > 28 && (
-        <text x={x + 6} y={y + 18} fontSize={11} fill="white" fontWeight={600}>{name}</text>
+    <Section title={title} icon={<Target className="h-4 w-4 text-[var(--cyan)]" />}>
+      {rows.length === 0 ? <div className="text-xs text-muted-foreground p-2">No data</div> : (
+        <ol className="space-y-1.5 text-xs">
+          {rows.slice(0, 10).map((s, i) => (
+            <li key={s.udise} className="glass-soft rounded-lg px-3 py-2 flex items-center gap-2">
+              <span className="text-[10px] font-bold tabular-nums w-5 text-muted-foreground">{i + 1}</span>
+              <span className="flex-1 truncate">
+                <span className="font-medium">{s.name}</span>
+                <span className="text-muted-foreground"> · {s.district}</span>
+              </span>
+              <span className="tabular-nums font-bold text-[var(--cyan)]">{inr(valueOf(s))}</span>
+            </li>
+          ))}
+        </ol>
       )}
-      {width > 60 && height > 44 && (
-        <text x={x + 6} y={y + 33} fontSize={10} fill="white" fillOpacity={0.85}>{conv}%</text>
-      )}
-    </g>
+    </Section>
   );
 }
 
-function Leader({ icon, label, name, value, accent }: { icon: React.ReactNode; label: string; name?: string; value: string; accent: string }) {
-  return (
-    <div className="glass rounded-2xl p-4">
-      <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-muted-foreground"><span style={{ color: accent }}>{icon}</span>{label}</div>
-      <div className="text-lg font-bold mt-1.5 truncate">{name ?? "—"}</div>
-      <div className="text-sm font-semibold tabular-nums" style={{ color: accent }}>{value}</div>
-    </div>
-  );
-}
-
-function StatusPill({ status }: { status: SchoolFinance["status"] }) {
-  return (
-    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-      style={{ background: `color-mix(in oklab, ${STATUS_COLOR[status]} 20%, transparent)`, color: STATUS_COLOR[status] }}>
-      {status}
-    </span>
-  );
-}
-
-/* ================================ MICRO ================================ */
-function Micro({ fins }: { fins: SchoolFinance[] }) {
-  const { t } = useI18n();
-  const [q, setQ] = useState("");
-  const [district, setDistrict] = useState("all");
-  const [status, setStatus] = useState("all");
-  const [selected, setSelected] = useState<SchoolFinance | null>(null);
-
-  const districts = useMemo(() => Array.from(new Set(fins.map((f) => f.district))).sort(), [fins]);
-  const list = useMemo(() => fins.filter((f) =>
-    (q === "" || f.name.toLowerCase().includes(q.toLowerCase()) || f.udise.includes(q) || f.block.toLowerCase().includes(q.toLowerCase())) &&
-    (district === "all" || f.district === district) &&
-    (status === "all" || f.status === status),
-  ).slice(0, 120), [fins, q, district, status]);
+function AiInsights({ fin }: { fin: NonNullable<ReturnType<typeof useRealFinance>> }) {
+  const insights: string[] = [];
+  const t = fin.totals;
+  insights.push(`Statewide required budget across ${fin.schools.length} responding schools is ${inr(t.required)} (Capital ${inr(t.capitalTotal)} + Operational ${inr(t.opexTotal)}).`);
+  if (t.gap > 0) insights.push(`Funding gap of ${inr(t.gap)} — ${Math.round((t.gap / Math.max(1, t.required)) * 100)}% short of the requirement.`);
+  else if (t.mobilized > 0) insights.push(`Resources mobilized (${inr(t.mobilized)}) currently meet or exceed the captured requirement.`);
+  if (fin.districts[0]) insights.push(`${fin.districts[0].district} carries the highest required budget at ${inr(fin.districts[0].required)}.`);
+  const lowest = [...fin.districts].sort((a, b) => a.convergence - b.convergence)[0];
+  if (lowest && lowest.required > 0) insights.push(`${lowest.district} has the lowest convergence at ${lowest.convergence}% — prioritise multi-source mobilisation.`);
+  if (fin.missingEstimates.length > 0) insights.push(`${fin.missingEstimates.length} school(s) submitted zero numeric estimates — see AI Notes Center for follow-up actions.`);
+  if (fin.notes.length > 0) insights.push(`${fin.notes.filter((n) => n.priority === "High").length} High priority and ${fin.notes.filter((n) => n.priority === "Medium").length} Medium priority data-quality notes have been auto-generated by AI.`);
+  if (fin.audit.mismatchSchools > 0) insights.push(`${fin.audit.mismatchSchools} school(s) report a mismatch between sub-totals and the declared estimated budget — verify entries.`);
 
   return (
-    <div className="flex flex-col min-h-full">
-      <Topbar title={t("fin.title")} subtitle={t("fin.microSub")} />
-      <div className="p-3 space-y-3">
-        {/* filters */}
-        <div className="glass rounded-2xl p-3 flex items-center gap-2 flex-wrap">
-          <Filter className="h-4 w-4 text-[var(--cyan)]" />
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("fin.search")}
-              className="w-full glass-soft rounded-lg pl-9 pr-3 py-2 text-sm outline-none focus:neon-ring" />
-          </div>
-          <select value={district} onChange={(e) => setDistrict(e.target.value)} className="glass-soft rounded-lg px-3 py-2 text-sm outline-none">
-            <option value="all">{t("fin.allDistricts")}</option>
-            {districts.map((d) => <option key={d} value={d}>{d}</option>)}
-          </select>
-          <select value={status} onChange={(e) => setStatus(e.target.value)} className="glass-soft rounded-lg px-3 py-2 text-sm outline-none">
-            <option value="all">{t("fin.allStatus")}</option>
-            {["Excellent", "Good", "Moderate", "Weak", "Critical"].map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <button onClick={() => dlCsv("school-funding-report.csv", list.map(({ capital, opex, sources, ...r }) => r) as any)}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg glass-soft hover:neon-ring transition">
-            <Download className="h-3.5 w-3.5" /> {t("fin.export")}
-          </button>
-          <div className="text-[11px] text-muted-foreground ml-auto">{list.length} / {fins.length.toLocaleString()}</div>
-        </div>
-
-        {/* air-ticket style cards */}
-        <div className="grid lg:grid-cols-2 gap-3">
-          {list.map((f, i) => <FinanceTicket key={f.udise} f={f} index={i} onClick={() => setSelected(f)} t={t} />)}
-        </div>
+    <div className="glass rounded-2xl p-5 relative overflow-hidden">
+      <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl opacity-20" style={{ background: COLORS[3] }} />
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-semibold flex items-center gap-2"><Sparkles className="h-4 w-4 text-[var(--aurora)]" /> AI Insights · auto-generated</h3>
+        <Link to="/ai-notes" className="text-xs text-accent hover:underline">Open AI Notes Center →</Link>
       </div>
-
-      {selected && <SchoolDetail f={selected} onClose={() => setSelected(null)} t={t} />}
-    </div>
-  );
-}
-
-function FinanceTicket({ f, index, onClick, t }: { f: SchoolFinance; index: number; onClick: () => void; t: (k: string) => string }) {
-  return (
-    <motion.button
-      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: Math.min(index * 0.015, 0.3) }}
-      onClick={onClick}
-      className="text-left relative grid grid-cols-[1fr_auto] gap-0 glass rounded-2xl overflow-hidden hover:neon-ring transition"
-    >
-      <div className="p-4">
-        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-[var(--cyan)]">
-          <Plane className="h-3 w-3" /> {f.block} · UDISE {f.udise}
-        </div>
-        <h3 className="text-base font-bold mt-1 leading-tight truncate">{f.name}</h3>
-        <div className="grid grid-cols-3 gap-2 mt-3">
-          <Mini label={t("fin.capital")} v={inr(f.capitalTotal)} accent={COLORS[0]} />
-          <Mini label={t("fin.opex")} v={inr(f.opexTotal)} accent={COLORS[1]} />
-          <Mini label={t("fin.mobilized")} v={inr(f.mobilized)} accent={COLORS[2]} />
-        </div>
-        <div className="grid grid-cols-2 gap-2 mt-2">
-          <Mini label={t("fin.gap")} v={inr(f.gap)} accent={COLORS[5]} />
-          <Mini label={t("fin.convergence")} v={`${f.convergence}%`} accent={COLORS[3]} />
-        </div>
-      </div>
-      {/* perforated right stub */}
-      <div className="relative w-[120px] p-4 grid place-items-center border-l border-dashed border-[oklch(0.85_0.2_195/0.25)] bg-gradient-to-b from-white/[0.04] to-transparent">
-        <div className="absolute -left-2 top-2 h-4 w-4 rounded-full bg-[var(--background)]" />
-        <div className="absolute -left-2 bottom-2 h-4 w-4 rounded-full bg-[var(--background)]" />
-        <div className="text-center">
-          <div className="text-[9px] uppercase tracking-wider text-muted-foreground">{t("fin.health")}</div>
-          <div className="text-3xl font-bold" style={{ color: STATUS_COLOR[f.status] }}>{f.healthScore}</div>
-          <StatusPill status={f.status} />
-        </div>
-      </div>
-    </motion.button>
-  );
-}
-
-function Mini({ label, v, accent }: { label: string; v: string; accent: string }) {
-  return (
-    <div className="glass-soft rounded-lg px-2 py-1.5">
-      <div className="text-[9px] uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className="text-sm font-bold tabular-nums" style={{ color: accent }}>{v}</div>
-    </div>
-  );
-}
-
-function SchoolDetail({ f, onClose, t }: { f: SchoolFinance; onClose: () => void; t: (k: string) => string }) {
-  const ai = schoolAiSummary(f);
-  const capitalData = CAPITAL_KEYS.map((k) => ({ name: CAPITAL_LABELS[k as CapitalKey], value: f.capital[k] }));
-  const opexData = OPEX_KEYS.map((k) => ({ name: OPEX_LABELS[k as OpexKey], value: f.opex[k] }));
-  const sourceData = SOURCE_KEYS.map((k) => ({ name: SOURCE_LABELS[k as SourceKey], value: f.sources[k] }));
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-center p-4 bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
-        onClick={(e) => e.stopPropagation()}
-        className="glass-strong rounded-2xl w-full max-w-4xl max-h-[88vh] overflow-y-auto scroll-invisible p-6">
-        <div className="flex items-start justify-between gap-4 mb-4">
-          <div>
-            <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--cyan)]">{f.block} · UDISE {f.udise}</div>
-            <h2 className="text-xl font-bold">{f.name}</h2>
-          </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-sm px-3 py-1 rounded-lg glass-soft">✕</button>
-        </div>
-
-        <div className="grid sm:grid-cols-4 gap-2 mb-4">
-          <KpiCard icon={<Wallet className="h-4 w-4" />} label={t("fin.required")} value={inr(f.required)} accent={COLORS[6]} />
-          <KpiCard icon={<TrendingUp className="h-4 w-4" />} label={t("fin.mobilized")} value={inr(f.mobilized)} accent={COLORS[2]} ring={f.convergence} />
-          <KpiCard icon={<AlertTriangle className="h-4 w-4" />} label={t("fin.gap")} value={inr(f.gap)} accent={COLORS[5]} />
-          <KpiCard icon={<Gauge className="h-4 w-4" />} label={t("fin.efficiency")} value={`${f.efficiencyScore}`} accent={COLORS[1]} ring={f.efficiencyScore} />
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-3 mb-4">
-          <DetailChart title={t("fin.capitalBreakdown")} data={capitalData} />
-          <DetailChart title={t("fin.opexBreakdown")} data={opexData} />
-          <DetailChart title={t("fin.sourceBreakdown")} data={sourceData} />
-        </div>
-
-        <div className="glass rounded-2xl p-4">
-          <h3 className="font-semibold flex items-center gap-2 mb-3"><Sparkles className="h-4 w-4 text-[var(--aurora)]" /> {t("fin.aiSchool")}</h3>
-          <div className="grid md:grid-cols-3 gap-3 text-sm">
-            <AiCol title={t("fin.strengths")} items={ai.strengths} color={COLORS[2]} />
-            <AiCol title={t("fin.weaknesses")} items={ai.weaknesses} color={COLORS[5]} />
-            <AiCol title={t("fin.recommend")} items={ai.recommendations} color={COLORS[0]} />
-          </div>
-        </div>
-        <div className="mt-4 flex justify-end">
-          <button onClick={() => dlCsv(`school-${f.udise}-finance.csv`, [{ ...f, capital: undefined, opex: undefined, sources: undefined }] as any)}
-            className="inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg glass-soft hover:neon-ring transition">
-            <Download className="h-3.5 w-3.5" /> {t("fin.export")}
-          </button>
-        </div>
-      </motion.div>
-    </div>
-  );
-}
-
-function DetailChart({ title, data }: { title: string; data: { name: string; value: number }[] }) {
-  return (
-    <div className="glass rounded-2xl p-4">
-      <div className="text-xs font-semibold mb-2">{title}</div>
-      <div className="h-[170px]">
-        <ResponsiveContainer>
-          <PieChart>
-            <Pie data={data} dataKey="value" nameKey="name" innerRadius={36} outerRadius={62} paddingAngle={2}>
-              {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-            </Pie>
-            <Tooltip formatter={(v: number) => inrFull(v)} />
-          </PieChart>
-        </ResponsiveContainer>
-      </div>
-      <div className="mt-1 space-y-0.5">
-        {data.map((d, i) => (
-          <div key={d.name} className="flex items-center justify-between text-[10px]">
-            <span className="flex items-center gap-1.5 truncate"><span className="h-2 w-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />{d.name}</span>
-            <span className="tabular-nums font-medium">{inr(d.value)}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function AiCol({ title, items, color }: { title: string; items: string[]; color: string }) {
-  return (
-    <div>
-      <div className="text-[10px] uppercase tracking-wider mb-1.5" style={{ color }}>{title}</div>
-      <ul className="space-y-1.5">
-        {items.map((it, i) => (
-          <li key={i} className="flex gap-2 text-xs leading-relaxed text-muted-foreground">
-            <span className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: color }} />{it}
+      <ul className="space-y-2">
+        {insights.map((line, i) => (
+          <li key={i} className="text-sm leading-relaxed flex gap-2">
+            <span className="mt-1.5 h-1.5 w-1.5 rounded-full shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
+            <span>{line}</span>
           </li>
         ))}
       </ul>
     </div>
   );
+}
+
+/* --------------------------- School-level financial table --------------------------- */
+
+type SortKey = keyof SchoolFin | "toiletsCost" | "waterCost" | "infraCost" | "maintCost" | "cleanCost" | "repairCost";
+
+function SchoolTable({ schools }: { schools: SchoolFin[] }) {
+  const [q, setQ] = useState("");
+  const [district, setDistrict] = useState("all");
+  const [sort, setSort] = useState<SortKey>("required");
+  const [dir, setDir] = useState<"asc" | "desc">("desc");
+  const [page, setPage] = useState(0);
+  const PAGE = 20;
+
+  const districts = useMemo(() => Array.from(new Set(schools.map((s) => s.district))).sort(), [schools]);
+
+  const filtered = useMemo(() => {
+    const ql = q.trim().toLowerCase();
+    return schools.filter((s) =>
+      (!ql || s.udise.toLowerCase().includes(ql) || s.name.toLowerCase().includes(ql)) &&
+      (district === "all" || s.district === district),
+    );
+  }, [schools, q, district]);
+
+  const getter = (s: SchoolFin): number | string => {
+    switch (sort) {
+      case "toiletsCost": return s.capital.toilets ?? 0;
+      case "waterCost": return s.capital.water ?? 0;
+      case "infraCost": return s.capital.infrastructure ?? 0;
+      case "maintCost": return s.opex.maintenance ?? 0;
+      case "cleanCost": return s.opex.cleaning ?? 0;
+      case "repairCost": return s.opex.repairs ?? 0;
+      default: return (s as any)[sort];
+    }
+  };
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    arr.sort((a, b) => {
+      const va = getter(a); const vb = getter(b);
+      const cmp = typeof va === "number" && typeof vb === "number" ? va - vb : String(va).localeCompare(String(vb));
+      return dir === "asc" ? cmp : -cmp;
+    });
+    return arr;
+  }, [filtered, sort, dir]);
+
+  const pageStart = page * PAGE;
+  const pageRows = sorted.slice(pageStart, pageStart + PAGE);
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE));
+
+  function header(label: string, key: SortKey) {
+    const active = sort === key;
+    return (
+      <th
+        className={`py-2 px-2 text-right uppercase tracking-wider text-[10px] cursor-pointer select-none ${active ? "text-[var(--cyan)]" : "text-muted-foreground"}`}
+        onClick={() => { if (active) setDir(dir === "asc" ? "desc" : "asc"); else { setSort(key); setDir("desc"); } setPage(0); }}
+      >
+        {label}{active ? (dir === "asc" ? " ▲" : " ▼") : ""}
+      </th>
+    );
+  }
+
+  return (
+    <Section title="School-level financial register" icon={<FileText className="h-4 w-4 text-[var(--aurora)]" />} note={`${sorted.length.toLocaleString()} school(s)`}>
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <div className="relative flex-1 min-w-[180px] max-w-sm">
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+          <input value={q} onChange={(e) => { setQ(e.target.value); setPage(0); }}
+            placeholder="Search by School ID or name…"
+            className="w-full glass-soft rounded-lg pl-9 pr-3 py-2 text-sm outline-none focus:neon-ring" />
+        </div>
+        <select value={district} onChange={(e) => { setDistrict(e.target.value); setPage(0); }}
+          className="glass-soft rounded-lg px-3 py-2 text-sm outline-none">
+          <option value="all">All districts</option>
+          {districts.map((d) => <option key={d} value={d}>{d}</option>)}
+        </select>
+        <button onClick={() => exportCsv("financial-register.csv", schoolsToCsvRows(sorted))}
+          className="inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg glass-soft hover:neon-ring transition">
+          <Download className="h-3.5 w-3.5" /> CSV
+        </button>
+        <button onClick={() => exportExcel("financial-register.xls", schoolsToCsvRows(sorted))}
+          className="inline-flex items-center gap-1.5 text-xs px-3 py-2 rounded-lg glass-soft hover:neon-ring transition">
+          <FileSpreadsheet className="h-3.5 w-3.5" /> Excel
+        </button>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-border/50">
+              <th className="py-2 pr-3 text-left uppercase tracking-wider text-[10px] text-muted-foreground cursor-pointer" onClick={() => { setSort("udise"); setDir(dir === "asc" ? "desc" : "asc"); }}>School ID</th>
+              <th className="py-2 pr-3 text-left uppercase tracking-wider text-[10px] text-muted-foreground cursor-pointer" onClick={() => { setSort("name"); setDir(dir === "asc" ? "desc" : "asc"); }}>School Name</th>
+              <th className="py-2 pr-3 text-left uppercase tracking-wider text-[10px] text-muted-foreground">District</th>
+              {header("Toilets", "toiletsCost")}
+              {header("Water", "waterCost")}
+              {header("Infra", "infraCost")}
+              {header("Maint.", "maintCost")}
+              {header("Clean.", "cleanCost")}
+              {header("Repairs", "repairCost")}
+              {header("Capital", "capitalTotal")}
+              {header("Opex", "opexTotal")}
+              {header("Total", "required")}
+              <th className="py-2 px-2 text-left uppercase tracking-wider text-[10px] text-muted-foreground">Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pageRows.map((s) => (
+              <tr key={s.udise} className="border-b border-border/30 hover:bg-white/[0.03]">
+                <td className="py-2 pr-3 font-mono">{s.udise}</td>
+                <td className="py-2 pr-3 font-medium truncate max-w-[220px]">{s.name}</td>
+                <td className="py-2 pr-3 text-muted-foreground">{s.district}</td>
+                <Cell0 v={s.capital.toilets} />
+                <Cell0 v={s.capital.water} />
+                <Cell0 v={s.capital.infrastructure} />
+                <Cell0 v={s.opex.maintenance} />
+                <Cell0 v={s.opex.cleaning} />
+                <Cell0 v={s.opex.repairs} />
+                <td className="py-2 px-2 text-right tabular-nums font-semibold">{inr(s.capitalTotal)}</td>
+                <td className="py-2 px-2 text-right tabular-nums font-semibold">{inr(s.opexTotal)}</td>
+                <td className="py-2 px-2 text-right tabular-nums font-bold text-[var(--cyan)]">{inr(s.required)}</td>
+                <td className="py-2 px-2 text-[10px] text-muted-foreground whitespace-nowrap">{s.lastUpdated || "—"}</td>
+              </tr>
+            ))}
+            {pageRows.length === 0 && (
+              <tr><td colSpan={13} className="text-center py-6 text-muted-foreground">No matching schools.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
+        <span>Page {page + 1} / {totalPages}</span>
+        <div className="flex gap-2">
+          <button disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}
+            className="px-3 py-1.5 rounded-lg glass-soft disabled:opacity-40">Prev</button>
+          <button disabled={page >= totalPages - 1} onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            className="px-3 py-1.5 rounded-lg glass-soft disabled:opacity-40">Next</button>
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+function Cell0({ v }: { v: number | null }) {
+  return <td className={`py-2 px-2 text-right tabular-nums ${v === null ? "text-muted-foreground italic" : ""}`}>{v === null ? "—" : inr(v)}</td>;
 }
