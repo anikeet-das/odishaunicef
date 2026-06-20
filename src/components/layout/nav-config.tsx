@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Globe2, Building2, School, Gauge, ShieldAlert, Star,
   FileBarChart2, BookOpen, ClipboardList,
   Lock, Droplets, Award, GitCompare, MessageCircle, Palette, Wallet,
-  Brain, FolderKanban, Network,
+  Brain, FolderKanban, Network, Sparkles,
 } from "lucide-react";
 
 export type NavItem = { to: string; labelKey: string; icon: any };

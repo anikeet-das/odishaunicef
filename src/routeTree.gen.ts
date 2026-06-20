@@ -33,6 +33,7 @@ import { Route as DistrictsRouteImport } from './routes/districts'
 import { Route as CompareRouteImport } from './routes/compare'
 import { Route as AlertsRouteImport } from './routes/alerts'
 import { Route as AiRecommendationsRouteImport } from './routes/ai-recommendations'
+import { Route as AiNotesRouteImport } from './routes/ai-notes'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicSheetRouteImport } from './routes/api/public/sheet'
@@ -158,6 +159,11 @@ const AiRecommendationsRoute = AiRecommendationsRouteImport.update({
   path: '/ai-recommendations',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AiNotesRoute = AiNotesRouteImport.update({
+  id: '/ai-notes',
+  path: '/ai-notes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -182,6 +188,7 @@ const ApiAiChatRoute = ApiAiChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/ai-notes': typeof AiNotesRoute
   '/ai-recommendations': typeof AiRecommendationsRoute
   '/alerts': typeof AlertsRoute
   '/compare': typeof CompareRoute
@@ -212,6 +219,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/ai-notes': typeof AiNotesRoute
   '/ai-recommendations': typeof AiRecommendationsRoute
   '/alerts': typeof AlertsRoute
   '/compare': typeof CompareRoute
@@ -243,6 +251,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/ai-notes': typeof AiNotesRoute
   '/ai-recommendations': typeof AiRecommendationsRoute
   '/alerts': typeof AlertsRoute
   '/compare': typeof CompareRoute
@@ -275,6 +284,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/ai-notes'
     | '/ai-recommendations'
     | '/alerts'
     | '/compare'
@@ -305,6 +315,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/ai-notes'
     | '/ai-recommendations'
     | '/alerts'
     | '/compare'
@@ -335,6 +346,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/ai-notes'
     | '/ai-recommendations'
     | '/alerts'
     | '/compare'
@@ -366,6 +378,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AiNotesRoute: typeof AiNotesRoute
   AiRecommendationsRoute: typeof AiRecommendationsRoute
   AlertsRoute: typeof AlertsRoute
   CompareRoute: typeof CompareRoute
@@ -564,6 +577,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AiRecommendationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ai-notes': {
+      id: '/ai-notes'
+      path: '/ai-notes'
+      fullPath: '/ai-notes'
+      preLoaderRoute: typeof AiNotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -598,6 +618,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AiNotesRoute: AiNotesRoute,
   AiRecommendationsRoute: AiRecommendationsRoute,
   AlertsRoute: AlertsRoute,
   CompareRoute: CompareRoute,
