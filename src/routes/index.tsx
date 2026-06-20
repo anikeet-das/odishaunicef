@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
-import { useSchools, platformKpis, hazardBreakdown, aggregateByDistrict } from "@/lib/data/cces";
+import { useSchools, platformKpis, shvrDistribution, type School } from "@/lib/data/cces";
 import { useSettings } from "@/components/layout/settings-provider";
-import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell } from "recharts";
+import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieChart, Pie, Legend } from "recharts";
 import { Activity, Droplets, Leaf, ShieldAlert, School as SchoolIcon, Star } from "lucide-react";
 import unicefLogo from "@/assets/unicef-logo.png";
 import { AwaitingData } from "@/components/data/AwaitingData";
