@@ -183,19 +183,20 @@ export async function exportScorecardPdf(opts: {
   const end = start + pct * Math.PI * 2;
   const steps = Math.max(8, Math.round(pct * 64));
   setFill(doc, C.unicef);
+  setStroke(doc, C.unicef);
+  doc.setLineWidth(0.2);
   for (let i = 0; i < steps; i++) {
     const a1 = start + ((end - start) * i) / steps;
     const a2 = start + ((end - start) * (i + 1)) / steps;
     const x1 = cx0 + Math.cos(a1) * rOut, y1 = cy0 + Math.sin(a1) * rOut;
     const x2 = cx0 + Math.cos(a2) * rOut, y2 = cy0 + Math.sin(a2) * rOut;
-    doc.triangles([[cx0, cy0, x1, y1, x2, y2]] as any, 0, 0, [1, 1], C.unicef as any, true as any);
-    // Fallback: small polygons via lines
-    doc.setLineWidth(0);
-    doc.setDrawColor(C.unicef[0], C.unicef[1], C.unicef[2]);
-    doc.line(cx0, cy0, x1, y1);
-    doc.line(x1, y1, x2, y2);
-    doc.line(x2, y2, cx0, cy0);
+    // Filled triangle via doc.lines
+    doc.lines(
+      [[x1 - cx0, y1 - cy0], [x2 - x1, y2 - y1], [cx0 - x2, cy0 - y2]],
+      cx0, cy0, [1, 1], "F", true
+    );
   }
+
   // redraw inner to mask
   setFill(doc, C.panel);
   doc.circle(cx0, cy0, rIn, "F");
