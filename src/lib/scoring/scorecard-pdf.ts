@@ -414,7 +414,7 @@ export async function exportScorecardPdf(opts: {
   setFill(doc, C.unicef);
   pts.forEach(p => doc.circle(p.x, p.y, 2.6, "F"));
   setText(doc, C.ink); doc.setFont("helvetica", "bold").setFontSize(8);
-  pts.forEach(p => doc.text(String(p.y), p.x, p.y - 5, { align: "center" }));
+  pts.forEach(p => doc.text(String(p.score), p.x, p.y - 5, { align: "center" }));
   setText(doc, C.sub); doc.setFont("helvetica", "normal").setFontSize(7);
   pts.forEach(p => doc.text(p.label, p.x, trendBoxY + trendBoxH - 4, { align: "center" }));
 
