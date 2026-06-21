@@ -7,7 +7,7 @@ import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, AreaChart, Area, Legend,
 } from "recharts";
 import { Award, Search, Download, Sparkles, ChevronLeft, Loader2 } from "lucide-react";
-import jsPDF from "jspdf";
+import { exportScorecardPdf } from "@/lib/scoring/scorecard-pdf";
 
 export const Route = createFileRoute("/scorecard")({
   head: () => ({ meta: [{ title: "Scorecard · CR-SAP Odisha" }] }),
@@ -199,42 +199,10 @@ function SchoolDetail({ school, comment, onComment, onBack }: {
   const [local, setLocal] = useState(comment);
   useEffect(() => setLocal(comment), [comment, school.udise]);
 
-  function exportPdf() {
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const W = doc.internal.pageSize.getWidth();
-    let y = 50;
-    doc.setFontSize(18); doc.text("UNICEF · CR-SAP Odisha — School Scorecard", 40, y); y += 24;
-    doc.setFontSize(11); doc.setTextColor(80);
-    doc.text(`${school.name}`, 40, y); y += 14;
-    doc.text(`UDISE+ ${school.udise}  ·  ${school.district}  ·  ${school.location}`, 40, y); y += 20;
-    doc.setDrawColor(20, 120, 200); doc.setLineWidth(1.2); doc.line(40, y, W - 40, y); y += 18;
-    doc.setTextColor(0); doc.setFontSize(28); doc.text(`Score: ${sc.total} / 100`, 40, y); y += 26;
-    doc.setFontSize(11);
-    doc.text(`Star Rating: ${"★".repeat(sc.rating)}${"☆".repeat(5 - sc.rating)}`, 40, y); y += 22;
-    doc.setFontSize(12); doc.text("Parameter Breakdown", 40, y); y += 14;
-    doc.setFontSize(10);
-    sc.params.forEach((p) => {
-      if (y > 770) { doc.addPage(); y = 50; }
-      doc.setTextColor(40);
-      doc.text(`${p.label}`, 40, y);
-      doc.text(`${p.obtained}/${p.full}`, 320, y);
-      doc.text(`${p.pct}%`, 380, y);
-      doc.setTextColor(110); doc.text(p.evaluation, 430, y, { maxWidth: W - 470 });
-      y += 16;
-    });
-    y += 8;
-    if (y > 720) { doc.addPage(); y = 50; }
-    doc.setFontSize(12); doc.setTextColor(0); doc.text("UNICEF Professional Comment", 40, y); y += 14;
-    doc.setFontSize(10); doc.setTextColor(60);
-    doc.text(local || "—", 40, y, { maxWidth: W - 80 }); y += 40;
-    doc.setFontSize(12); doc.setTextColor(0); doc.text("AI Final Evaluation", 40, y); y += 14;
-    doc.setFontSize(10); doc.setTextColor(60);
-    const finalEval = sc.total >= 75 ? "Exemplary CR-SAP performance. Maintain trajectory."
-                    : sc.total >= 55 ? "Solid baseline. Address mid-tier categories for jump to top tier."
-                    : "Operational intervention recommended. Prioritise WASH + climate management.";
-    doc.text(finalEval, 40, y, { maxWidth: W - 80 });
-    doc.save(`scorecard-${school.udise}.pdf`);
+  async function exportPdf() {
+    await exportScorecardPdf({ school, comment: local });
   }
+
 
   return (
     <div className="space-y-4" ref={ref}>
