@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import type { School } from "@/lib/data/cces";
 import { computeScorecard } from "@/lib/scoring/scorecard";
+import unicefLogo from "@/assets/unicef-logo.png";
 
 /* ---------- helpers ---------- */
 async function loadDataUrl(src: string): Promise<string | null> {
