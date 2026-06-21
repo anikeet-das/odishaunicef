@@ -407,7 +407,7 @@ export async function exportScorecardPdf(opts: {
   const pts = trend.map((t, i) => {
     const x = trendBoxX + (trendBoxW / (trend.length - 1)) * i;
     const y = trendBoxY + (trendBoxH - 22) * (1 - t.y / 100) + 4;
-    return { x, y, ...t };
+    return { x, y, score: t.y, label: t.label };
   });
   setStroke(doc, C.unicef); doc.setLineWidth(1.4);
   for (let i = 0; i < pts.length - 1; i++) doc.line(pts[i].x, pts[i].y, pts[i + 1].x, pts[i + 1].y);
