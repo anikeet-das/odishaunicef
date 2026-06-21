@@ -8,6 +8,8 @@ import {
 } from "recharts";
 import { Award, Search, Download, Sparkles, ChevronLeft, Loader2 } from "lucide-react";
 import jsPDF from "jspdf";
+import unicefLogo from "@/assets/unicef-logo.png";
+import { exportScorecardPdf } from "@/lib/scoring/scorecard-pdf";
 
 export const Route = createFileRoute("/scorecard")({
   head: () => ({ meta: [{ title: "Scorecard · CR-SAP Odisha" }] }),
