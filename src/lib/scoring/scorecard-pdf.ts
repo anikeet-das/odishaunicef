@@ -176,7 +176,7 @@ export async function exportScorecardPdf(opts: {
   const gridBottom = H - footerH - 10;
   const gridH = gridBottom - topY;
 
-  const leftW = 280;
+  const leftW = 260;
   const rightX = M + leftW + 14;
   const rightW = W - rightX - M;
 
