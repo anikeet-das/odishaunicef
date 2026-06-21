@@ -333,20 +333,17 @@ export async function exportScorecardPdf(opts: {
     lx -= tw + 20;
   }
 
-  // Column layout (no overlap)
+  // Column layout (no overlap). rightW ~ 520.
   const padL = 16;
-  const colX = {
-    icon: rightX + padL + 14,
-    label: rightX + padL + 36,
-    score: rightX + padL + 168,
-    bar: rightX + padL + 220,
-    pct: 0,
-    perf: 0,
-  };
-  const barW = 150;
-  colX.pct = colX.bar + barW + 12;
-  colX.perf = colX.pct + 38;
-  const perfW = rightX + rightW - colX.perf - 16;
+  const icon = rightX + padL + 10;
+  const labelX = rightX + padL + 28;
+  const scoreX = rightX + padL + 138;
+  const barX = rightX + padL + 188;
+  const barW = 128;
+  const pctX = barX + barW + 6;
+  const perfX = pctX + 30;
+  const perfW = rightX + rightW - perfX - padL;
+  const colX = { icon, label: labelX, score: scoreX, bar: barX, pct: pctX, perf: perfX };
 
   // Headers
   const hdrY = topY + 44;
