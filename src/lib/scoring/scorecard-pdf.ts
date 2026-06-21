@@ -274,7 +274,7 @@ export async function exportScorecardPdf(opts: {
   const baseRemark = sc.total >= 75 ? "Exemplary CR-SAP performance. Maintain trajectory."
                    : sc.total >= 55 ? "Solid baseline. Address mid-tier categories to reach top tier."
                    : "Operational intervention recommended. Prioritise WASH and climate management.";
-  const remark = (comment && comment.trim()) || `${baseRemark} Key focus area: ${weakest?.label ?? "—"}.`;
+  const remark = (comment && comment.trim()) || `${baseRemark} Key focus area: ${weakest?.label ?? "-"}.`;
   setText(doc, C.ink); doc.setFont("helvetica", "normal").setFontSize(9);
   const lines = doc.splitTextToSize(remark, leftW - 56);
   doc.text(lines.slice(0, 5), M + 40, cmtY + 34, { lineHeightFactor: 1.35 });
