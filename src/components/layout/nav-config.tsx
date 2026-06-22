@@ -2,7 +2,7 @@ import {
   LayoutDashboard, Globe2, Building2, School, Gauge, ShieldAlert, Star,
   FileBarChart2, BookOpen, ClipboardList,
   Lock, Droplets, Award, GitCompare, MessageCircle, Palette, Wallet,
-  Brain, FolderKanban, Network, Sparkles, Images, Image as ImageIcon, Video as VideoIcon,
+  Brain, FolderKanban, Network, Sparkles,
 } from "lucide-react";
 
 export type NavItem = { to: string; labelKey: string; icon: any };
@@ -44,15 +44,6 @@ export const NAV_GROUPS: NavGroup[] = [
     icon: Award,
     items: [
       { to: "/scorecard", labelKey: "nav.scorecard", icon: Award },
-    ],
-  },
-  {
-    id: "gallery",
-    labelKey: "group.gallery",
-    icon: Images,
-    items: [
-      { to: "/gallery/photos", labelKey: "nav.gallery.photos", icon: ImageIcon },
-      { to: "/gallery/videos", labelKey: "nav.gallery.videos", icon: VideoIcon },
     ],
   },
   {
