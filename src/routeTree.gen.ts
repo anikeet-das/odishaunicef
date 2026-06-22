@@ -36,6 +36,7 @@ import { Route as AiRecommendationsRouteImport } from './routes/ai-recommendatio
 import { Route as AiNotesRouteImport } from './routes/ai-notes'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GalleryVideosRouteImport } from './routes/gallery.videos'
 import { Route as GalleryPhotosRouteImport } from './routes/gallery.photos'
 import { Route as ApiPublicSheetRouteImport } from './routes/api/public/sheet'
 import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
@@ -175,6 +176,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GalleryVideosRoute = GalleryVideosRouteImport.update({
+  id: '/gallery/videos',
+  path: '/gallery/videos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GalleryPhotosRoute = GalleryPhotosRouteImport.update({
   id: '/gallery/photos',
   path: '/gallery/photos',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/truth-check': typeof TruthCheckRoute
   '/wash': typeof WashRoute
   '/gallery/photos': typeof GalleryPhotosRoute
+  '/gallery/videos': typeof GalleryVideosRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/public/sheet': typeof ApiPublicSheetRoute
 }
@@ -252,6 +259,7 @@ export interface FileRoutesByTo {
   '/truth-check': typeof TruthCheckRoute
   '/wash': typeof WashRoute
   '/gallery/photos': typeof GalleryPhotosRoute
+  '/gallery/videos': typeof GalleryVideosRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/public/sheet': typeof ApiPublicSheetRoute
 }
@@ -285,6 +293,7 @@ export interface FileRoutesById {
   '/truth-check': typeof TruthCheckRoute
   '/wash': typeof WashRoute
   '/gallery/photos': typeof GalleryPhotosRoute
+  '/gallery/videos': typeof GalleryVideosRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/public/sheet': typeof ApiPublicSheetRoute
 }
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/truth-check'
     | '/wash'
     | '/gallery/photos'
+    | '/gallery/videos'
     | '/api/ai/chat'
     | '/api/public/sheet'
   fileRoutesByTo: FileRoutesByTo
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/truth-check'
     | '/wash'
     | '/gallery/photos'
+    | '/gallery/videos'
     | '/api/ai/chat'
     | '/api/public/sheet'
   id:
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/truth-check'
     | '/wash'
     | '/gallery/photos'
+    | '/gallery/videos'
     | '/api/ai/chat'
     | '/api/public/sheet'
   fileRoutesById: FileRoutesById
@@ -416,6 +428,7 @@ export interface RootRouteChildren {
   TruthCheckRoute: typeof TruthCheckRoute
   WashRoute: typeof WashRoute
   GalleryPhotosRoute: typeof GalleryPhotosRoute
+  GalleryVideosRoute: typeof GalleryVideosRoute
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiPublicSheetRoute: typeof ApiPublicSheetRoute
 }
@@ -611,6 +624,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gallery/videos': {
+      id: '/gallery/videos'
+      path: '/gallery/videos'
+      fullPath: '/gallery/videos'
+      preLoaderRoute: typeof GalleryVideosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/gallery/photos': {
       id: '/gallery/photos'
       path: '/gallery/photos'
@@ -664,6 +684,7 @@ const rootRouteChildren: RootRouteChildren = {
   TruthCheckRoute: TruthCheckRoute,
   WashRoute: WashRoute,
   GalleryPhotosRoute: GalleryPhotosRoute,
+  GalleryVideosRoute: GalleryVideosRoute,
   ApiAiChatRoute: ApiAiChatRoute,
   ApiPublicSheetRoute: ApiPublicSheetRoute,
 }
