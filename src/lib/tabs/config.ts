@@ -64,6 +64,10 @@ export const TAB_CONFIG: Record<string, TabConfig> = {
   "/scorecard": { view: true },
   "/feedback": { view: false },
 
+  // Gallery — real photo/video evidence from form responses (no uploads)
+  "/gallery/photos": { view: false },
+  "/gallery/videos": { view: false },
+
   // System
   "/google-form": { view: false },
   "/theme": { view: false },
