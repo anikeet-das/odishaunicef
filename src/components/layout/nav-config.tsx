@@ -47,6 +47,15 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    id: "gallery",
+    labelKey: "group.gallery",
+    icon: Images,
+    items: [
+      { to: "/gallery/photos", labelKey: "nav.gallery.photos", icon: ImageIcon },
+      { to: "/gallery/videos", labelKey: "nav.gallery.videos", icon: VideoIcon },
+    ],
+  },
+  {
     id: "form",
     labelKey: "group.form",
     icon: ClipboardList,
