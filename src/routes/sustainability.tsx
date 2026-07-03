@@ -9,6 +9,7 @@ import {
   RadialBarChart, RadialBar, PolarAngleAxis, Legend,
 } from "recharts";
 import { Search, Sparkles, ExternalLink, Filter } from "lucide-react";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/sustainability")({
   head: () => ({ meta: [{ title: "Sustainability Index · CR-SAP Odisha" }, { name: "description", content: "Live distribution of sustainability scores across 10,000 schools." }] }),
