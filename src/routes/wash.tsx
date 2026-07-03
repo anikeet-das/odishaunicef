@@ -74,6 +74,8 @@ function Macro() {
 
   return (
     <div className="space-y-4">
+      <KeyDistrictsPanel schools={schools} focus="wash" />
+
       {/* AI summary */}
       <Panel>
         <div className="flex items-start gap-3">
