@@ -249,7 +249,7 @@ function Micro() {
         <Panel className="p-0 overflow-hidden">
           <div className="max-h-[68vh] overflow-auto scroll-invisible">
             <table className="w-full text-sm">
-              <thead className="sticky top-0 z-10 backdrop-blur bg-[oklch(0.18_0.04_220/0.65)]">
+              <thead className="sticky top-0 z-10 backdrop-blur bg-card/95 border-b border-border">
                 <tr className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                   <th className="px-4 py-2.5">School</th>
                   <th className="px-3 py-2.5">District</th>
