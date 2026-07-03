@@ -64,6 +64,8 @@ function MacroView({ rows, schools }: { rows: DistrictAgg[]; schools: School[] }
     <div className="flex flex-col min-h-full">
       <Topbar title="District Intelligence" subtitle="DaisyDisk · 30-district sunburst comparator" />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={schools} focus="overview" />
+
         <div className="grid lg:grid-cols-[1fr_320px] gap-3">
           {/* Sunburst */}
           <div className="relative glass rounded-2xl p-4 min-h-[78vh]">
