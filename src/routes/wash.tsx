@@ -35,9 +35,9 @@ function Macro() {
   const kpis = useMemo(() => (schools ? platformKpis(schools) : null), [schools]);
   const byDistrict = useMemo(() => (schools ? aggregateByDistrict(schools) : []), [schools]);
 
-  const waterData = useMemo(() => byDistrict.slice(0, 10).map((d) => ({ name: d.district.slice(0, 8), wash: d.avgWash, sus: d.avgSust })), [byDistrict]);
+  const waterData = useMemo(() => byDistrict.filter((d) => d.schools > 0).slice(0, 10).map((d) => ({ name: d.district.slice(0, 10), wash: d.avgWash, sus: d.avgSust })), [byDistrict]);
   const waterDistricts = useMemo(() =>
-    byDistrict.slice(0, 10).map((d) => ({ name: d.district.slice(0, 8), water: d.avgWash })),
+    byDistrict.filter((d) => d.schools > 0).slice(0, 10).map((d) => ({ name: d.district.slice(0, 10), water: d.avgWash })),
     [byDistrict]);
 
   // Real sanitation readiness buckets, derived from each school's washScore.
