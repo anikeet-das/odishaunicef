@@ -180,7 +180,7 @@ function comparisonNarrative(rows: DistrictAgg[]): string {
 }
 
 /* ========================= MICRO — 30x1 flight-ticket matrix ========================= */
-function MicroView({ rows, focus }: { rows: DistrictAgg[]; focus?: string }) {
+function MicroView({ rows, schools, focus }: { rows: DistrictAgg[]; schools: School[]; focus?: string }) {
   const [q, setQ] = useState(focus ?? "");
   const list = useMemo(
     () => rows.filter((r) => r.district.toLowerCase().includes(q.toLowerCase())),
