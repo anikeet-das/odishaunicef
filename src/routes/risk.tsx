@@ -328,18 +328,20 @@ function buildMatrix(schools: School[]) {
     const list = schools.filter((s) => s.district === name);
     const row: Record<string, number | string | null> = { name, _count: list.length };
     for (const h of HAZARDS) {
-      // If the district has no submitted entries with hazard data, surface
-      // "—" rather than misleading 0% / 100% percentages.
-      const hazardSamples = list.filter((s) => Number.isFinite(s.hazards[h]));
-      if (!list.length || hazardSamples.length === 0) {
+      // Use mean hazard intensity (0..3) scaled to 0..100 so districts show a
+      // realistic exposure %, not a binary "any-school-reported-anything" 100%.
+      const samples = list.filter((s) => Number.isFinite(s.hazards[h]));
+      if (!list.length || samples.length === 0) {
         row[h] = null;
       } else {
-        row[h] = Math.round((list.filter((s) => s.hazards[h] > 0).length / list.length) * 100);
+        const mean = samples.reduce((a, s) => a + s.hazards[h], 0) / samples.length;
+        row[h] = Math.round((mean / 3) * 100);
       }
     }
     return row as { name: string; _count: number } & Record<string, number | null>;
   });
 }
+
 
 function cellColor(v: number): string {
   if (v >= 70) return "oklch(0.68 0.24 22)";
