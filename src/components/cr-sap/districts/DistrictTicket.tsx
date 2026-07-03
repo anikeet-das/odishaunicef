@@ -27,7 +27,7 @@ export function DistrictTicket({ d, index }: { d: DistrictAgg; index: number }) 
   const pct = Math.min(100, Math.round((d.schools / totalSchoolsOdisha) * 100));
   const pie = [
     { name: "This district", value: d.schools, fill: "oklch(0.86 0.16 200)" },
-    { name: "Rest of state", value: Math.max(0, totalSchoolsOdisha - d.schools), fill: "oklch(0.3 0.04 260)" },
+    { name: "Rest of state", value: Math.max(0, totalSchoolsOdisha - d.schools), fill: "var(--muted)" },
   ];
   const stars = Math.round(d.avgShvr);
   const wash3 = Math.min(3, Math.max(0, Math.round((d.avgWash / 100) * 3)));
