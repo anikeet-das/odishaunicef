@@ -79,3 +79,15 @@ export function jitter(udise: string, base: OdishaDistrict): { lat: number; lng:
 
 // Odisha bounding box (rough) used by the map SVG projection.
 export const ODISHA_BOUNDS = { minLat: 17.78, maxLat: 22.57, minLng: 81.37, maxLng: 87.53 };
+// UNICEF-priority districts for the CR-SAP Odisha programme.
+export const KEY_DISTRICTS = [
+  "Koraput", "Khordha", "Rayagada", "Ganjam",
+  "Kendrapara", "Sambalpur", "Sundargarh",
+] as const;
+export type KeyDistrict = (typeof KEY_DISTRICTS)[number];
+
+export function isKeyDistrict(name: string | undefined | null): boolean {
+  if (!name) return false;
+  const norm = name.trim().toLowerCase();
+  return KEY_DISTRICTS.some((k) => k.toLowerCase() === norm);
+}
