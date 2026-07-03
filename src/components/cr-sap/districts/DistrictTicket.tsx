@@ -41,7 +41,7 @@ export function DistrictTicket({ d, index }: { d: DistrictAgg; index: number }) 
       className="relative grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-0 glass rounded-2xl overflow-hidden border border-[oklch(0.85_0.2_195/0.18)] hover:border-[oklch(0.85_0.2_195/0.45)] transition"
     >
       {/* LEFT STUB — identity */}
-      <div className="relative p-4 bg-gradient-to-br from-[oklch(0.22_0.05_220/0.6)] to-transparent">
+      <div className="relative p-4 bg-gradient-to-br from-secondary/50 to-transparent dark:from-[oklch(0.22_0.05_220/0.6)]">
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-[var(--cyan)]">
           <Plane className="h-3 w-3" /> CR-SAP · {String(index + 1).padStart(2, "0")} / 30
         </div>
