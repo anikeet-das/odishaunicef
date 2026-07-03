@@ -424,3 +424,114 @@ function DistrictDrilldown({ district, schools, onClose }: { district: string; s
     </div>
   );
 }
+
+/* ============ Multi-district hazard radar with index side-panel ============ */
+function districtColor(i: number, n: number) {
+  const hue = Math.round((i / Math.max(1, n)) * 340);
+  return `oklch(0.72 0.2 ${hue})`;
+}
+function MultiHazardRadar({ schools, aggs }: { schools: School[]; aggs: DistrictAgg[] }) {
+  const [openIndex, setOpenIndex] = useState(false);
+  const districts = useMemo(
+    () => aggs.filter((d) => d.schools > 0).slice().sort((a, b) => b.avgHazard - a.avgHazard),
+    [aggs],
+  );
+  const data = useMemo(() => {
+    return HAZARDS.map((h) => {
+      const row: Record<string, number | string> = { hazard: h };
+      for (const d of districts) {
+        const list = schools.filter((s) => s.district === d.district);
+        const samples = list.filter((s) => Number.isFinite(s.hazards[h]));
+        row[d.district] = samples.length
+          ? Math.round((samples.reduce((a, s) => a + s.hazards[h], 0) / samples.length / 3) * 100)
+          : 0;
+      }
+      return row;
+    });
+  }, [schools, districts]);
+
+  return (
+    <div className="glass rounded-2xl p-5 h-[44vh] flex flex-col relative">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-sm font-semibold">Hazard radar · all districts</div>
+        <button
+          onClick={() => setOpenIndex(true)}
+          className="inline-flex items-center gap-1.5 text-[11px] glass-soft rounded-full px-2.5 py-1 hover:bg-primary/10"
+          aria-label="Open district index"
+        >
+          <List className="h-3 w-3" /> Index
+        </button>
+      </div>
+      <div className="flex-1">
+        <ResponsiveContainer>
+          <RadarChart data={data}>
+            <PolarGrid stroke="var(--border)" />
+            <PolarAngleAxis dataKey="hazard" tick={{ fontSize: 9, fill: "var(--muted-foreground)" }} />
+            <PolarRadiusAxis tick={{ fontSize: 9, fill: "var(--muted-foreground)" }} domain={[0, 100]} />
+            <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 11 }} />
+            {districts.map((d, i) => (
+              <Radar
+                key={d.district}
+                name={d.district}
+                dataKey={d.district}
+                stroke={districtColor(i, districts.length)}
+                fill={districtColor(i, districts.length)}
+                fillOpacity={0.08}
+                strokeWidth={1.5}
+              />
+            ))}
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <AnimatePresence>
+        {openIndex && (
+          <div className="fixed inset-0 z-[70] flex" onClick={() => setOpenIndex(false)}>
+            <div className="flex-1 bg-black/50" />
+            <motion.aside
+              initial={{ x: 320, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 320, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 260 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-[min(400px,92vw)] h-full bg-background border-l border-border shadow-2xl overflow-y-auto p-5"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">District Index</div>
+                  <h3 className="text-lg font-semibold">Hazard radar legend</h3>
+                </div>
+                <button onClick={() => setOpenIndex(false)} className="text-muted-foreground hover:text-foreground">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="text-[11px] text-muted-foreground mb-3">
+                Sorted by average climate risk. Each district is drawn on the radar with its swatch color.
+              </div>
+              <ul className="space-y-1.5">
+                {districts.map((d, i) => (
+                  <li key={d.district} className="flex items-center gap-3 rounded-lg px-3 py-2 bg-secondary/40">
+                    <span
+                      className="h-3 w-3 rounded-full shrink-0"
+                      style={{
+                        background: districtColor(i, districts.length),
+                        boxShadow: `0 0 6px ${districtColor(i, districts.length)}`,
+                      }}
+                    />
+                    <span className="flex-1 truncate font-medium text-sm">{d.district}</span>
+                    <span className="text-[11px] text-muted-foreground tabular-nums">
+                      risk {d.avgHazard}% · {d.schools} sch
+                    </span>
+                  </li>
+                ))}
+                {districts.length === 0 && (
+                  <li className="text-center text-xs text-muted-foreground py-6">No district data available.</li>
+                )}
+              </ul>
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
