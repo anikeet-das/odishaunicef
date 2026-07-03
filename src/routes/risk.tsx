@@ -12,6 +12,7 @@ import { AwaitingData } from "@/components/data/AwaitingData";
 import { useViewMode } from "@/components/layout/view-mode";
 import { ShieldAlert, Sparkles, TrendingUp, ChevronRight, X, Activity, List } from "lucide-react";
 import type { DistrictAgg } from "@/lib/data/cces";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/risk")({
   head: () => ({
