@@ -17,6 +17,8 @@ import {
   CAPITAL_FIELDS, OPEX_FIELDS, FIELD_LABEL,
   type SchoolFin,
 } from "@/lib/data/real-finance";
+import { useSchools } from "@/lib/data/cces";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/finance")({
   head: () => ({
