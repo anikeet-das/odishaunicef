@@ -10,7 +10,8 @@ import { useSchools, hazardBreakdown, HAZARDS, aggregateByDistrict, platformKpis
 import { LoadingShell } from "@/components/data/LoadingShell";
 import { AwaitingData } from "@/components/data/AwaitingData";
 import { useViewMode } from "@/components/layout/view-mode";
-import { ShieldAlert, Sparkles, TrendingUp, ChevronRight, X, Activity } from "lucide-react";
+import { ShieldAlert, Sparkles, TrendingUp, ChevronRight, X, Activity, List } from "lucide-react";
+import type { DistrictAgg } from "@/lib/data/cces";
 
 export const Route = createFileRoute("/risk")({
   head: () => ({
