@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
-import { useSchools, aggregateByDistrict, type DistrictAgg } from "@/lib/data/cces";
+import { useSchools, aggregateByDistrict, type DistrictAgg, type School } from "@/lib/data/cces";
 import { LoadingShell } from "@/components/data/LoadingShell";
 import { useViewMode } from "@/components/layout/view-mode";
 import { DistrictSunburst } from "@/components/cr-sap/districts/DistrictSunburst";
