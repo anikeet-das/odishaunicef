@@ -33,7 +33,7 @@ function Page() {
 }
 
 /* ========================= MACRO — DaisyDisk sunburst ========================= */
-function MacroView({ rows }: { rows: DistrictAgg[] }) {
+function MacroView({ rows, schools }: { rows: DistrictAgg[]; schools: School[] }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const MAX = 7;
