@@ -221,7 +221,7 @@ function MicroView({ schools }: { schools: School[] }) {
             <table className="w-full text-xs">
               <thead>
                 <tr>
-                  <th className="text-left py-2 px-3 text-[10px] uppercase tracking-wider text-muted-foreground sticky left-0 bg-[oklch(0.16_0.03_260)]">District</th>
+                  <th className="text-left py-2 px-3 text-[10px] uppercase tracking-wider text-muted-foreground sticky left-0 bg-card">District</th>
                   {HAZARDS.map((h) => (
                     <th key={h} className="px-2 py-2 text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap text-center">{h}</th>
                   ))}
@@ -229,8 +229,8 @@ function MicroView({ schools }: { schools: School[] }) {
               </thead>
               <tbody>
                 {matrix.map((r) => (
-                  <tr key={r.name} className="border-t border-border/30 hover:bg-white/[0.03]">
-                    <td className="py-2 px-3 font-medium sticky left-0 bg-[oklch(0.16_0.03_260)]">
+                  <tr key={r.name} className="border-t border-border/30 hover:bg-primary/5">
+                    <td className="py-2 px-3 font-medium sticky left-0 bg-card">
                       <button onClick={() => setOpened(r.name)} className="inline-flex items-center gap-1 hover:text-[var(--cyan)]">
                         {r.name} <ChevronRight className="h-3 w-3" />
                       </button>
