@@ -293,19 +293,7 @@ function MicroView({ schools }: { schools: School[] }) {
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="glass rounded-2xl p-5 h-[44vh] flex flex-col">
-            <div className="text-sm font-semibold mb-2">Hazard radar · {opened ?? aggs[0]?.district}</div>
-            <div className="flex-1">
-              <ResponsiveContainer>
-                <RadarChart data={radarFor(schools, opened ?? aggs[0]?.district)}>
-                  <PolarGrid stroke="oklch(0.85 0.2 195 / 0.18)" />
-                  <PolarAngleAxis dataKey="hazard" tick={{ fontSize: 9 }} />
-                  <PolarRadiusAxis tick={{ fontSize: 9 }} domain={[0, 100]} />
-                  <Radar dataKey="exposed" stroke="oklch(0.85 0.18 75)" fill="oklch(0.85 0.18 75)" fillOpacity={0.3} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <MultiHazardRadar schools={schools} aggs={aggs} />
         </div>
       </div>
 
