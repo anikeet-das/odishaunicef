@@ -7,6 +7,7 @@ import { useViewMode } from "@/components/layout/view-mode";
 import { DistrictSunburst } from "@/components/cr-sap/districts/DistrictSunburst";
 import { DistrictTicket } from "@/components/cr-sap/districts/DistrictTicket";
 import { Sparkles, Search, Download, X, Check, RotateCcw } from "lucide-react";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/districts")({
   validateSearch: (search: Record<string, unknown>) => ({
