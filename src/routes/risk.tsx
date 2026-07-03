@@ -57,6 +57,8 @@ function MacroView({ schools }: { schools: School[] }) {
     <div className="flex flex-col min-h-full">
       <Topbar title="Risk Analytics" subtitle="State Strategic Overview" />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={schools} focus="risk" />
+
         {/* Cinematic header */}
         <div className="glass-strong rounded-2xl p-6 relative overflow-hidden">
           <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-30 animate-pulse-glow"
