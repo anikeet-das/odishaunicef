@@ -96,7 +96,7 @@ export function DistrictTicket({ d, index }: { d: DistrictAgg; index: number }) 
       </div>
 
       {/* RIGHT STUB — AI hazard statement */}
-      <div className="relative p-4 bg-gradient-to-bl from-[oklch(0.22_0.05_280/0.5)] to-transparent border-l border-dashed border-[oklch(0.85_0.2_195/0.15)] lg:border-l-0">
+      <div className="relative p-4 bg-gradient-to-bl from-secondary/40 to-transparent dark:from-[oklch(0.22_0.05_280/0.5)] border-l border-dashed border-[oklch(0.85_0.2_195/0.15)] lg:border-l-0">
         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[var(--aurora)]">
           <Sparkles className="h-3 w-3" /> AI hazard scan
         </div>
