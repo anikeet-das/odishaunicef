@@ -215,6 +215,7 @@ function MicroView({ schools }: { schools: School[] }) {
     <div className="flex flex-col min-h-full">
       <Topbar title="Risk Analytics" subtitle="Operational District Intelligence" />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={schools} focus="risk" />
         <div className="glass-strong rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-2">
             <ShieldAlert className="h-4 w-4 text-[var(--warn)]" />
