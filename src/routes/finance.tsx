@@ -62,6 +62,7 @@ function Dashboard({ fin }: { fin: NonNullable<ReturnType<typeof useRealFinance>
         subtitle="Live · sourced from Google Form responses"
       />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={schools} focus="finance" />
         {/* Data integrity banner */}
         <div className="glass rounded-2xl p-4 flex flex-wrap items-center gap-3">
           <ShieldCheck className={`h-5 w-5 ${accuracyGood ? "text-[var(--aurora)]" : "text-[var(--warn)]"}`} />
