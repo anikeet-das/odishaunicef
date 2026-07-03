@@ -17,6 +17,8 @@ import {
   CAPITAL_FIELDS, OPEX_FIELDS, FIELD_LABEL,
   type SchoolFin,
 } from "@/lib/data/real-finance";
+import { useSchools } from "@/lib/data/cces";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/finance")({
   head: () => ({
@@ -49,7 +51,9 @@ function Page() {
 
 function Dashboard({ fin }: { fin: NonNullable<ReturnType<typeof useRealFinance>> }) {
   const { totals, audit, districts } = fin;
+  const { data: schools } = useSchools();
   const accuracyGood = audit.accuracyPct >= 95;
+
 
   return (
     <div className="flex flex-col min-h-full">
@@ -58,6 +62,7 @@ function Dashboard({ fin }: { fin: NonNullable<ReturnType<typeof useRealFinance>
         subtitle="Live · sourced from Google Form responses"
       />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={schools} focus="finance" />
         {/* Data integrity banner */}
         <div className="glass rounded-2xl p-4 flex flex-wrap items-center gap-3">
           <ShieldCheck className={`h-5 w-5 ${accuracyGood ? "text-[var(--aurora)]" : "text-[var(--warn)]"}`} />

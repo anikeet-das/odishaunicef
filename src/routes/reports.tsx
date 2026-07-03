@@ -42,6 +42,17 @@ function Page() {
             <div className="text-xs text-muted-foreground mt-1">Generated from {data.length.toLocaleString()} live records · {r.file}</div>
           </button>
         ))}
+        <a
+          href="/cr-sap-odisha-code.zip"
+          download
+          className="glass rounded-2xl p-6 text-left hover:neon-ring transition group border border-primary/30"
+        >
+          <Download className="h-6 w-6 text-[var(--aurora)] mb-3" />
+          <div className="font-semibold">Full project source code</div>
+          <div className="text-xs text-muted-foreground mt-1">
+            Complete CR-SAP Odisha codebase (React + TanStack Start) · cr-sap-odisha-code.zip
+          </div>
+        </a>
       </div>
     </div>
   );

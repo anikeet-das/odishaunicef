@@ -27,7 +27,7 @@ export function DistrictTicket({ d, index }: { d: DistrictAgg; index: number }) 
   const pct = Math.min(100, Math.round((d.schools / totalSchoolsOdisha) * 100));
   const pie = [
     { name: "This district", value: d.schools, fill: "oklch(0.86 0.16 200)" },
-    { name: "Rest of state", value: Math.max(0, totalSchoolsOdisha - d.schools), fill: "oklch(0.3 0.04 260)" },
+    { name: "Rest of state", value: Math.max(0, totalSchoolsOdisha - d.schools), fill: "var(--muted)" },
   ];
   const stars = Math.round(d.avgShvr);
   const wash3 = Math.min(3, Math.max(0, Math.round((d.avgWash / 100) * 3)));
@@ -41,7 +41,7 @@ export function DistrictTicket({ d, index }: { d: DistrictAgg; index: number }) 
       className="relative grid grid-cols-1 lg:grid-cols-[280px_1fr_280px] gap-0 glass rounded-2xl overflow-hidden border border-[oklch(0.85_0.2_195/0.18)] hover:border-[oklch(0.85_0.2_195/0.45)] transition"
     >
       {/* LEFT STUB — identity */}
-      <div className="relative p-4 bg-gradient-to-br from-[oklch(0.22_0.05_220/0.6)] to-transparent">
+      <div className="relative p-4 bg-gradient-to-br from-secondary/50 to-transparent dark:from-[oklch(0.22_0.05_220/0.6)]">
         <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-[var(--cyan)]">
           <Plane className="h-3 w-3" /> CR-SAP · {String(index + 1).padStart(2, "0")} / 30
         </div>
@@ -96,7 +96,7 @@ export function DistrictTicket({ d, index }: { d: DistrictAgg; index: number }) 
       </div>
 
       {/* RIGHT STUB — AI hazard statement */}
-      <div className="relative p-4 bg-gradient-to-bl from-[oklch(0.22_0.05_280/0.5)] to-transparent border-l border-dashed border-[oklch(0.85_0.2_195/0.15)] lg:border-l-0">
+      <div className="relative p-4 bg-gradient-to-bl from-secondary/40 to-transparent dark:from-[oklch(0.22_0.05_280/0.5)] border-l border-dashed border-[oklch(0.85_0.2_195/0.15)] lg:border-l-0">
         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-[0.22em] text-[var(--aurora)]">
           <Sparkles className="h-3 w-3" /> AI hazard scan
         </div>

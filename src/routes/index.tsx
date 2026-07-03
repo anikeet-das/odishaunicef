@@ -7,6 +7,7 @@ import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieCha
 import { Activity, Droplets, Leaf, ShieldAlert, School as SchoolIcon, Star } from "lucide-react";
 import unicefLogo from "@/assets/unicef-logo.png";
 import { AwaitingData } from "@/components/data/AwaitingData";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -83,6 +84,8 @@ function Index() {
             <KPI icon={ShieldAlert} label="Climate Risk" value={`${kpi.avgHazard}%`} />
           </div>
         </div>
+
+        <KeyDistrictsPanel schools={schools} focus="overview" />
 
         <div className="grid lg:grid-cols-2 gap-3">
           {/* SHVR star rating distribution 2025-26 */}

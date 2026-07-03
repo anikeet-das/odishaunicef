@@ -10,7 +10,9 @@ import { useSchools, hazardBreakdown, HAZARDS, aggregateByDistrict, platformKpis
 import { LoadingShell } from "@/components/data/LoadingShell";
 import { AwaitingData } from "@/components/data/AwaitingData";
 import { useViewMode } from "@/components/layout/view-mode";
-import { ShieldAlert, Sparkles, TrendingUp, ChevronRight, X, Activity } from "lucide-react";
+import { ShieldAlert, Sparkles, TrendingUp, ChevronRight, X, Activity, List } from "lucide-react";
+import type { DistrictAgg } from "@/lib/data/cces";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/risk")({
   head: () => ({
@@ -55,6 +57,8 @@ function MacroView({ schools }: { schools: School[] }) {
     <div className="flex flex-col min-h-full">
       <Topbar title="Risk Analytics" subtitle="State Strategic Overview" />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={schools} focus="risk" />
+
         {/* Cinematic header */}
         <div className="glass-strong rounded-2xl p-6 relative overflow-hidden">
           <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-30 animate-pulse-glow"
@@ -211,6 +215,7 @@ function MicroView({ schools }: { schools: School[] }) {
     <div className="flex flex-col min-h-full">
       <Topbar title="Risk Analytics" subtitle="Operational District Intelligence" />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={schools} focus="risk" />
         <div className="glass-strong rounded-2xl p-5">
           <div className="flex items-center gap-2 mb-2">
             <ShieldAlert className="h-4 w-4 text-[var(--warn)]" />
@@ -221,7 +226,7 @@ function MicroView({ schools }: { schools: School[] }) {
             <table className="w-full text-xs">
               <thead>
                 <tr>
-                  <th className="text-left py-2 px-3 text-[10px] uppercase tracking-wider text-muted-foreground sticky left-0 bg-[oklch(0.16_0.03_260)]">District</th>
+                  <th className="text-left py-2 px-3 text-[10px] uppercase tracking-wider text-muted-foreground sticky left-0 bg-card">District</th>
                   {HAZARDS.map((h) => (
                     <th key={h} className="px-2 py-2 text-[10px] uppercase tracking-wider text-muted-foreground whitespace-nowrap text-center">{h}</th>
                   ))}
@@ -229,8 +234,8 @@ function MicroView({ schools }: { schools: School[] }) {
               </thead>
               <tbody>
                 {matrix.map((r) => (
-                  <tr key={r.name} className="border-t border-border/30 hover:bg-white/[0.03]">
-                    <td className="py-2 px-3 font-medium sticky left-0 bg-[oklch(0.16_0.03_260)]">
+                  <tr key={r.name} className="border-t border-border/30 hover:bg-primary/5">
+                    <td className="py-2 px-3 font-medium sticky left-0 bg-card">
                       <button onClick={() => setOpened(r.name)} className="inline-flex items-center gap-1 hover:text-[var(--cyan)]">
                         {r.name} <ChevronRight className="h-3 w-3" />
                       </button>
@@ -293,19 +298,7 @@ function MicroView({ schools }: { schools: School[] }) {
               </ResponsiveContainer>
             </div>
           </div>
-          <div className="glass rounded-2xl p-5 h-[44vh] flex flex-col">
-            <div className="text-sm font-semibold mb-2">Hazard radar · {opened ?? aggs[0]?.district}</div>
-            <div className="flex-1">
-              <ResponsiveContainer>
-                <RadarChart data={radarFor(schools, opened ?? aggs[0]?.district)}>
-                  <PolarGrid stroke="oklch(0.85 0.2 195 / 0.18)" />
-                  <PolarAngleAxis dataKey="hazard" tick={{ fontSize: 9 }} />
-                  <PolarRadiusAxis tick={{ fontSize: 9 }} domain={[0, 100]} />
-                  <Radar dataKey="exposed" stroke="oklch(0.85 0.18 75)" fill="oklch(0.85 0.18 75)" fillOpacity={0.3} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <MultiHazardRadar schools={schools} aggs={aggs} />
         </div>
       </div>
 
@@ -328,18 +321,20 @@ function buildMatrix(schools: School[]) {
     const list = schools.filter((s) => s.district === name);
     const row: Record<string, number | string | null> = { name, _count: list.length };
     for (const h of HAZARDS) {
-      // If the district has no submitted entries with hazard data, surface
-      // "—" rather than misleading 0% / 100% percentages.
-      const hazardSamples = list.filter((s) => Number.isFinite(s.hazards[h]));
-      if (!list.length || hazardSamples.length === 0) {
+      // Use mean hazard intensity (0..3) scaled to 0..100 so districts show a
+      // realistic exposure %, not a binary "any-school-reported-anything" 100%.
+      const samples = list.filter((s) => Number.isFinite(s.hazards[h]));
+      if (!list.length || samples.length === 0) {
         row[h] = null;
       } else {
-        row[h] = Math.round((list.filter((s) => s.hazards[h] > 0).length / list.length) * 100);
+        const mean = samples.reduce((a, s) => a + s.hazards[h], 0) / samples.length;
+        row[h] = Math.round((mean / 3) * 100);
       }
     }
     return row as { name: string; _count: number } & Record<string, number | null>;
   });
 }
+
 
 function cellColor(v: number): string {
   if (v >= 70) return "oklch(0.68 0.24 22)";
@@ -430,6 +425,117 @@ function DistrictDrilldown({ district, schools, onClose }: { district: string; s
           </p>
         </div>
       </motion.div>
+    </div>
+  );
+}
+
+/* ============ Multi-district hazard radar with index side-panel ============ */
+function districtColor(i: number, n: number) {
+  const hue = Math.round((i / Math.max(1, n)) * 340);
+  return `oklch(0.72 0.2 ${hue})`;
+}
+function MultiHazardRadar({ schools, aggs }: { schools: School[]; aggs: DistrictAgg[] }) {
+  const [openIndex, setOpenIndex] = useState(false);
+  const districts = useMemo(
+    () => aggs.filter((d) => d.schools > 0).slice().sort((a, b) => b.avgHazard - a.avgHazard),
+    [aggs],
+  );
+  const data = useMemo(() => {
+    return HAZARDS.map((h) => {
+      const row: Record<string, number | string> = { hazard: h };
+      for (const d of districts) {
+        const list = schools.filter((s) => s.district === d.district);
+        const samples = list.filter((s) => Number.isFinite(s.hazards[h]));
+        row[d.district] = samples.length
+          ? Math.round((samples.reduce((a, s) => a + s.hazards[h], 0) / samples.length / 3) * 100)
+          : 0;
+      }
+      return row;
+    });
+  }, [schools, districts]);
+
+  return (
+    <div className="glass rounded-2xl p-5 h-[44vh] flex flex-col relative">
+      <div className="flex items-center justify-between mb-2">
+        <div className="text-sm font-semibold">Hazard radar · all districts</div>
+        <button
+          onClick={() => setOpenIndex(true)}
+          className="inline-flex items-center gap-1.5 text-[11px] glass-soft rounded-full px-2.5 py-1 hover:bg-primary/10"
+          aria-label="Open district index"
+        >
+          <List className="h-3 w-3" /> Index
+        </button>
+      </div>
+      <div className="flex-1">
+        <ResponsiveContainer>
+          <RadarChart data={data}>
+            <PolarGrid stroke="var(--border)" />
+            <PolarAngleAxis dataKey="hazard" tick={{ fontSize: 9, fill: "var(--muted-foreground)" }} />
+            <PolarRadiusAxis tick={{ fontSize: 9, fill: "var(--muted-foreground)" }} domain={[0, 100]} />
+            <Tooltip contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 12, fontSize: 11 }} />
+            {districts.map((d, i) => (
+              <Radar
+                key={d.district}
+                name={d.district}
+                dataKey={d.district}
+                stroke={districtColor(i, districts.length)}
+                fill={districtColor(i, districts.length)}
+                fillOpacity={0.08}
+                strokeWidth={1.5}
+              />
+            ))}
+          </RadarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <AnimatePresence>
+        {openIndex && (
+          <div className="fixed inset-0 z-[70] flex" onClick={() => setOpenIndex(false)}>
+            <div className="flex-1 bg-black/50" />
+            <motion.aside
+              initial={{ x: 320, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 320, opacity: 0 }}
+              transition={{ type: "spring", damping: 30, stiffness: 260 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-[min(400px,92vw)] h-full bg-background border-l border-border shadow-2xl overflow-y-auto p-5"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">District Index</div>
+                  <h3 className="text-lg font-semibold">Hazard radar legend</h3>
+                </div>
+                <button onClick={() => setOpenIndex(false)} className="text-muted-foreground hover:text-foreground">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="text-[11px] text-muted-foreground mb-3">
+                Sorted by average climate risk. Each district is drawn on the radar with its swatch color.
+              </div>
+              <ul className="space-y-1.5">
+                {districts.map((d, i) => (
+                  <li key={d.district} className="flex items-center gap-3 rounded-lg px-3 py-2 bg-secondary/40">
+                    <span
+                      className="h-3 w-3 rounded-full shrink-0"
+                      style={{
+                        background: districtColor(i, districts.length),
+                        boxShadow: `0 0 6px ${districtColor(i, districts.length)}`,
+                      }}
+                    />
+                    <span className="flex-1 truncate font-medium text-sm">{d.district}</span>
+                    <span className="text-[11px] text-muted-foreground tabular-nums">
+                      risk {d.avgHazard}% · {d.schools} sch
+                    </span>
+                  </li>
+                ))}
+                {districts.length === 0 && (
+                  <li className="text-center text-xs text-muted-foreground py-6">No district data available.</li>
+                )}
+              </ul>
+            </motion.aside>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

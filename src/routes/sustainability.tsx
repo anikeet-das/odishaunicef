@@ -9,6 +9,7 @@ import {
   RadialBarChart, RadialBar, PolarAngleAxis, Legend,
 } from "recharts";
 import { Search, Sparkles, ExternalLink, Filter } from "lucide-react";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/sustainability")({
   head: () => ({ meta: [{ title: "Sustainability Index · CR-SAP Odisha" }, { name: "description", content: "Live distribution of sustainability scores across 10,000 schools." }] }),
@@ -57,6 +58,7 @@ function MacroView({ data, buckets }: { data: School[]; buckets: { range: string
     <div className="flex flex-col min-h-full">
       <Topbar title="Sustainability Index" subtitle="Macro · Live Aggregates" />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={data} focus="sustainability" />
         {/* Filters */}
         <div className="glass rounded-2xl p-3 flex items-center gap-2 flex-wrap">
           <Filter className="h-4 w-4 text-[var(--cyan)]" />

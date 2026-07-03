@@ -225,8 +225,8 @@ function HazardPulse({ seed, top }: { seed: string; top: string | null }) {
 function Drawer({ school, onClose }: { school: School; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex" onClick={onClose}>
-      <div className="flex-1 bg-background/60 backdrop-blur-sm" />
-      <aside className="w-[min(520px,90vw)] h-full glass border-l border-border overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+      <div className="flex-1 bg-black/50" />
+      <aside className="w-[min(520px,90vw)] h-full bg-background border-l border-border shadow-2xl overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
           <div>
             <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">UDISE {school.udise}</div>

@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Topbar } from "@/components/layout/Topbar";
-import { useSchools, aggregateByDistrict, type DistrictAgg } from "@/lib/data/cces";
+import { useSchools, aggregateByDistrict, type DistrictAgg, type School } from "@/lib/data/cces";
 import { LoadingShell } from "@/components/data/LoadingShell";
 import { useViewMode } from "@/components/layout/view-mode";
 import { DistrictSunburst } from "@/components/cr-sap/districts/DistrictSunburst";
 import { DistrictTicket } from "@/components/cr-sap/districts/DistrictTicket";
 import { Sparkles, Search, Download, X, Check, RotateCcw } from "lucide-react";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/districts")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -27,12 +28,12 @@ function Page() {
   const { focus } = Route.useSearch();
   if (!schools) return <LoadingShell title="District Intelligence" subtitle="AI Leaderboard" />;
   return mode === "macro"
-    ? <MacroView rows={aggregateByDistrict(schools)} />
-    : <MicroView rows={aggregateByDistrict(schools)} focus={focus} />;
+    ? <MacroView rows={aggregateByDistrict(schools)} schools={schools} />
+    : <MicroView rows={aggregateByDistrict(schools)} schools={schools} focus={focus} />;
 }
 
 /* ========================= MACRO — DaisyDisk sunburst ========================= */
-function MacroView({ rows }: { rows: DistrictAgg[] }) {
+function MacroView({ rows, schools }: { rows: DistrictAgg[]; schools: School[] }) {
   const [selected, setSelected] = useState<string[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const MAX = 7;
@@ -63,6 +64,8 @@ function MacroView({ rows }: { rows: DistrictAgg[] }) {
     <div className="flex flex-col min-h-full">
       <Topbar title="District Intelligence" subtitle="DaisyDisk · 30-district sunburst comparator" />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={schools} focus="overview" />
+
         <div className="grid lg:grid-cols-[1fr_320px] gap-3">
           {/* Sunburst */}
           <div className="relative glass rounded-2xl p-4 min-h-[78vh]">
@@ -179,7 +182,7 @@ function comparisonNarrative(rows: DistrictAgg[]): string {
 }
 
 /* ========================= MICRO — 30x1 flight-ticket matrix ========================= */
-function MicroView({ rows, focus }: { rows: DistrictAgg[]; focus?: string }) {
+function MicroView({ rows, schools, focus }: { rows: DistrictAgg[]; schools: School[]; focus?: string }) {
   const [q, setQ] = useState(focus ?? "");
   const list = useMemo(
     () => rows.filter((r) => r.district.toLowerCase().includes(q.toLowerCase())),
@@ -201,6 +204,7 @@ function MicroView({ rows, focus }: { rows: DistrictAgg[]; focus?: string }) {
     <div className="flex flex-col min-h-full">
       <Topbar title="District Intelligence" subtitle="30×1 Ticket Matrix · per-district intelligence" />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={schools} focus="overview" />
         <div className="glass rounded-2xl p-3 flex items-center gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />

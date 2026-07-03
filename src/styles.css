@@ -414,3 +414,23 @@ html[data-theme="cream"] .recharts-text { fill: oklch(0.42 0.05 255) !important;
 html[data-theme="cream"] .recharts-cartesian-grid line,
 html[data-theme="cream"] .recharts-cartesian-axis-line,
 html[data-theme="cream"] .recharts-cartesian-axis-tick-line { stroke: oklch(0.6 0.1 245 / 0.18) !important; }
+
+/* ============================================================
+ * Cross-project Recharts legend / axis readability fix
+ * (previous rules only handled cream theme — this ensures ALL
+ *  non-dark themes render legend labels in the foreground color)
+ * ============================================================ */
+:where(html:not(.dark)) .recharts-legend-item-text,
+:where(html:not(.dark)) .recharts-legend-wrapper {
+  color: var(--foreground) !important;
+}
+.dark .recharts-legend-item-text,
+.dark .recharts-legend-wrapper {
+  color: var(--foreground) !important;
+}
+:where(html:not(.dark)) .recharts-cartesian-axis-tick text,
+:where(html:not(.dark)) .recharts-polar-angle-axis-tick text,
+:where(html:not(.dark)) .recharts-text.recharts-label {
+  fill: var(--foreground) !important;
+  opacity: 0.85;
+}

@@ -10,6 +10,7 @@ import {
   PolarAngleAxis, PolarRadiusAxis, LineChart, Line, Legend,
 } from "recharts";
 import { Droplets, Sparkles, Search, Download, Filter, Loader2 } from "lucide-react";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/wash")({
   head: () => ({ meta: [{ title: "WASH Board · CR-SAP Odisha" }] }),
@@ -35,9 +36,9 @@ function Macro() {
   const kpis = useMemo(() => (schools ? platformKpis(schools) : null), [schools]);
   const byDistrict = useMemo(() => (schools ? aggregateByDistrict(schools) : []), [schools]);
 
-  const waterData = useMemo(() => byDistrict.slice(0, 10).map((d) => ({ name: d.district.slice(0, 8), wash: d.avgWash, sus: d.avgSust })), [byDistrict]);
+  const waterData = useMemo(() => byDistrict.filter((d) => d.schools > 0).slice(0, 10).map((d) => ({ name: d.district.slice(0, 10), wash: d.avgWash, sus: d.avgSust })), [byDistrict]);
   const waterDistricts = useMemo(() =>
-    byDistrict.slice(0, 10).map((d) => ({ name: d.district.slice(0, 8), water: d.avgWash })),
+    byDistrict.filter((d) => d.schools > 0).slice(0, 10).map((d) => ({ name: d.district.slice(0, 10), water: d.avgWash })),
     [byDistrict]);
 
   // Real sanitation readiness buckets, derived from each school's washScore.
@@ -73,6 +74,8 @@ function Macro() {
 
   return (
     <div className="space-y-4">
+      <KeyDistrictsPanel schools={schools} focus="wash" />
+
       {/* AI summary */}
       <Panel>
         <div className="flex items-start gap-3">
@@ -249,7 +252,7 @@ function Micro() {
         <Panel className="p-0 overflow-hidden">
           <div className="max-h-[68vh] overflow-auto scroll-invisible">
             <table className="w-full text-sm">
-              <thead className="sticky top-0 z-10 backdrop-blur bg-[oklch(0.18_0.04_220/0.65)]">
+              <thead className="sticky top-0 z-10 backdrop-blur bg-card/95 border-b border-border">
                 <tr className="text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                   <th className="px-4 py-2.5">School</th>
                   <th className="px-3 py-2.5">District</th>
