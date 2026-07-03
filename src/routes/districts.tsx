@@ -28,8 +28,8 @@ function Page() {
   const { focus } = Route.useSearch();
   if (!schools) return <LoadingShell title="District Intelligence" subtitle="AI Leaderboard" />;
   return mode === "macro"
-    ? <MacroView rows={aggregateByDistrict(schools)} />
-    : <MicroView rows={aggregateByDistrict(schools)} focus={focus} />;
+    ? <MacroView rows={aggregateByDistrict(schools)} schools={schools} />
+    : <MicroView rows={aggregateByDistrict(schools)} schools={schools} focus={focus} />;
 }
 
 /* ========================= MACRO — DaisyDisk sunburst ========================= */
