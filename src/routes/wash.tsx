@@ -10,6 +10,7 @@ import {
   PolarAngleAxis, PolarRadiusAxis, LineChart, Line, Legend,
 } from "recharts";
 import { Droplets, Sparkles, Search, Download, Filter, Loader2 } from "lucide-react";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/wash")({
   head: () => ({ meta: [{ title: "WASH Board · CR-SAP Odisha" }] }),
