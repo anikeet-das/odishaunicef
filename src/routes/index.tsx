@@ -7,6 +7,7 @@ import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, PieCha
 import { Activity, Droplets, Leaf, ShieldAlert, School as SchoolIcon, Star } from "lucide-react";
 import unicefLogo from "@/assets/unicef-logo.png";
 import { AwaitingData } from "@/components/data/AwaitingData";
+import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/")({
   head: () => ({
