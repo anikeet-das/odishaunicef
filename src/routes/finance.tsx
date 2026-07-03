@@ -51,7 +51,9 @@ function Page() {
 
 function Dashboard({ fin }: { fin: NonNullable<ReturnType<typeof useRealFinance>> }) {
   const { totals, audit, districts } = fin;
+  const { data: schools } = useSchools();
   const accuracyGood = audit.accuracyPct >= 95;
+
 
   return (
     <div className="flex flex-col min-h-full">
