@@ -204,6 +204,7 @@ function MicroView({ rows, schools, focus }: { rows: DistrictAgg[]; schools: Sch
     <div className="flex flex-col min-h-full">
       <Topbar title="District Intelligence" subtitle="30×1 Ticket Matrix · per-district intelligence" />
       <div className="p-3 space-y-3">
+        <KeyDistrictsPanel schools={schools} focus="overview" />
         <div className="glass rounded-2xl p-3 flex items-center gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
