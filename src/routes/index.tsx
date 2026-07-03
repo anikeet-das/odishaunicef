@@ -85,6 +85,8 @@ function Index() {
           </div>
         </div>
 
+        <KeyDistrictsPanel schools={schools} focus="overview" />
+
         <div className="grid lg:grid-cols-2 gap-3">
           {/* SHVR star rating distribution 2025-26 */}
           <div className="glass rounded-2xl p-5">
