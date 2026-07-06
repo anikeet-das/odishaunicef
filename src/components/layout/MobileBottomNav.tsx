@@ -56,9 +56,24 @@ const GROUPS: Group[] = [
 export function MobileBottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [openGroup, setOpenGroup] = useState<Group | null>(null);
+  const [atTop, setAtTop] = useState(true);
 
   // close sheet when route changes
   useEffect(() => { setOpenGroup(null); }, [pathname]);
+
+  // Hide the floating Settings disc as soon as the user scrolls.
+  // The main scroller is `.app-main`; fall back to window when absent.
+  useEffect(() => {
+    const scroller: HTMLElement | Window =
+      (typeof document !== "undefined" && document.querySelector<HTMLElement>(".app-main")) || window;
+    const readTop = () => {
+      const y = scroller instanceof Window ? window.scrollY : scroller.scrollTop;
+      setAtTop(y < 24);
+    };
+    readTop();
+    scroller.addEventListener("scroll", readTop, { passive: true });
+    return () => scroller.removeEventListener("scroll", readTop as EventListener);
+  }, [pathname]);
 
   const activeGroupId =
     GROUPS.find((g) => g.items.some((it) => it.to === pathname))?.id
@@ -71,11 +86,13 @@ export function MobileBottomNav() {
       {/* Spacer so page content never sits under the bar */}
       <div className="lg:hidden h-[96px]" aria-hidden />
 
-      {/* Floating Settings disc (top-right, mobile/tablet only) */}
+      {/* Floating Settings disc (top-right, mobile/tablet only) — hides on scroll */}
       <Link
         to="/settings"
         aria-label="Settings"
-        className="lg:hidden fixed top-3 right-3 z-[55] h-10 w-10 grid place-items-center rounded-full transition active:scale-95"
+        className={`lg:hidden fixed top-3 right-3 z-[55] h-10 w-10 grid place-items-center rounded-full transition-all duration-300 active:scale-95 ${
+          atTop ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-3 pointer-events-none"
+        }`}
         style={{
           background: "color-mix(in oklab, var(--background) 70%, transparent)",
           backdropFilter: "blur(18px) saturate(160%)",
@@ -87,6 +104,7 @@ export function MobileBottomNav() {
       >
         <Settings className="h-4 w-4" />
       </Link>
+
 
 
       {/* Sheet */}
