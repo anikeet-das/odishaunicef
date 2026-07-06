@@ -32,7 +32,7 @@ export function Topbar({ title, subtitle, hasViewToggle, uploadTab, uploadRecomm
       <div className="flex items-start sm:items-center justify-between gap-3">
         <div className="min-w-0 flex-1 pr-10 sm:pr-0">
           <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground truncate">
-            {subtitle ?? "Command Center"}
+            {subtitle ?? t("common.commandCenter")}
           </div>
           <h1 className="text-lg sm:text-xl font-semibold truncate">{title}</h1>
         </div>

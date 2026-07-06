@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Topbar } from "@/components/layout/Topbar";
-import { useSettings, type AppSettings } from "@/components/layout/settings-provider";
+import { useSettings } from "@/components/layout/settings-provider";
+import { useI18n, type Lang } from "@/lib/i18n";
 import { RotateCcw, Sparkles, AlertTriangle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { wipeAllData, ADMIN_KEY } from "@/lib/data/reset";
+
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
@@ -72,6 +74,7 @@ function Segment<T extends string>({ value, options, onChange }: {
 
 function Page() {
   const { settings, set, reset } = useSettings();
+  const { lang, setLang } = useI18n();
   const s = settings;
   const [wipeOpen, setWipeOpen] = useState(false);
   const [wipePw, setWipePw] = useState("");
@@ -157,8 +160,8 @@ function Page() {
             <Slider value={s.liveRefreshSec} min={1} max={30} onChange={(n) => set("liveRefreshSec", n)} suffix="s" />
           </Row>
 
-          <Row label="Language">
-            <Segment value={s.language} onChange={(v) => set("language", v as AppSettings["language"])}
+          <Row label="Language" hint="Applies to sidebar, top bar and translated UI in real time.">
+            <Segment<Lang> value={lang} onChange={(v) => { setLang(v); set("language", v); }}
               options={[
                 { value: "en", label: "English" },
                 { value: "hi", label: "हिंदी" },
