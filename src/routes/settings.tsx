@@ -160,8 +160,8 @@ function Page() {
             <Slider value={s.liveRefreshSec} min={1} max={30} onChange={(n) => set("liveRefreshSec", n)} suffix="s" />
           </Row>
 
-          <Row label="Language">
-            <Segment value={s.language} onChange={(v) => set("language", v as AppSettings["language"])}
+          <Row label="Language" hint="Applies to sidebar, top bar and translated UI in real time.">
+            <Segment<Lang> value={lang} onChange={(v) => { setLang(v); set("language", v); }}
               options={[
                 { value: "en", label: "English" },
                 { value: "hi", label: "हिंदी" },
