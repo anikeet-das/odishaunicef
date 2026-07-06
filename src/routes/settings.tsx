@@ -74,6 +74,7 @@ function Segment<T extends string>({ value, options, onChange }: {
 
 function Page() {
   const { settings, set, reset } = useSettings();
+  const { lang, setLang } = useI18n();
   const s = settings;
   const [wipeOpen, setWipeOpen] = useState(false);
   const [wipePw, setWipePw] = useState("");
