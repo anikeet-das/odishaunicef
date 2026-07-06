@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Topbar } from "@/components/layout/Topbar";
-import { useSettings, type AppSettings } from "@/components/layout/settings-provider";
+import { useSettings } from "@/components/layout/settings-provider";
+import { useI18n, type Lang } from "@/lib/i18n";
 import { RotateCcw, Sparkles, AlertTriangle, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { wipeAllData, ADMIN_KEY } from "@/lib/data/reset";
+
 
 export const Route = createFileRoute("/settings")({
   head: () => ({
