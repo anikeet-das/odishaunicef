@@ -205,10 +205,13 @@ function aiThreats(schools: School[]) {
 }
 
 // =================== MICRO ===================
+type MatrixCell = { p: number; n: number; total: number } | null;
+type MatrixRow = { name: string; _count: number } & Record<string, MatrixCell | string | number>;
+
 function MicroView({ schools }: { schools: School[] }) {
   const aggs = useMemo(() => aggregateByDistrict(schools), [schools]);
   const matrix = useMemo(() => buildMatrix(schools), [schools]);
-  const [hover, setHover] = useState<{ d: string; h: string; v: number } | null>(null);
+  const [hover, setHover] = useState<{ d: string; h: string; c: MatrixCell } | null>(null);
   const [opened, setOpened] = useState<string | null>(null);
 
   return (
@@ -217,10 +220,12 @@ function MicroView({ schools }: { schools: School[] }) {
       <div className="p-3 space-y-3">
         <KeyDistrictsPanel schools={schools} focus="risk" />
         <div className="glass-strong rounded-2xl p-5">
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <ShieldAlert className="h-4 w-4 text-[var(--warn)]" />
             <div className="text-sm font-semibold">Statewise Risk Matrix</div>
-            <span className="ml-auto text-[10px] text-muted-foreground">% of schools exposed · click a row to drill into the district dashboard</span>
+            <span className="ml-auto text-[10px] text-muted-foreground">
+              Format · <b className="text-foreground">exposed schools / % intensity</b> · tap any row to drill into the district dashboard
+            </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
@@ -241,26 +246,28 @@ function MicroView({ schools }: { schools: School[] }) {
                       </button>
                     </td>
                     {HAZARDS.map((h) => {
-                      const v = r[h] as number | null;
-                      if (v === null || v === undefined) {
+                      const c = r[h] as MatrixCell;
+                      if (!c) {
                         return (
                           <td key={h} className="px-1 py-1 text-center">
-                            <div className="rounded-md mx-auto h-8 min-w-[40px] grid place-items-center text-muted-foreground/70 text-xs">—</div>
+                            <div className="rounded-md mx-auto h-9 min-w-[52px] grid place-items-center text-muted-foreground/60 text-[11px]">—</div>
                           </td>
                         );
                       }
-                      const color = cellColor(v);
+                      const color = cellColor(c.p);
                       return (
                         <td key={h} className="px-1 py-1 text-center"
-                            onMouseEnter={() => setHover({ d: r.name, h, v })}
+                            onMouseEnter={() => setHover({ d: r.name, h, c })}
                             onMouseLeave={() => setHover(null)}>
-                          <div className="rounded-md mx-auto h-8 min-w-[40px] grid place-items-center font-bold tabular-nums transition-transform hover:scale-110"
+                          <div className="rounded-md mx-auto h-9 min-w-[52px] px-1.5 flex flex-col items-center justify-center gap-0 leading-tight tabular-nums transition-transform hover:scale-[1.06]"
                                style={{
-                                 background: `${color}${Math.round((0.18 + v / 200) * 255).toString(16).padStart(2, "0")}`,
-                                 color: v > 60 ? "var(--background)" : "var(--foreground)",
-                                 boxShadow: v >= 70 ? `0 0 12px ${color}99` : "none",
+                                 background: `${color}${Math.round((0.18 + c.p / 200) * 255).toString(16).padStart(2, "0")}`,
+                                 color: c.p > 60 ? "var(--background)" : "var(--foreground)",
+                                 boxShadow: c.p >= 70 ? `0 0 12px ${color}99` : "none",
                                }}>
-                            {v}
+                            <span className="text-[12px] font-bold">
+                              {c.n}<span className="opacity-60 font-medium"> / </span>{c.p}<span className="text-[9px] opacity-70">%</span>
+                            </span>
                           </div>
                         </td>
                       );
@@ -270,12 +277,13 @@ function MicroView({ schools }: { schools: School[] }) {
               </tbody>
             </table>
           </div>
-          {hover && (
+          {hover && hover.c && (
             <div className="mt-3 glass rounded-xl p-3 text-xs flex items-center gap-3">
-              <span className="h-2 w-2 rounded-full" style={{ background: cellColor(hover.v), boxShadow: `0 0 6px ${cellColor(hover.v)}` }} />
+              <span className="h-2 w-2 rounded-full" style={{ background: cellColor(hover.c.p), boxShadow: `0 0 6px ${cellColor(hover.c.p)}` }} />
               <div className="flex-1">
-                <b>{hover.d} · {hover.h}</b>: {hover.v}% of schools exposed.
-                <span className="text-muted-foreground"> {commentaryFor(hover.h, hover.v)}</span>
+                <b>{hover.d} · {hover.h}</b>: <b className="text-foreground">{hover.c.n}</b> of {hover.c.total} schools reported exposure ·
+                mean intensity <b className="text-foreground">{hover.c.p}%</b>.
+                <span className="text-muted-foreground"> {commentaryFor(hover.h, hover.c.p)}</span>
               </div>
             </div>
           )}
@@ -315,25 +323,29 @@ function MicroView({ schools }: { schools: School[] }) {
   );
 }
 
-function buildMatrix(schools: School[]) {
+function buildMatrix(schools: School[]): MatrixRow[] {
   const districts = Array.from(new Set(schools.map((s) => s.district))).sort();
   return districts.map((name) => {
     const list = schools.filter((s) => s.district === name);
-    const row: Record<string, number | string | null> = { name, _count: list.length };
+    const row: MatrixRow = { name, _count: list.length };
     for (const h of HAZARDS) {
-      // Use mean hazard intensity (0..3) scaled to 0..100 so districts show a
-      // realistic exposure %, not a binary "any-school-reported-anything" 100%.
       const samples = list.filter((s) => Number.isFinite(s.hazards[h]));
       if (!list.length || samples.length === 0) {
         row[h] = null;
       } else {
+        const exposed = samples.filter((s) => s.hazards[h] > 0);
         const mean = samples.reduce((a, s) => a + s.hazards[h], 0) / samples.length;
-        row[h] = Math.round((mean / 3) * 100);
+        row[h] = {
+          n: exposed.length,
+          total: samples.length,
+          p: Math.round((mean / 3) * 100),
+        };
       }
     }
-    return row as { name: string; _count: number } & Record<string, number | null>;
+    return row;
   });
 }
+
 
 
 function cellColor(v: number): string {
