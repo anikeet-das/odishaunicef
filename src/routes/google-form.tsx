@@ -3,9 +3,9 @@ import { Topbar } from "@/components/layout/Topbar";
 import { ExternalLink } from "lucide-react";
 
 const FORM_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSdfiO-Nh1uTSLbhE1oOuGg_ktFEfyh6w9EmFPELKeGOiumk9A/viewform?embedded=true";
+  "https://docs.google.com/forms/d/e/1FAIpQLSe1v8RWC6U483d2O7gZfGDA4OnP8c1HtjSq5rChZkprjYNprA/viewform?embedded=true";
 const OPEN_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSdfiO-Nh1uTSLbhE1oOuGg_ktFEfyh6w9EmFPELKeGOiumk9A/viewform?usp=sharing";
+  "https://docs.google.com/forms/d/e/1FAIpQLSe1v8RWC6U483d2O7gZfGDA4OnP8c1HtjSq5rChZkprjYNprA/viewform?usp=header";
 
 export const Route = createFileRoute("/google-form")({
   head: () => ({ meta: [{ title: "Google Form · CR-SAP Odisha" }] }),

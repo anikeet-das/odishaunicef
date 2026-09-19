@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Inbox, RefreshCw, ExternalLink } from "lucide-react";
 
 const FORM_OPEN_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSdfiO-Nh1uTSLbhE1oOuGg_ktFEfyh6w9EmFPELKeGOiumk9A/viewform?usp=sharing";
+  "https://docs.google.com/forms/d/e/1FAIpQLSe1v8RWC6U483d2O7gZfGDA4OnP8c1HtjSq5rChZkprjYNprA/viewform?usp=header";
 
 /**
  * Shown anywhere the live Google-Form spreadsheet has zero responses yet.
