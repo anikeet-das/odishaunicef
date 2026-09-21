@@ -3,306 +3,138 @@ import { useQuery } from "@tanstack/react-query";
 import { ODISHA_DISTRICTS, districtFor, districtByName, jitter, hashCode } from "./odisha";
 
 export type SchoolRaw = Record<string, string>;
+export const HAZARDS = ["Cyclone", "Tsunami", "Floods", "Lightning", "Thunderstorm", "Tornadoes", "Drought", "Earthquakes", "Heatwave", "Cold waves", "Sea erosion", "Landslides", "Forest fires"] as const;
+export type HazardKey = typeof HAZARDS[number];
+export type SectionKey = "risk" | "water" | "sanitation" | "hygiene" | "waste" | "operations" | "energy" | "environment" | "behaviour";
 
 export type School = {
-  udise: string;
-  name: string;
-  respondent: string;
-  designation: string;
-  email: string;
-  phone: string;
-  management: string;
-  category: string;
-  classification: string;
-  location: string; // Rural / Urban
-  established: number;
-  board: string;
-  boys: number;
-  girls: number;
-  totalStudents: number;
-  cwsn: number;
-  maleStaff: number;
-  femaleStaff: number;
-  totalStaff: number;
-  // Plans
-  hasGreenPlan: boolean;
-  hasCRSAP: boolean;
-  hasSAP: boolean;
-  // SHVR
-  shvr: number; // 0..5 stars (2025-26)
-  // Safety
-  hasSafetyCommittee: boolean;
-  hasSDMP: boolean;
-  mockDrills: boolean;
-  // Hazards (probability score 0..3)
-  hazards: Record<HazardKey, number>;
-  topHazard: HazardKey | null;
-  hazardScore: number; // 0..100
-  // Sustainability score 0..100 derived from many Yes/No fields
-  sustainabilityScore: number;
-  // WASH composite 0..100
-  washScore: number;
-  // Geo
-  district: string;
-  districtId: number;
-  lat: number;
-  lng: number;
-  raw: SchoolRaw;
+  udise: string; name: string; block: string; state: string; cluster: string; timestamp: string;
+  respondent: string; designation: string; email: string; phone: string; management: string; category: string;
+  classification: string; location: string; established: number; board: string;
+  boys: number; girls: number; totalStudents: number; cwsn: number; maleStaff: number; femaleStaff: number; totalStaff: number;
+  hasGreenPlan: boolean | null; hasCRSAP: boolean | null; hasSAP: boolean | null;
+  shvr: number; shvrAvailable: boolean;
+  hasSafetyCommittee: boolean | null; hasSDMP: boolean | null; mockDrills: boolean | null;
+  hazards: Record<HazardKey, number | null>; topHazard: HazardKey | null; hazardScore: number | null; hazardDataAvailable: boolean;
+  sustainabilityScore: number; washScore: number;
+  sectionScores: Record<SectionKey, number | null>;
+  district: string; districtId: number; lat: number; lng: number; raw: SchoolRaw;
 };
 
-export const HAZARDS = [
-  "Cyclone", "Tsunami", "Floods", "Lightning", "Thunderstorm", "Tornadoes",
-  "Drought", "Earthquakes", "Heatwave", "Cold waves", "Sea erosion",
-  "Landslides", "Forest fires",
-] as const;
-export type HazardKey = typeof HAZARDS[number];
-
-const STAR_MAP: Record<string, number> = {
-  "0 Star": 0, "I Star": 1, "II Star": 2, "III Star": 3, "IV Star": 4, "V Star": 5,
+const STAR_MAP: Record<string, number> = { "0 Star": 0, "I Star": 1, "II Star": 2, "III Star": 3, "IV Star": 4, "V Star": 5 };
+const SECTION_CODES: Record<SectionKey, string[]> = {
+  risk: ["A.", "risk assessment"], water: ["B.", "water"], sanitation: ["C.", "sanitation"], hygiene: ["D.", "handwashing"],
+  waste: ["E.", "waste management"], operations: ["F.", "operation & maintenance", "operation and maintenance"], energy: ["G.", "energy"],
+  environment: ["H.", "environment"], behaviour: ["I.", "behaviour change", "capacity building"],
 };
 
-function yes(v: string | undefined): boolean {
-  if (!v) return false;
-  const t = v.trim().toLowerCase();
-  return t === "yes" || t.startsWith("a) yes") || t === "true";
-}
-function num(v: string | undefined): number {
-  if (!v) return 0;
-  const n = Number(String(v).replace(/[^\d.-]/g, ""));
-  return Number.isFinite(n) ? n : 0;
-}
-function probability(v: string | undefined): number {
-  if (!v) return 0;
-  const t = v.toLowerCase();
-  if (t.includes("very high") || t.includes("high")) return t.includes("very") ? 3 : 2;
-  if (t.includes("medium") || t.includes("moderate")) return 1.5;
-  if (t.includes("low")) return 1;
-  if (t.includes("not")) return 0;
-  return 0;
-}
-
-// Find a header that contains all given fragments (case-insensitive).
+function text(value: string | undefined): string { return (value ?? "").trim(); }
 function findCol(headers: string[], ...frags: string[]): string | undefined {
-  const lc = headers.map((h) => h.toLowerCase());
-  for (let i = 0; i < headers.length; i++) {
-    if (frags.every((f) => lc[i].includes(f.toLowerCase()))) return headers[i];
-  }
-  return undefined;
+  return headers.find((h) => frags.every((f) => h.toLowerCase().includes(f.toLowerCase())));
+}
+function answer(row: SchoolRaw, headers: string[], ...frags: string[]): string { return text(findCol(headers, ...frags) ? row[findCol(headers, ...frags) as string] : ""); }
+function num(value: string | undefined): number { const n = Number(String(value ?? "").replace(/[^\d.-]/g, "")); return Number.isFinite(n) ? n : 0; }
+function bool(value: string): boolean | null {
+  const v = value.toLowerCase();
+  if (!v) return null;
+  if (/^(yes|true|available|adequate|functional|regular|daily|a\)|1)/.test(v)) return true;
+  if (/^(no|false|not|unavailable|inadequate|non-functional|never|b\)|0)/.test(v)) return false;
+  return null;
+}
+function scoreSection(row: SchoolRaw, headers: string[], key: SectionKey): number | null {
+  const markers = SECTION_CODES[key];
+  const values = headers.filter((h) => markers.some((marker) => h.toLowerCase().includes(marker.toLowerCase())))
+    .map((h) => bool(text(row[h])))
+    .filter((v): v is boolean => v !== null);
+  return values.length ? Math.round((values.filter(Boolean).length / values.length) * 100) : null;
+}
+function average(values: Array<number | null>): number {
+  const available = values.filter((v): v is number => v !== null);
+  return available.length ? Math.round(available.reduce((a, v) => a + v, 0) / available.length) : 0;
+}
+function hazardValue(value: string): number | null {
+  const v = value.toLowerCase();
+  if (!v) return null;
+  if (v.includes("very high")) return 3;
+  if (v.includes("high")) return 2;
+  if (v.includes("medium") || v.includes("moderate")) return 1.5;
+  if (v.includes("low")) return 1;
+  if (v.includes("no") || v.includes("none")) return 0;
+  return null;
 }
 
 function normalize(row: SchoolRaw, headers: string[]): School {
-  const get = (h?: string) => (h ? row[h] ?? "" : "");
-
-  const udise = (get(findCol(headers, "udise")) || "").trim() || `UD${hashCode(JSON.stringify(row))}`;
-  const name = get(findCol(headers, "school name")) || get(findCol(headers, "name of school"));
-  // Real district from the form's District column; fall back to UDISE hash only
-  // if the respondent left it blank, so the live map is geographically accurate.
-  const districtRaw = get(findCol(headers, "district"));
+  const udise = answer(row, headers, "udise") || `UD${hashCode(JSON.stringify(row))}`;
+  const name = answer(row, headers, "school name") || answer(row, headers, "name of school");
+  const districtRaw = answer(row, headers, "district");
   const district = districtByName(districtRaw) ?? districtFor(udise);
-  const j = jitter(udise, district);
+  const point = jitter(udise, district);
+  const sectionScores = {} as Record<SectionKey, number | null>;
+  (Object.keys(SECTION_CODES) as SectionKey[]).forEach((key) => { sectionScores[key] = scoreSection(row, headers, key); });
+  const washScore = average([sectionScores.water, sectionScores.sanitation, sectionScores.hygiene]);
+  const sustainabilityScore = average([sectionScores.waste, sectionScores.operations, sectionScores.energy, sectionScores.environment, sectionScores.behaviour]);
 
-  const boys = num(get(findCol(headers, "boys")));
-  const girls = num(get(findCol(headers, "girls")));
-  const cwsnB = num(get(findCol(headers, "cwsn boys")));
-  const cwsnG = num(get(findCol(headers, "cwsn girls")));
-  const ms = num(get(findCol(headers, "male teachers")));
-  const fs = num(get(findCol(headers, "female teachers")));
-
-  // Plans
-  const hasGreen = yes(get(findCol(headers, "clean and sustainable")));
-  const hasCRSAP = yes(get(findCol(headers, "climate resilient")));
-  const hasSAP = yes(get(findCol(headers, "[swachhata action plan")));
-
-  // SHVR 2025-26 (match the tagged column, not the long question prefix)
-  const shvrCol = headers.find((h) => h.includes("[SHVR 2025-26]"));
-  const shvr = STAR_MAP[get(shvrCol).trim()] ?? 0;
-
-  // Safety
-  const hasSafety = yes(get(findCol(headers, "1.1 ", "committee")));
-  const hasSDMP = yes(get(findCol(headers, "school disaster management plan")));
-  const mockDrills = yes(get(findCol(headers, "mock drills")));
-
-  // Hazards
-  const hazards = {} as Record<HazardKey, number>;
-  for (const hz of HAZARDS) {
-    const col = headers.find((h) => h.includes("likelihood") && h.includes(`[${hz}`));
-    hazards[hz] = probability(get(col));
+  const hazards = {} as Record<HazardKey, number | null>;
+  let hazardDataAvailable = false;
+  for (const hazard of HAZARDS) {
+    const col = headers.find((h) => h.toLowerCase().includes(hazard.toLowerCase()) && /(likelihood|risk|hazard|exposure)/i.test(h));
+    hazards[hazard] = col ? hazardValue(text(row[col])) : null;
+    if (hazards[hazard] !== null) hazardDataAvailable = true;
   }
-  const topHazardEntry = (Object.entries(hazards) as [HazardKey, number][])
-    .sort((a, b) => b[1] - a[1])[0];
-  const topHazard = topHazardEntry[1] > 0 ? topHazardEntry[0] : null;
-  const hazardScore = Math.min(100, Math.round((Object.values(hazards).reduce((a, b) => a + b, 0) / (HAZARDS.length * 3)) * 100));
-
-  // Sustainability: % of YES across sections 2-5 (heuristic)
-  let yesCount = 0;
-  let totalCount = 0;
-  for (const h of headers) {
-    if (/^[2-5]\./.test(h.trim()) || /^[2-5]\.\d/.test(h.trim())) {
-      const v = (row[h] || "").trim().toLowerCase();
-      if (v === "yes" || v === "no" || v.startsWith("a) yes") || v.startsWith("b) no")) {
-        totalCount++;
-        if (v === "yes" || v.startsWith("a) yes")) yesCount++;
-      }
-    }
-  }
-  const sustainabilityScore = totalCount > 0 ? Math.round((yesCount / totalCount) * 100) : 50;
-
-  // WASH: section 2 only (water + sanitation + hygiene)
-  let wYes = 0, wTot = 0;
-  for (const h of headers) {
-    if (/^2\./.test(h.trim())) {
-      const v = (row[h] || "").trim().toLowerCase();
-      if (v === "yes" || v === "no") { wTot++; if (v === "yes") wYes++; }
-    }
-  }
-  const washScore = wTot > 0 ? Math.round((wYes / wTot) * 100) : sustainabilityScore;
+  const hazardEntries = Object.entries(hazards) as [HazardKey, number | null][];
+  const availableHazards = hazardEntries.filter(([, value]) => value !== null);
+  const top = [...availableHazards].sort((a, b) => (b[1] ?? 0) - (a[1] ?? 0))[0];
+  const hazardScore = availableHazards.length ? Math.round((availableHazards.reduce((sum, [, value]) => sum + (value ?? 0), 0) / (availableHazards.length * 3)) * 100) : null;
+  const shvrCol = headers.find((h) => /shvr/i.test(h) && /star/i.test(h));
+  const shvrRaw = text(shvrCol ? row[shvrCol] : "");
 
   return {
-    udise,
-    name: name || `School ${udise.slice(-4)}`,
-    respondent: get(findCol(headers, "submitted by")),
-    designation: get(findCol(headers, "reporter role")),
-    email: get(findCol(headers, "email")),
-    phone: get(findCol(headers, "mobile")),
-    management: get(findCol(headers, "management category")),
-    category: get(findCol(headers, "category of school")),
-    classification: get(findCol(headers, "classication")) || get(findCol(headers, "classification")),
-    location: get(findCol(headers, "location of the school")),
-    established: num(get(findCol(headers, "year of establishment"))),
-    board: get(findCol(headers, "name of board")),
-    boys, girls,
-    totalStudents: boys + girls,
-    cwsn: cwsnB + cwsnG,
-    maleStaff: ms, femaleStaff: fs,
-    totalStaff: ms + fs,
-    hasGreenPlan: hasGreen,
-    hasCRSAP,
-    hasSAP,
-    shvr,
-    hasSafetyCommittee: hasSafety,
-    hasSDMP,
-    mockDrills,
-    hazards,
-    topHazard,
-    hazardScore,
-    sustainabilityScore,
-    washScore,
-    district: district.name,
-    districtId: district.id,
-    lat: j.lat,
-    lng: j.lng,
-    raw: row,
+    udise, name: name || `School ${udise.slice(-4)}`,
+    block: answer(row, headers, "block"), state: answer(row, headers, "state"), cluster: answer(row, headers, "cluster"), timestamp: answer(row, headers, "timestamp"),
+    respondent: answer(row, headers, "submitted by"), designation: answer(row, headers, "reporter role"), email: answer(row, headers, "email"), phone: answer(row, headers, "mobile"),
+    management: answer(row, headers, "management category"), category: answer(row, headers, "school category"), classification: "", location: "", established: 0, board: "",
+    boys: num(answer(row, headers, "boys")), girls: num(answer(row, headers, "girls")), totalStudents: num(answer(row, headers, "boys")) + num(answer(row, headers, "girls")),
+    cwsn: 0, maleStaff: 0, femaleStaff: 0, totalStaff: 0,
+    hasGreenPlan: null, hasCRSAP: sectionScores.risk === null ? null : true, hasSAP: null,
+    shvr: STAR_MAP[shvrRaw] ?? 0, shvrAvailable: Boolean(shvrCol && shvrRaw),
+    hasSafetyCommittee: bool(answer(row, headers, "safety", "committee")), hasSDMP: bool(answer(row, headers, "disaster management plan")), mockDrills: null,
+    hazards, topHazard: top?.[0] ?? null, hazardScore, hazardDataAvailable,
+    sustainabilityScore, washScore, sectionScores,
+    district: district.name, districtId: district.id, lat: point.lat, lng: point.lng, raw: row,
   };
 }
 
-// Live source of truth: the Google Form response spreadsheet, proxied through
-// our own server route (avoids CORS + normalises the export URL). Every record
-// that flows into the dashboard, charts and AI is a REAL submitted response.
 const LIVE_SOURCE = "/api/public/sheet";
-
 export async function loadSchools(): Promise<School[]> {
   const res = await fetch(`${LIVE_SOURCE}?t=${Date.now()}`, { cache: "no-store" });
   if (!res.ok) throw new Error(`Failed to load live responses (${res.status})`);
-  const text = await res.text();
-  const parsed = Papa.parse<SchoolRaw>(text, { header: true, skipEmptyLines: true });
+  const parsed = Papa.parse<SchoolRaw>(await res.text(), { header: true, skipEmptyLines: true });
   const headers = parsed.meta.fields ?? [];
-  return parsed.data
-    .filter((r) => r && (r[headers[0]] ?? "").trim() !== "")
-    .map((r) => normalize(r, headers));
+  return parsed.data.filter((row) => row && headers.some((h) => text(row[h]))).map((row) => normalize(row, headers));
 }
-
 export function useSchools() {
-  return useQuery({
-    queryKey: ["cces", "schools"],
-    queryFn: loadSchools,
-    // Real-time behaviour: poll the live sheet so a newly submitted Google Form
-    // response materialises across the whole dashboard automatically.
-    staleTime: 10_000,
-    refetchInterval: 30_000,
-    refetchOnWindowFocus: true,
-  });
+  return useQuery({ queryKey: ["cces", "schools"], queryFn: loadSchools, staleTime: 10_000, refetchInterval: 30_000, refetchOnWindowFocus: true });
 }
 
-// ---------- Aggregations ----------
-
-export type DistrictAgg = {
-  districtId: number;
-  district: string;
-  lat: number;
-  lng: number;
-  schools: number;
-  students: number;
-  avgShvr: number;
-  avgSust: number;
-  avgWash: number;
-  avgHazard: number;
-  crsapAdoption: number; // %
-  greenAdoption: number; // %
-  topHazard: HazardKey | null;
-};
-
+export type DistrictAgg = { districtId: number; district: string; lat: number; lng: number; schools: number; students: number; avgShvr: number; avgSust: number; avgWash: number; avgHazard: number; hazardDataAvailable: boolean; crsapAdoption: number; greenAdoption: number; topHazard: HazardKey | null };
 export function aggregateByDistrict(schools: School[]): DistrictAgg[] {
-  const map = new Map<number, School[]>();
-  for (const s of schools) {
-    if (!map.has(s.districtId)) map.set(s.districtId, []);
-    map.get(s.districtId)!.push(s);
+  const out: DistrictAgg[] = [];
+  for (const d of ODISHA_DISTRICTS) {
+    const list = schools.filter((s) => s.districtId === d.id);
+    const avg = (values: Array<number | null>) => average(values);
+    const risk = list.map((s) => s.hazardScore).filter((v): v is number => v !== null);
+    const shvr = list.filter((s) => s.shvrAvailable).map((s) => s.shvr);
+    out.push({ districtId: d.id, district: d.name, lat: d.lat, lng: d.lng, schools: list.length, students: list.reduce((a, s) => a + s.totalStudents, 0), avgShvr: shvr.length ? Number((shvr.reduce((a, v) => a + v, 0) / shvr.length).toFixed(2)) : 0, avgSust: avg(list.map((s) => s.sustainabilityScore)), avgWash: avg(list.map((s) => s.washScore)), avgHazard: risk.length ? Math.round(risk.reduce((a, v) => a + v, 0) / risk.length) : 0, hazardDataAvailable: risk.length > 0, crsapAdoption: list.length ? Math.round(list.filter((s) => s.hasCRSAP === true).length / list.length * 100) : 0, greenAdoption: 0, topHazard: null });
   }
-  const out: DistrictAgg[] = ODISHA_DISTRICTS.map((d) => {
-    const list = map.get(d.id) ?? [];
-    const avg = (f: (s: School) => number) => list.length ? list.reduce((a, s) => a + f(s), 0) / list.length : 0;
-    const hzTotals: Record<string, number> = {};
-    for (const s of list) for (const h of HAZARDS) hzTotals[h] = (hzTotals[h] ?? 0) + (s.hazards[h] ?? 0);
-    const top = Object.entries(hzTotals).sort((a, b) => b[1] - a[1])[0];
-    return {
-      districtId: d.id,
-      district: d.name,
-      lat: d.lat,
-      lng: d.lng,
-      schools: list.length,
-      students: list.reduce((a, s) => a + s.totalStudents, 0),
-      avgShvr: +avg((s) => s.shvr).toFixed(2),
-      avgSust: Math.round(avg((s) => s.sustainabilityScore)),
-      avgWash: Math.round(avg((s) => s.washScore)),
-      avgHazard: Math.round(avg((s) => s.hazardScore)),
-      crsapAdoption: list.length ? Math.round((list.filter((s) => s.hasCRSAP).length / list.length) * 100) : 0,
-      greenAdoption: list.length ? Math.round((list.filter((s) => s.hasGreenPlan).length / list.length) * 100) : 0,
-      topHazard: top && top[1] > 0 ? (top[0] as HazardKey) : null,
-    };
-  });
   return out;
 }
-
 export function platformKpis(schools: School[]) {
-  const n = schools.length || 1;
-  const sum = (f: (s: School) => number) => schools.reduce((a, s) => a + f(s), 0);
-  return {
-    total: schools.length,
-    students: sum((s) => s.totalStudents),
-    staff: sum((s) => s.totalStaff),
-    avgShvr: +(sum((s) => s.shvr) / n).toFixed(2),
-    avgSust: Math.round(sum((s) => s.sustainabilityScore) / n),
-    avgWash: Math.round(sum((s) => s.washScore) / n),
-    avgHazard: Math.round(sum((s) => s.hazardScore) / n),
-    crsapPct: Math.round((schools.filter((s) => s.hasCRSAP).length / n) * 100),
-    greenPct: Math.round((schools.filter((s) => s.hasGreenPlan).length / n) * 100),
-    sdmpPct: Math.round((schools.filter((s) => s.hasSDMP).length / n) * 100),
-    drillsPct: Math.round((schools.filter((s) => s.mockDrills).length / n) * 100),
-  };
+  const n = schools.length || 1; const averageValue = (values: number[]) => values.length ? values.reduce((a, v) => a + v, 0) / values.length : 0;
+  const risks = schools.map((s) => s.hazardScore).filter((v): v is number => v !== null);
+  const rated = schools.filter((s) => s.shvrAvailable).map((s) => s.shvr);
+  return { total: schools.length, students: schools.reduce((a, s) => a + s.totalStudents, 0), staff: schools.reduce((a, s) => a + s.totalStaff, 0), avgShvr: Number(averageValue(rated).toFixed(2)), avgSust: Math.round(averageValue(schools.map((s) => s.sustainabilityScore))), avgWash: Math.round(averageValue(schools.map((s) => s.washScore))), avgHazard: risks.length ? Math.round(averageValue(risks)) : 0, crsapPct: Math.round(schools.filter((s) => s.hasCRSAP === true).length / n * 100), greenPct: 0, sdmpPct: Math.round(schools.filter((s) => s.hasSDMP === true).length / n * 100), drillsPct: 0, hazardDataAvailable: risks.length > 0 };
 }
-
 export function hazardBreakdown(schools: School[]) {
-  return HAZARDS.map((h) => {
-    const exposed = schools.filter((s) => s.hazards[h] > 0).length;
-    const high = schools.filter((s) => s.hazards[h] >= 2).length;
-    return { hazard: h, exposed, high, exposedPct: Math.round((exposed / (schools.length || 1)) * 100) };
-  }).sort((a, b) => b.exposed - a.exposed);
+  return HAZARDS.map((hazard) => { const samples = schools.filter((s) => s.hazards[hazard] !== null); const exposed = samples.filter((s) => (s.hazards[hazard] ?? 0) > 0).length; return { hazard, exposed, high: samples.filter((s) => (s.hazards[hazard] ?? 0) >= 2).length, exposedPct: samples.length ? Math.round(exposed / samples.length * 100) : null, available: samples.length > 0 }; }).sort((a, b) => b.exposed - a.exposed);
 }
-
-export function shvrDistribution(schools: School[]) {
-  const buckets = [0, 1, 2, 3, 4, 5].map((star) => ({
-    star,
-    label: star === 0 ? "Unrated" : `${"★".repeat(star)}`,
-    count: schools.filter((s) => s.shvr === star).length,
-  }));
-  return buckets;
-}
+export function shvrDistribution(schools: School[]) { return [0, 1, 2, 3, 4, 5].map((star) => ({ star, label: star === 0 ? "Unrated" : "★".repeat(star), count: schools.filter((s) => s.shvrAvailable ? s.shvr === star : star === 0).length })); }
