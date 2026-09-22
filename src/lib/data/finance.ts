@@ -11,9 +11,8 @@ import {
 
 /* ------------------------------------------------------------------ *
  * Financial Intelligence & Resource Convergence model.
- * All numbers are deterministically derived from each school's UDISE
- * hash + real attributes so values are stable across reloads and
- * aggregate cleanly School -> Block -> District -> State.
+ * The supplied CR-SAP form has no financial cost columns. This module therefore
+ * exposes manual ledger entries only and never invents school-level amounts.
  * Currency unit: Indian Rupees (₹).
  * ------------------------------------------------------------------ */
 
@@ -165,11 +164,8 @@ function computeSchoolFinance(s: School): SchoolFinance {
 let _cache: WeakMap<School[], SchoolFinance[]> = new WeakMap();
 
 export function computeAllFinance(schools: School[]): SchoolFinance[] {
-  const hit = _cache.get(schools);
-  if (hit) return hit;
-  const out = schools.map(computeSchoolFinance);
-  _cache.set(schools, out);
-  return out;
+  void schools;
+  return [];
 }
 
 export function useFinance() {
@@ -177,8 +173,7 @@ export function useFinance() {
   const { entries } = useFundLedger();
   return useMemo(() => {
     if (!data) return null;
-    const base = computeAllFinance(data);
-    return applyLedgerOverlay(base, entries);
+    return applyLedgerOverlay([], entries);
   }, [data, entries]);
 }
 
