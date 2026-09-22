@@ -51,7 +51,9 @@ function MacroView({ schools }: { schools: School[] }) {
       }));
   }, [schools]);
 
-  const overallRisk = Math.round((kpis.avgHazard + (100 - kpis.avgWash) * 0.4) / 1.4);
+  const overallRisk = kpis.hazardDataAvailable
+    ? Math.round((kpis.avgHazard + (100 - kpis.avgWash) * 0.4) / 1.4)
+    : null;
 
   return (
     <div className="flex flex-col min-h-full">
@@ -66,7 +68,7 @@ function MacroView({ schools }: { schools: School[] }) {
           <div className="grid lg:grid-cols-5 gap-6 relative">
             <div className="lg:col-span-2">
               <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Overall Odisha Risk Score</div>
-              <div className="text-6xl font-black text-gradient-cyan leading-none mt-1">{overallRisk}<span className="text-3xl">/100</span></div>
+              <div className="text-6xl font-black text-gradient-cyan leading-none mt-1">{overallRisk === null ? "NA" : overallRisk}<span className="text-3xl">{overallRisk === null ? "" : "/100"}</span></div>
               <div className="text-xs text-muted-foreground mt-2">
                 Composite of climate exposure, infrastructure vulnerability and WASH gaps across {kpis.total.toLocaleString()} schools.
               </div>
@@ -77,7 +79,7 @@ function MacroView({ schools }: { schools: School[] }) {
               </div>
             </div>
             <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-2">
-              <Stat label="Climate Risk" value={`${kpis.avgHazard}%`} accent="var(--warn)" />
+              <Stat label="Climate Risk" value={kpis.hazardDataAvailable ? `${kpis.avgHazard}%` : "NA"} accent="var(--warn)" />
               <Stat label="Infra Vulnerability" value={`${100 - kpis.avgWash}%`} accent="var(--danger)" />
               <Stat label="WASH Strength" value={`${kpis.avgWash}%`} accent="var(--cyan)" />
               <Stat label="Sustainability" value={`${kpis.avgSust}%`} accent="var(--aurora)" />
@@ -266,7 +268,7 @@ function MicroView({ schools }: { schools: School[] }) {
                                  boxShadow: c.p >= 70 ? `0 0 12px ${color}99` : "none",
                                }}>
                             <span className="text-[12px] font-bold">
-                              {c.n}<span className="opacity-60 font-medium"> / </span>{c.p}<span className="text-[9px] opacity-70">%</span>
+                  {c.n}<span className="opacity-60 font-medium"> / </span>{c.p}<span className="text-[9px] opacity-70">%</span>
                             </span>
                           </div>
                         </td>
@@ -329,12 +331,12 @@ function buildMatrix(schools: School[]): MatrixRow[] {
     const list = schools.filter((s) => s.district === name);
     const row: MatrixRow = { name, _count: list.length };
     for (const h of HAZARDS) {
-      const samples = list.filter((s) => Number.isFinite(s.hazards[h]));
+      const samples = list.filter((s) => s.hazards[h] !== null);
       if (!list.length || samples.length === 0) {
         row[h] = null;
       } else {
-        const exposed = samples.filter((s) => s.hazards[h] > 0);
-        const mean = samples.reduce((a, s) => a + s.hazards[h], 0) / samples.length;
+        const exposed = samples.filter((s) => (s.hazards[h] ?? 0) > 0);
+        const mean = samples.reduce((a, s) => a + (s.hazards[h] ?? 0), 0) / samples.length;
         row[h] = {
           n: exposed.length,
           total: samples.length,
@@ -367,14 +369,14 @@ function radarFor(schools: School[], district: string) {
   if (!list.length) return [];
   return HAZARDS.map((h) => ({
     hazard: h,
-    exposed: Math.round((list.filter((s) => s.hazards[h] > 0).length / list.length) * 100),
+    exposed: Math.round((list.filter((s) => (s.hazards[h] ?? 0) > 0).length / list.length) * 100),
   }));
 }
 
 function DistrictDrilldown({ district, schools, onClose }: { district: string; schools: School[]; onClose: () => void }) {
   const list = schools.filter((s) => s.district === district);
   const radar = radarFor(schools, district);
-  const exposedSchools = list.filter((s) => s.hazardScore >= 50).slice(0, 8);
+  const exposedSchools = list.filter((s) => s.hazardScore !== null && s.hazardScore >= 50).slice(0, 8);
   return (
     <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm grid place-items-center p-4" onClick={onClose}>
       <motion.div
@@ -415,9 +417,9 @@ function DistrictDrilldown({ district, schools, onClose }: { district: string; s
             <ul className="space-y-1.5 text-xs">
               {exposedSchools.map((s) => (
                 <li key={s.udise} className="glass-soft rounded-lg px-3 py-2 flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full" style={{ background: cellColor(s.hazardScore), boxShadow: `0 0 6px ${cellColor(s.hazardScore)}` }} />
+                  <span className="h-2 w-2 rounded-full" style={{ background: cellColor(s.hazardScore ?? 0), boxShadow: `0 0 6px ${cellColor(s.hazardScore ?? 0)}` }} />
                   <span className="flex-1 truncate">{s.name}</span>
-                  <span className="text-[var(--warn)] font-bold tabular-nums">{s.hazardScore}%</span>
+                  <span className="text-[var(--warn)] font-bold tabular-nums">{s.hazardScore === null ? "NA" : `${s.hazardScore}%`}</span>
                 </li>
               ))}
               {exposedSchools.length === 0 && <li className="text-muted-foreground text-center p-3">No schools above the 50% exposure threshold.</li>}
@@ -430,10 +432,10 @@ function DistrictDrilldown({ district, schools, onClose }: { district: string; s
           <p>
             Based on current sustainability ({Math.round(list.reduce((a, s) => a + s.sustainabilityScore, 0) / list.length)}%),
             WASH composite ({Math.round(list.reduce((a, s) => a + s.washScore, 0) / list.length)}%), and SDMP coverage
-            ({Math.round((list.filter((s) => s.hasSDMP).length / list.length) * 100)}%), {district} is projected to remain in
-            the <b style={{ color: cellColor(Math.round(list.reduce((a, s) => a + s.hazardScore, 0) / list.length)) }}>
-              {list.reduce((a, s) => a + s.hazardScore, 0) / list.length >= 60 ? "high-risk" : "moderate-risk"}
-            </b> band over the next 90 days. Prioritise drill compliance and toilet/water infrastructure audits.
+            ({Math.round((list.filter((s) => s.hasSDMP === true).length / list.length) * 100)}%), {district} has
+            {list.some((s) => s.hazardScore !== null)
+              ? <> a measured climate-risk profile; use the source hazard responses for prioritisation.</>
+              : <> no hazard responses available yet; climate-risk prioritisation is unavailable.</>}
           </p>
         </div>
       </motion.div>
@@ -457,10 +459,10 @@ function MultiHazardRadar({ schools, aggs }: { schools: School[]; aggs: District
       const row: Record<string, number | string> = { hazard: h };
       for (const d of districts) {
         const list = schools.filter((s) => s.district === d.district);
-        const samples = list.filter((s) => Number.isFinite(s.hazards[h]));
+        const samples = list.filter((s) => s.hazards[h] !== null);
         row[d.district] = samples.length
-          ? Math.round((samples.reduce((a, s) => a + s.hazards[h], 0) / samples.length / 3) * 100)
-          : 0;
+          ? Math.round((samples.reduce((a, s) => a + (s.hazards[h] ?? 0), 0) / samples.length / 3) * 100)
+          : "NA";
       }
       return row;
     });

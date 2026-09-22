@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ODISHA_DISTRICTS, hashCode } from "./odisha";
+import { ODISHA_DISTRICTS } from "./odisha";
 import { useSchools, aggregateByDistrict, type School, type DistrictAgg } from "./cces";
 import {
   useFundLedger,
@@ -11,9 +11,8 @@ import {
 
 /* ------------------------------------------------------------------ *
  * Financial Intelligence & Resource Convergence model.
- * All numbers are deterministically derived from each school's UDISE
- * hash + real attributes so values are stable across reloads and
- * aggregate cleanly School -> Block -> District -> State.
+ * The supplied CR-SAP form has no financial cost columns. This module therefore
+ * exposes manual ledger entries only and never invents school-level amounts.
  * Currency unit: Indian Rupees (₹).
  * ------------------------------------------------------------------ */
 
@@ -71,17 +70,6 @@ export type SchoolFinance = {
 
 export type FinStatus = "Excellent" | "Good" | "Moderate" | "Weak" | "Critical";
 
-// Deterministic pseudo-random in [0,1) from a seed string.
-function rnd(seed: string): number {
-  const h = hashCode(seed);
-  return ((h % 100000) / 100000);
-}
-
-function blockFor(s: School): string {
-  const blocks = ["North", "South", "East", "West", "Central"];
-  return `${s.district} ${blocks[hashCode(s.udise + "blk") % blocks.length]}`;
-}
-
 export function statusFor(score: number): FinStatus {
   if (score >= 80) return "Excellent";
   if (score >= 65) return "Good";
@@ -98,78 +86,9 @@ export const STATUS_COLOR: Record<FinStatus, string> = {
   Critical: "var(--danger)",
 };
 
-function computeSchoolFinance(s: School): SchoolFinance {
-  // Base capital scaled by student footprint + needs (lower scores = more need).
-  const base = 600000 + s.totalStudents * 1800;
-  const needFactor = 1 + (100 - s.washScore) / 140 + (s.hazardScore) / 220;
-
-  const capital = {} as Record<CapitalKey, number>;
-  const capWeights: Record<CapitalKey, number> = {
-    water: 0.22, sanitation: 0.24, hygiene: 0.12, environment: 0.12,
-    riskReduction: 0.13, technology: 0.09, education: 0.08,
-  };
-  for (const k of CAPITAL_KEYS) {
-    const v = base * needFactor * capWeights[k] * (0.7 + rnd(s.udise + k) * 0.7);
-    capital[k] = Math.round(v / 1000) * 1000;
-  }
-  const capitalTotal = CAPITAL_KEYS.reduce((a, k) => a + capital[k], 0);
-
-  const opex = {} as Record<OpexKey, number>;
-  const opexWeights: Record<OpexKey, number> = {
-    maintenance: 0.3, repairs: 0.2, cleaning: 0.2, consumables: 0.15, utilities: 0.15,
-  };
-  const opexBase = capitalTotal * 0.18;
-  for (const k of OPEX_KEYS) {
-    const v = opexBase * opexWeights[k] * (0.7 + rnd(s.udise + k) * 0.7);
-    opex[k] = Math.round(v / 1000) * 1000;
-  }
-  const opexTotal = OPEX_KEYS.reduce((a, k) => a + opex[k], 0);
-  const required = capitalTotal + opexTotal;
-
-  // Mobilization — better schools (CR-SAP/green) mobilize more.
-  const mobFactor = 0.45 + rnd(s.udise + "mob") * 0.6
-    + (s.hasCRSAP ? 0.08 : 0) + (s.hasGreenPlan ? 0.05 : 0)
-    + (s.sustainabilityScore / 600);
-  const targetMobilized = required * Math.min(1.15, mobFactor);
-  const sources = {} as Record<SourceKey, number>;
-  const srcWeights: Record<SourceKey, number> = {
-    unicef: 0.26, government: 0.34, csr: 0.13, panchayat: 0.1, ngo: 0.07, community: 0.06, others: 0.04,
-  };
-  for (const k of SOURCE_KEYS) {
-    const v = targetMobilized * srcWeights[k] * (0.6 + rnd(s.udise + k) * 0.8);
-    sources[k] = Math.round(v / 1000) * 1000;
-  }
-  const mobilized = SOURCE_KEYS.reduce((a, k) => a + sources[k], 0);
-  const utilized = Math.round(mobilized * (0.5 + rnd(s.udise + "util") * 0.45));
-  const gap = Math.max(0, required - mobilized);
-  const convergence = Math.round((mobilized / required) * 100);
-  const utilization = Math.round((utilized / Math.max(1, mobilized)) * 100);
-
-  const healthScore = Math.max(0, Math.min(100, Math.round(
-    convergence * 0.45 + utilization * 0.3 + s.sustainabilityScore * 0.15 + (s.hasCRSAP ? 10 : 0),
-  )));
-  const efficiencyScore = Math.max(0, Math.min(100, Math.round(
-    Math.min(100, convergence) * 0.6 + utilization * 0.4,
-  )));
-
-  return {
-    udise: s.udise, name: s.name, district: s.district, districtId: s.districtId,
-    block: blockFor(s), location: s.location,
-    capital, opex, sources,
-    capitalTotal, opexTotal, required, mobilized, utilized, gap,
-    convergence, utilization, healthScore, efficiencyScore,
-    status: statusFor(healthScore),
-  };
-}
-
-let _cache: WeakMap<School[], SchoolFinance[]> = new WeakMap();
-
 export function computeAllFinance(schools: School[]): SchoolFinance[] {
-  const hit = _cache.get(schools);
-  if (hit) return hit;
-  const out = schools.map(computeSchoolFinance);
-  _cache.set(schools, out);
-  return out;
+  void schools;
+  return [];
 }
 
 export function useFinance() {
@@ -177,8 +96,7 @@ export function useFinance() {
   const { entries } = useFundLedger();
   return useMemo(() => {
     if (!data) return null;
-    const base = computeAllFinance(data);
-    return applyLedgerOverlay(base, entries);
+    return applyLedgerOverlay([], entries);
   }, [data, entries]);
 }
 
@@ -362,20 +280,9 @@ export function aggregateState(fins: SchoolFinance[]): StateFinance {
 
 /* ----------------------------- Monthly trends ----------------------------- */
 
-const MONTHS = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
-
 export function monthlyTrend(state: StateFinance) {
-  return MONTHS.map((m, i) => {
-    const ramp = (i + 1) / 12;
-    const wobble = 0.85 + ((hashCode(m) % 30) / 100);
-    return {
-      month: m,
-      capital: Math.round((state.capitalTotal / 12) * wobble * (0.6 + ramp * 0.8)),
-      opex: Math.round((state.opexTotal / 12) * wobble),
-      mobilized: Math.round((state.mobilized / 12) * wobble * (0.5 + ramp * 0.9)),
-      utilized: Math.round((state.utilized / 12) * wobble * (0.4 + ramp * 0.9)),
-    };
-  });
+  void state;
+  return [];
 }
 
 /* ----------------------------- Term tracker ----------------------------- */

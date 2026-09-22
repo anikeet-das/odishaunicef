@@ -61,7 +61,7 @@ function Page() {
     const counts = {
       total: focus.length,
       active: focus.filter((s) => s.totalStudents > 0).length,
-      highRisk: focus.filter((s) => s.hazardScore >= 60).length,
+      highRisk: focus.filter((s) => s.hazardScore !== null && s.hazardScore >= 60).length,
       shvr: focus.filter((s) => s.shvr >= 3).length,
       wash: focus.filter((s) => s.washScore >= 60).length,
       sustainability: focus.filter((s) => s.sustainabilityScore >= 60).length,
@@ -292,7 +292,7 @@ function MicroView({
                 <div className="text-xs">Students: {hover.totalStudents.toLocaleString()}</div>
                 <div className="text-xs">SHVR: {"★".repeat(hover.shvr) || "Unrated"}</div>
                 <div className="text-xs">Sustainability: {hover.sustainabilityScore}%</div>
-                <div className="text-xs">Climate risk: {hover.hazardScore}% · top: {hover.topHazard ?? "—"}</div>
+                <div className="text-xs">Climate risk: {hover.hazardScore === null ? "NA" : `${hover.hazardScore}%`} · top: {hover.topHazard ?? "—"}</div>
               </div>
             ) : <div className="text-xs text-muted-foreground">Hover any dot on the map.</div>}
           </div>

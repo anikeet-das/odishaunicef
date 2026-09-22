@@ -415,7 +415,7 @@ function SchoolDetail({ school, onClose }: { school: School; onClose: () => void
           <Tile label="SHVR" value={`${school.shvr}★`} color={starColor(school.shvr)} />
           <Tile label="Sustainability" value={`${school.sustainabilityScore}%`} color="var(--aurora)" />
           <Tile label="WASH" value={`${school.washScore}%`} color="var(--cyan)" />
-          <Tile label="Climate Risk" value={`${school.hazardScore}%`} color="var(--warn)" />
+          <Tile label="Climate Risk" value={school.hazardScore === null ? "NA" : `${school.hazardScore}%`} color="var(--warn)" />
           <Tile label="Students" value={school.totalStudents.toLocaleString()} color="var(--cyan)" />
           <Tile label="Staff" value={String(school.totalStaff)} color="var(--aurora)" />
           <Tile label="SDMP" value={school.hasSDMP ? "Yes" : "No"} color={school.hasSDMP ? "var(--aurora)" : "var(--danger)"} />
@@ -452,7 +452,7 @@ function recommendationsFor(s: School): string[] {
   if (!s.hasSDMP) out.push("Draft a School Disaster Management Plan (SDMP) — top driver of climate resilience score.");
   if (!s.mockDrills) out.push("Schedule quarterly mock drills (fire, flood, earthquake) with the local DDMA.");
   if (s.washScore < 60) out.push("Audit water taps, soap availability and toilet hygiene — WASH score is below benchmark.");
-  if (s.hazardScore >= 60) out.push("High climate exposure — link this school to district early-warning SMS feed.");
+  if (s.hazardScore !== null && s.hazardScore >= 60) out.push("High climate exposure — link this school to district early-warning SMS feed.");
   if (!out.length) out.push("Performance is strong. Continue current sustainability practices and document them for peer schools.");
   return out;
 }

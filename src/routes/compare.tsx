@@ -54,7 +54,7 @@ function Page() {
         sustainability: s.sustainabilityScore,
         wash: s.washScore,
         shvr: s.shvr * 20,
-        risk: s.hazardScore,
+        risk: s.hazardScore ?? 0,
         crsap: s.hasCRSAP ? 100 : 0,
         green: s.hasGreenPlan ? 100 : 0,
       }));

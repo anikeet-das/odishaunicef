@@ -23,7 +23,7 @@ export function SimulationBody() {
       const nSdmp  = s.hasSDMP  || seed < sdmp;
       const nDrill = s.mockDrills || seed < drills;
       const bonus = (nCrsap ? 5 : 0) + (nSdmp ? 4 : 0) + (nDrill ? 3 : 0);
-      return { ...s, hasCRSAP: nCrsap, hasSDMP: nSdmp, mockDrills: nDrill, sustainabilityScore: Math.min(100, s.sustainabilityScore + bonus), hazardScore: Math.max(0, s.hazardScore - (nSdmp ? 6 : 0) - (nDrill ? 4 : 0)) };
+      return { ...s, hasCRSAP: nCrsap, hasSDMP: nSdmp, mockDrills: nDrill, sustainabilityScore: Math.min(100, s.sustainabilityScore + bonus), hazardScore: Math.max(0, (s.hazardScore ?? 0) - (nSdmp ? 6 : 0) - (nDrill ? 4 : 0)) };
     });
     return platformKpis(cloned);
   }, [data, crsap, sdmp, drills]);

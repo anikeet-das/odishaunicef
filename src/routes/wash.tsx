@@ -58,14 +58,17 @@ function Macro() {
   const radar = useMemo(() => {
     const list = schools ?? [];
     const n = list.length || 1;
-    const avg = (f: (s: typeof list[number]) => number) => Math.round(list.reduce((a, s) => a + f(s), 0) / n);
+    const avg = (f: (s: typeof list[number]) => number | null) => {
+      const values = list.map(f).filter((value): value is number => value !== null);
+      return values.length ? Math.round(values.reduce((a, value) => a + value, 0) / values.length) : 0;
+    };
     return [
-      { k: "Water", v: avg((s) => s.washScore) },
-      { k: "Sanitation", v: avg((s) => (s.sustainabilityScore >= 45 ? 100 : 0)) },
-      { k: "Hygiene", v: avg((s) => (s.washScore >= 45 ? 100 : 0)) },
-      { k: "CR-SAP", v: Math.round((list.filter((s) => s.hasCRSAP).length / n) * 100) },
-      { k: "Green Plan", v: Math.round((list.filter((s) => s.hasGreenPlan).length / n) * 100) },
-      { k: "SHVR", v: Math.round((avg((s) => s.shvr) / 5) * 100) },
+      { k: "Water", v: avg((s) => s.sectionScores.water) },
+      { k: "Sanitation", v: avg((s) => s.sectionScores.sanitation) },
+      { k: "Hygiene", v: avg((s) => s.sectionScores.hygiene) },
+      { k: "Risk plan", v: avg((s) => s.sectionScores.risk) },
+      { k: "Environment", v: avg((s) => s.sectionScores.environment) },
+      { k: "SHVR", v: avg((s) => s.shvrAvailable ? s.shvr * 20 : null) },
     ];
   }, [schools]);
 
@@ -297,7 +300,7 @@ function Micro() {
           const top = sorted.slice(0, 3).map((d) => d.district).join(" · ");
           const low = sorted.slice(-3).reverse().map((d) => d.district).join(" · ");
           const critical = all.filter((s) => s.washScore < 40).length;
-          const noSan = all.filter((s) => s.sustainabilityScore < 45).length;
+           const noSan = all.filter((s) => s.sectionScores.sanitation !== null && s.sectionScores.sanitation < 45).length;
           return (
             <>
               <Insight title="Critical clusters" body={`${critical.toLocaleString()} schools below 40% WASH readiness need priority intervention.`} />
