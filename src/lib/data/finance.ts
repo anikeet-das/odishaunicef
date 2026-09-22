@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { ODISHA_DISTRICTS, hashCode } from "./odisha";
+import { ODISHA_DISTRICTS } from "./odisha";
 import { useSchools, aggregateByDistrict, type School, type DistrictAgg } from "./cces";
 import {
   useFundLedger,
@@ -69,17 +69,6 @@ export type SchoolFinance = {
 };
 
 export type FinStatus = "Excellent" | "Good" | "Moderate" | "Weak" | "Critical";
-
-// Deterministic pseudo-random in [0,1) from a seed string.
-function rnd(seed: string): number {
-  const h = hashCode(seed);
-  return ((h % 100000) / 100000);
-}
-
-function blockFor(s: School): string {
-  const blocks = ["North", "South", "East", "West", "Central"];
-  return `${s.district} ${blocks[hashCode(s.udise + "blk") % blocks.length]}`;
-}
 
 export function statusFor(score: number): FinStatus {
   if (score >= 80) return "Excellent";
@@ -357,20 +346,9 @@ export function aggregateState(fins: SchoolFinance[]): StateFinance {
 
 /* ----------------------------- Monthly trends ----------------------------- */
 
-const MONTHS = ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
-
 export function monthlyTrend(state: StateFinance) {
-  return MONTHS.map((m, i) => {
-    const ramp = (i + 1) / 12;
-    const wobble = 0.85 + ((hashCode(m) % 30) / 100);
-    return {
-      month: m,
-      capital: Math.round((state.capitalTotal / 12) * wobble * (0.6 + ramp * 0.8)),
-      opex: Math.round((state.opexTotal / 12) * wobble),
-      mobilized: Math.round((state.mobilized / 12) * wobble * (0.5 + ramp * 0.9)),
-      utilized: Math.round((state.utilized / 12) * wobble * (0.4 + ramp * 0.9)),
-    };
-  });
+  void state;
+  return [];
 }
 
 /* ----------------------------- Term tracker ----------------------------- */
