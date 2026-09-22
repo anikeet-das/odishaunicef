@@ -462,7 +462,7 @@ function MultiHazardRadar({ schools, aggs }: { schools: School[]; aggs: District
         const samples = list.filter((s) => s.hazards[h] !== null);
         row[d.district] = samples.length
           ? Math.round((samples.reduce((a, s) => a + (s.hazards[h] ?? 0), 0) / samples.length / 3) * 100)
-          : null;
+          : "NA";
       }
       return row;
     });
