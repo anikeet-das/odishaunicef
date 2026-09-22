@@ -187,7 +187,7 @@ function Micro({ data }: { data: School[] }) {
                     <td className="py-2 px-2 tabular-nums">{s.sustainabilityScore}%</td>
                     <td className="py-2 px-2 tabular-nums">{s.washScore}%</td>
                     <td className="py-2 px-2 text-xs">{s.hasCRSAP ? "✓" : "—"}</td>
-                    <td className="py-2 px-2 tabular-nums">{s.hazardScore}%</td>
+                    <td className="py-2 px-2 tabular-nums">{s.hazardScore === null ? "NA" : `${s.hazardScore}%`}</td>
                     <td className="py-2 px-2 text-xs">{s.topHazard ?? "—"}</td>
                     <td className="py-2 px-2 w-[120px]"><HazardPulse seed={s.udise} top={s.topHazard} /></td>
                   </tr>
@@ -248,17 +248,17 @@ function Drawer({ school, onClose }: { school: School; onClose: () => void }) {
           <Info k="SHVR 25-26" v={"★".repeat(school.shvr) || "Unrated"} />
           <Info k="Sustainability" v={`${school.sustainabilityScore}%`} />
           <Info k="WASH" v={`${school.washScore}%`} />
-          <Info k="Risk" v={`${school.hazardScore}%`} />
+          <Info k="Risk" v={school.hazardScore === null ? "NA" : `${school.hazardScore}%`} />
         </div>
         <div className="mt-5 glass-soft rounded-xl p-4">
           <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Plans</div>
           <div className="flex flex-wrap gap-2 text-xs">
-            <Pill on={school.hasCRSAP}>CR-SAP</Pill>
-            <Pill on={school.hasGreenPlan}>Green Plan</Pill>
-            <Pill on={school.hasSAP}>SAP</Pill>
-            <Pill on={school.hasSDMP}>SDMP</Pill>
-            <Pill on={school.hasSafetyCommittee}>Safety Cmt.</Pill>
-            <Pill on={school.mockDrills}>Mock Drills</Pill>
+            <Pill on={school.hasCRSAP === true}>CR-SAP</Pill>
+            <Pill on={school.hasGreenPlan === true}>Green Plan</Pill>
+            <Pill on={school.hasSAP === true}>SAP</Pill>
+            <Pill on={school.hasSDMP === true}>SDMP</Pill>
+            <Pill on={school.hasSafetyCommittee === true}>Safety Cmt.</Pill>
+            <Pill on={school.mockDrills === true}>Mock Drills</Pill>
           </div>
         </div>
         <div className="mt-5 glass-soft rounded-xl p-4">
