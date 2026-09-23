@@ -19,9 +19,9 @@ export function SimulationBody() {
     if (!data) return null;
     const cloned = data.map((s, i) => {
       const seed = i / data.length * 100;
-      const nCrsap = s.hasCRSAP || seed < crsap;
-      const nSdmp  = s.hasSDMP  || seed < sdmp;
-      const nDrill = s.mockDrills || seed < drills;
+      const nCrsap = s.hasCRSAP === true || seed < crsap;
+      const nSdmp  = s.hasSDMP === true || seed < sdmp;
+      const nDrill = s.mockDrills === true || seed < drills;
       const bonus = (nCrsap ? 5 : 0) + (nSdmp ? 4 : 0) + (nDrill ? 3 : 0);
       return { ...s, hasCRSAP: nCrsap, hasSDMP: nSdmp, mockDrills: nDrill, sustainabilityScore: Math.min(100, s.sustainabilityScore + bonus), hazardScore: Math.max(0, (s.hazardScore ?? 0) - (nSdmp ? 6 : 0) - (nDrill ? 4 : 0)) };
     });
