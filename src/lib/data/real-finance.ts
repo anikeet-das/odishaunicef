@@ -84,6 +84,7 @@ export function parseAmount(raw: string): { value: number | null; reason?: strin
 
   // Strip currency / commas / spaces and try to read a plain number.
   const cleaned = t.replace(/[₹,\s]|inr|rs\.?|rupees?/gi, "");
+  if (/[a-z]/i.test(cleaned)) return { value: null, reason: "text" };
   // Patterns like "2000-0" → take the first number group.
   const m = cleaned.match(/-?\d+(?:\.\d+)?/);
   if (!m) return { value: null, reason: "text" };

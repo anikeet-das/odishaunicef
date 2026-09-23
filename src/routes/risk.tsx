@@ -428,7 +428,7 @@ function DistrictDrilldown({ district, schools, onClose }: { district: string; s
         </div>
 
         <div className="mt-3 glass rounded-xl p-4 text-xs">
-          <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5">AI prediction</div>
+          <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1.5">Source-based interpretation</div>
           <p>
             Based on current sustainability ({Math.round(list.reduce((a, s) => a + s.sustainabilityScore, 0) / list.length)}%),
             WASH composite ({Math.round(list.reduce((a, s) => a + s.washScore, 0) / list.length)}%), and SDMP coverage
