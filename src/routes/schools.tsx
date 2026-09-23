@@ -264,7 +264,7 @@ function Drawer({ school, onClose }: { school: School; onClose: () => void }) {
         <div className="mt-5 glass-soft rounded-xl p-4">
           <div className="text-xs uppercase tracking-wider text-muted-foreground mb-2">Hazard exposure</div>
           <div className="space-y-1.5">
-            {Object.entries(school.hazards).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).map(([h, v]) => (
+             {Object.entries(school.hazards).filter((entry): entry is [string, number] => entry[1] !== null && entry[1] > 0).sort((a, b) => b[1] - a[1]).map(([h, v]) => (
               <div key={h} className="flex items-center gap-2 text-xs">
                 <span className="w-28">{h}</span>
                 <div className="flex-1 h-1.5 rounded bg-secondary/50 overflow-hidden">
@@ -273,7 +273,8 @@ function Drawer({ school, onClose }: { school: School; onClose: () => void }) {
                 <span className="tabular-nums w-10 text-right">{v.toFixed(1)}</span>
               </div>
             ))}
-            {Object.values(school.hazards).every((v) => v === 0) && <div className="text-xs text-muted-foreground">No exposure reported.</div>}
+             {Object.values(school.hazards).every((v) => v === null) && <div className="text-xs text-muted-foreground">No hazard response is available.</div>}
+             {Object.values(school.hazards).some((v) => v !== null) && Object.values(school.hazards).every((v) => v === null || v === 0) && <div className="text-xs text-muted-foreground">No exposure reported.</div>}
           </div>
         </div>
       </aside>

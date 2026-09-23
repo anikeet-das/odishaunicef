@@ -418,8 +418,8 @@ function SchoolDetail({ school, onClose }: { school: School; onClose: () => void
           <Tile label="Climate Risk" value={school.hazardScore === null ? "NA" : `${school.hazardScore}%`} color="var(--warn)" />
           <Tile label="Students" value={school.totalStudents.toLocaleString()} color="var(--cyan)" />
           <Tile label="Staff" value={String(school.totalStaff)} color="var(--aurora)" />
-          <Tile label="SDMP" value={school.hasSDMP ? "Yes" : "No"} color={school.hasSDMP ? "var(--aurora)" : "var(--danger)"} />
-          <Tile label="Drills" value={school.mockDrills ? "Yes" : "No"} color={school.mockDrills ? "var(--aurora)" : "var(--danger)"} />
+           <Tile label="SDMP" value={school.hasSDMP === null ? "NA" : school.hasSDMP ? "Yes" : "No"} color={school.hasSDMP === null ? "var(--muted-foreground)" : school.hasSDMP ? "var(--aurora)" : "var(--danger)"} />
+           <Tile label="Drills" value={school.mockDrills === null ? "NA" : school.mockDrills ? "Yes" : "No"} color={school.mockDrills === null ? "var(--muted-foreground)" : school.mockDrills ? "var(--aurora)" : "var(--danger)"} />
         </div>
         <div className="mt-5">
           <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">AI recommendations</div>
@@ -449,8 +449,8 @@ function Tile({ label, value, color }: { label: string; value: string; color: st
 function recommendationsFor(s: School): string[] {
   const out: string[] = [];
   if (s.shvr < 3) out.push("Enrol the school into the SHVR uplift programme: monthly hygiene audits + green-plan workshop.");
-  if (!s.hasSDMP) out.push("Draft a School Disaster Management Plan (SDMP) — top driver of climate resilience score.");
-  if (!s.mockDrills) out.push("Schedule quarterly mock drills (fire, flood, earthquake) with the local DDMA.");
+  if (s.hasSDMP === false) out.push("Draft a School Disaster Management Plan (SDMP) — top driver of climate resilience score.");
+  if (s.mockDrills === false) out.push("Schedule quarterly mock drills (fire, flood, earthquake) with the local DDMA.");
   if (s.washScore < 60) out.push("Audit water taps, soap availability and toilet hygiene — WASH score is below benchmark.");
   if (s.hazardScore !== null && s.hazardScore >= 60) out.push("High climate exposure — link this school to district early-warning SMS feed.");
   if (!out.length) out.push("Performance is strong. Continue current sustainability practices and document them for peer schools.");
