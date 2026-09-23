@@ -151,8 +151,8 @@ function Page() {
                     Across the selected {picked.length} {mode === "district" ? "districts" : "schools"}, the highest sustainability score is
                     <b className="text-[var(--aurora)]"> {rows.reduce((a, b) => a.sustainability >= b.sustainability ? a : b).name}</b> and the
                     biggest WASH gap is held by <b className="text-[var(--warn)]"> {rows.reduce((a, b) => a.wash <= b.wash ? a : b).name}</b>.
-                    Average climate risk is <b>{Math.round(rows.reduce((s, r) => s + r.risk, 0) / rows.length)}%</b>.
-                    Recommendation: replicate operational playbook from the top performer into the bottom-half entities — projected uplift +9–14 pts in 90 days.
+                    Average climate risk is <b>{rows.some((r) => r.risk !== null) ? `${Math.round(rows.reduce((s, r) => s + (r.risk ?? 0), 0) / rows.filter((r) => r.risk !== null).length)}%` : "NA"}</b>.
+                    Recommendation: use the comparison to prioritise evidence-backed interventions for the lowest-scoring entities.
                   </p>
                 </div>
               </>

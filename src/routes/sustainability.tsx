@@ -200,7 +200,7 @@ function SchoolNarrative({ s }: { s: School }) {
         <div className="flex items-center gap-2 shrink-0">
           <Badge label="Sust." v={`${s.sustainabilityScore}%`} />
           <Badge label="WASH" v={`${s.washScore}%`} />
-          <Badge label="Risk" v={`${s.hazardScore}%`} />
+          <Badge label="Risk" v={s.hazardScore === null ? "NA" : `${s.hazardScore}%`} />
           <Badge label="SHVR" v={`${s.shvr}★`} />
         </div>
       </div>
@@ -210,7 +210,7 @@ function SchoolNarrative({ s }: { s: School }) {
       </div>
       <p className="text-xs leading-relaxed text-muted-foreground">
         {s.name} ({s.district}) currently records a sustainability index of <b className="text-foreground">{s.sustainabilityScore}%</b> against
-        a WASH composite of <b className="text-foreground">{s.washScore}%</b> and a climate-risk load of <b className="text-foreground">{s.hazardScore}%</b>.
+            a WASH composite of <b className="text-foreground">{s.washScore}%</b> and a climate-risk load of <b className="text-foreground">{s.hazardScore === null ? "NA" : `${s.hazardScore}%`}</b>.
         The school is rated <b className="text-foreground">{s.shvr}★</b> on the SHVR 2025-26 scale, and {risk}.
         Sustainability drivers in evidence: {drivers.length ? drivers.join(", ") : "limited — no formal plans on record"}.
         With {s.totalStudents.toLocaleString()} students and {s.totalStaff} staff, the operational footprint

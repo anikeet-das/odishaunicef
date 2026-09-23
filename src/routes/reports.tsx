@@ -27,7 +27,7 @@ function Page() {
 
   const reports = [
     { name: "District leaderboard", file: "districts.csv", build: () => toCsv(districts) },
-    { name: "All schools (flat)", file: "schools.csv", build: () => toCsv(data.map(({ raw: _r, hazards, ...s }) => ({ ...s, topHazardProb: hazards[s.topHazard ?? "Cyclone"] ?? 0 }))) },
+    { name: "All schools (flat)", file: "schools.csv", build: () => toCsv(data.map(({ raw: _r, hazards, ...s }) => ({ ...s, topHazardProb: s.topHazard ? hazards[s.topHazard] : "NA" }))) },
     { name: "High-risk alerts (score ≥ 4)", file: "alerts.csv", build: () => toCsv(data.filter((s) => s.hazardScore !== null && s.hazardScore >= 50 && !s.hasSDMP).map((s) => ({ udise: s.udise, name: s.name, district: s.district, hazardScore: s.hazardScore, topHazard: s.topHazard }))) },
   ];
 

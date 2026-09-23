@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
-import { Search, X, TrendingUp, TrendingDown, Minus, Sparkles, Star, Filter } from "lucide-react";
+import { Search, X, Sparkles, Star, Filter } from "lucide-react";
 import { Topbar } from "@/components/layout/Topbar";
 import { useSchools, shvrDistribution, aggregateByDistrict, type School } from "@/lib/data/cces";
 import { LoadingShell } from "@/components/data/LoadingShell";
@@ -29,17 +29,18 @@ function Page() {
 function MacroView({ schools }: { schools: School[] }) {
   const dist = shvrDistribution(schools);
   const total = schools.length;
-  const avg = (schools.reduce((a, s) => a + s.shvr, 0) / total).toFixed(2);
+  const rated = schools.filter((s) => s.shvrAvailable);
+  const avg = rated.length ? (rated.reduce((a, s) => a + s.shvr, 0) / rated.length).toFixed(2) : null;
   const aggs = aggregateByDistrict(schools);
   const top = [...aggs].sort((a, b) => b.avgShvr - a.avgShvr).slice(0, 8)
     .map((a) => ({ district: a.district, score: +a.avgShvr.toFixed(2) }));
   const radar = [
     { metric: "Sustainability", v: Math.round(schools.reduce((a, s) => a + s.sustainabilityScore, 0) / total) },
     { metric: "WASH", v: Math.round(schools.reduce((a, s) => a + s.washScore, 0) / total) },
-    { metric: "SHVR", v: Math.round(+avg * 20) },
-    { metric: "Safety", v: Math.round((schools.filter((s) => s.hasSDMP).length / total) * 100) },
-    { metric: "Drills", v: Math.round((schools.filter((s) => s.mockDrills).length / total) * 100) },
-    { metric: "CR-SAP", v: Math.round((schools.filter((s) => s.hasCRSAP).length / total) * 100) },
+    { metric: "SHVR", v: avg === null ? null : Math.round(Number(avg) * 20) },
+    { metric: "Safety", v: schools.some((s) => s.hasSDMP !== null) ? Math.round((schools.filter((s) => s.hasSDMP === true).length / schools.filter((s) => s.hasSDMP !== null).length) * 100) : null },
+    { metric: "Drills", v: schools.some((s) => s.mockDrills !== null) ? Math.round((schools.filter((s) => s.mockDrills === true).length / schools.filter((s) => s.mockDrills !== null).length) * 100) : null },
+    { metric: "CR-SAP", v: schools.some((s) => s.hasCRSAP !== null) ? Math.round((schools.filter((s) => s.hasCRSAP === true).length / schools.filter((s) => s.hasCRSAP !== null).length) * 100) : null },
   ];
   return (
     <div className="flex flex-col min-h-full">
@@ -236,8 +237,6 @@ function starColor(star: number): string {
 }
 
 function Row({ s, onClick, highlight }: { s: School; onClick: () => void; highlight: string }) {
-  // pseudo-trend from sustainability score parity
-  const trend = s.sustainabilityScore > 60 ? "up" : s.sustainabilityScore < 40 ? "down" : "flat";
   const color = starColor(s.shvr);
   return (
     <button onClick={onClick}
@@ -256,10 +255,7 @@ function Row({ s, onClick, highlight }: { s: School; onClick: () => void; highli
       <div className="col-span-1 text-center tabular-nums">{s.sustainabilityScore}</div>
       <div className="col-span-1 text-center tabular-nums">{s.washScore}</div>
       <div className="col-span-2 flex items-center justify-end gap-1 pr-2">
-        <Sparkline values={syntheticSpark(s)} color={color} />
-        {trend === "up" && <TrendingUp className="h-3.5 w-3.5 text-[var(--aurora)]" />}
-        {trend === "down" && <TrendingDown className="h-3.5 w-3.5 text-[var(--danger)]" />}
-        {trend === "flat" && <Minus className="h-3.5 w-3.5 text-[var(--cyan)]" />}
+         <Sparkline values={[s.sustainabilityScore, s.washScore, ...(s.hazardScore === null ? [] : [100 - s.hazardScore])]} color={color} />
       </div>
     </button>
   );
@@ -309,13 +305,6 @@ function Sparkline({ values, color }: { values: number[]; color: string }) {
       <polyline points={pts} fill="none" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
-}
-
-function syntheticSpark(s: School): number[] {
-  // deterministic 8-point series from hash
-  const base = s.sustainabilityScore;
-  const seed = s.udise.charCodeAt(0) + s.udise.charCodeAt(s.udise.length - 1);
-  return Array.from({ length: 8 }, (_, i) => base + Math.sin((i + seed) * 0.7) * 6 + (i * (s.shvr - 2)));
 }
 
 function MultiSelect({ label, options, value, onChange, placeholder }: {
@@ -418,8 +407,8 @@ function SchoolDetail({ school, onClose }: { school: School; onClose: () => void
           <Tile label="Climate Risk" value={school.hazardScore === null ? "NA" : `${school.hazardScore}%`} color="var(--warn)" />
           <Tile label="Students" value={school.totalStudents.toLocaleString()} color="var(--cyan)" />
           <Tile label="Staff" value={String(school.totalStaff)} color="var(--aurora)" />
-          <Tile label="SDMP" value={school.hasSDMP ? "Yes" : "No"} color={school.hasSDMP ? "var(--aurora)" : "var(--danger)"} />
-          <Tile label="Drills" value={school.mockDrills ? "Yes" : "No"} color={school.mockDrills ? "var(--aurora)" : "var(--danger)"} />
+           <Tile label="SDMP" value={school.hasSDMP === null ? "NA" : school.hasSDMP ? "Yes" : "No"} color={school.hasSDMP === null ? "var(--muted-foreground)" : school.hasSDMP ? "var(--aurora)" : "var(--danger)"} />
+           <Tile label="Drills" value={school.mockDrills === null ? "NA" : school.mockDrills ? "Yes" : "No"} color={school.mockDrills === null ? "var(--muted-foreground)" : school.mockDrills ? "var(--aurora)" : "var(--danger)"} />
         </div>
         <div className="mt-5">
           <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">AI recommendations</div>
@@ -449,8 +438,8 @@ function Tile({ label, value, color }: { label: string; value: string; color: st
 function recommendationsFor(s: School): string[] {
   const out: string[] = [];
   if (s.shvr < 3) out.push("Enrol the school into the SHVR uplift programme: monthly hygiene audits + green-plan workshop.");
-  if (!s.hasSDMP) out.push("Draft a School Disaster Management Plan (SDMP) — top driver of climate resilience score.");
-  if (!s.mockDrills) out.push("Schedule quarterly mock drills (fire, flood, earthquake) with the local DDMA.");
+  if (s.hasSDMP === false) out.push("Draft a School Disaster Management Plan (SDMP) — top driver of climate resilience score.");
+  if (s.mockDrills === false) out.push("Schedule quarterly mock drills (fire, flood, earthquake) with the local DDMA.");
   if (s.washScore < 60) out.push("Audit water taps, soap availability and toilet hygiene — WASH score is below benchmark.");
   if (s.hazardScore !== null && s.hazardScore >= 60) out.push("High climate exposure — link this school to district early-warning SMS feed.");
   if (!out.length) out.push("Performance is strong. Continue current sustainability practices and document them for peer schools.");

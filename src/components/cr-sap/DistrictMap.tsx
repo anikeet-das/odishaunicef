@@ -59,7 +59,7 @@ export function DistrictMap({
 
   function colorFor(s: School) {
     if (overlay === "sustainability") return scoreColor(s.sustainabilityScore);
-    if (overlay === "hazard") return scoreColor(100 - s.hazardScore);
+    if (overlay === "hazard") return s.hazardScore === null ? "var(--muted-foreground)" : scoreColor(100 - s.hazardScore);
     return scoreColor((s.shvr / 5) * 100);
   }
 
