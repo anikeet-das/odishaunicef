@@ -15,7 +15,16 @@ function Page() {
   const { data } = useSchools();
   if (!data) return <LoadingShell title="Mission LiFE" subtitle="Lifestyle for Environment" />;
   const total = data.length;
-  const sectionAverage = (key: keyof typeof data[number][
+  const sectionAverage = (key: "waste" | "operations" | "energy" | "environment" | "behaviour") => {
+    const values = data.map((s) => s.sectionScores[key]).filter((v): v is number => v !== null);
+    return values.length ? Math.round(values.reduce((a, v) => a + v, 0) / values.length) : null;
+  };
+  const environment = sectionAverage("environment");
+  const waste = sectionAverage("waste");
+  const energy = sectionAverage("energy");
+  const behaviour = sectionAverage("behaviour");
+  const green = data.filter((s) => s.hasGreenPlan === true).length;
+  const drills = data.filter((s) => s.mockDrills === true).length;
 
   return (
     <div className="flex flex-col min-h-full">
@@ -32,23 +41,20 @@ function Page() {
             <div className="min-w-0">
               <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Aurora · Mission LiFE Synthesis</div>
               <p className="text-sm mt-1 leading-relaxed">
-                Odisha is tracking <b className="text-[var(--aurora)]">{ecoClubs.toLocaleString()}</b> active eco-clubs across {total.toLocaleString()} schools.
-                Estimated <b className="text-[var(--cyan)]">{carbonCut.toLocaleString()} tCO₂e</b> avoided this year through behaviour-first nudges.
-                Renewables adoption remains the largest growth lever — only <b>{Math.round((renewables / total) * 100)}%</b> of campuses run on rooftop solar today.
+                The live form currently provides environmental readiness scores for <b className="text-[var(--aurora)]">{total.toLocaleString()}</b> schools.
+                Environmental section coverage is <b className="text-[var(--cyan)]">{environment === null ? "NA" : `${environment}%`}</b>; no carbon, plantation, solar, or eco-club totals are inferred without source fields.
               </p>
             </div>
           </div>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card icon={<Users className="h-5 w-5" />}     title="Eco-club intelligence"     value={ecoClubs}   total={total} hint="Schools with active student-led eco-clubs." />
-          <Card icon={<Leaf className="h-5 w-5" />}      title="Carbon reduction"          value={carbonCut}  unit=" tCO₂e" hint="Estimated avoided emissions from LiFE behaviours." />
-          <Card icon={<Recycle className="h-5 w-5" />}   title="Plastic-free score"        value={plasticFree} total={total} hint="Campuses meeting plastic-free thresholds (≥70%)." />
-          <Card icon={<Zap className="h-5 w-5" />}       title="Renewable energy"          value={renewables} total={total} hint="Schools with at least one renewable installation." />
-          <Card icon={<Trees className="h-5 w-5" />}     title="Plantation drives"         value={plantation} unit=" trees" hint="Trees planted under Vana Mahotsav / SBA." />
-          <Card icon={<GraduationCap className="h-5 w-5" />} title="Climate participation" value={participate} total={total} hint="Schools enrolled in at least one climate event/year." />
-          <Card icon={<Leaf className="h-5 w-5" />}      title="Green / sustainable plans" value={green}      total={total} hint="Schools with a formal clean & sustainable action plan." />
-          <Card icon={<Droplets className="h-5 w-5" />}  title="Mock drills active"        value={drills}     total={total} hint="Schools regularly running disaster response drills." />
+          <Card icon={<Recycle className="h-5 w-5" />} title="Waste management" value={waste ?? 0} total={waste === null ? undefined : 100} hint="Live score from the form’s Waste Management section." />
+          <Card icon={<Leaf className="h-5 w-5" />} title="Environment" value={environment ?? 0} total={environment === null ? undefined : 100} hint="Live score from the form’s Environment section." />
+          <Card icon={<Zap className="h-5 w-5" />} title="Energy" value={energy ?? 0} total={energy === null ? undefined : 100} hint="Live score from the form’s Energy section." />
+          <Card icon={<GraduationCap className="h-5 w-5" />} title="Behaviour change" value={behaviour ?? 0} total={behaviour === null ? undefined : 100} hint="Live score from the form’s Behaviour section." />
+          <Card icon={<Leaf className="h-5 w-5" />}      title="Green / sustainable plans" value={green} total={total} hint="Schools with a formal clean & sustainable action plan." />
+          <Card icon={<Droplets className="h-5 w-5" />}  title="Mock drills reported"        value={drills}     total={total} hint="Schools regularly running disaster response drills." />
         </div>
       </div>
     </div>
