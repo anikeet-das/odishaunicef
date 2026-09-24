@@ -14,17 +14,21 @@ export const Route = createFileRoute("/tech")({
   component: Page,
 });
 
-/** Deterministic synthetic tech metrics derived from school hash so the page is reproducible. */
 function techFor(s: School) {
-  const h = (str: string) => { let x = 0; for (let i = 0; i < str.length; i++) x = (x * 31 + str.charCodeAt(i)) | 0; return Math.abs(x); };
-  const a = h(s.udise);
+  const value = (...terms: string[]) => {
+    const key = Object.keys(s.raw).find((header) => terms.every((term) => header.toLowerCase().includes(term)));
+    if (!key) return null;
+    const match = s.raw[key].replace(/,/g, "").match(/\d+(?:\.\d+)?/);
+    const parsed = match ? Number(match[0]) : NaN;
+    return Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : null;
+  };
   return {
-    internet: 40 + (a % 60),
-    smartClass: 25 + ((a >> 3) % 70),
-    devices: 30 + ((a >> 5) % 60),
-    aiReadiness: 15 + ((a >> 7) % 70),
-    literacy: 30 + ((a >> 9) % 60),
-    infra: 30 + ((a >> 11) % 65),
+    internet: value("internet"),
+    smartClass: value("smart", "class"),
+    devices: value("device"),
+    aiReadiness: value("ai", "readiness"),
+    literacy: value("digital", "literacy"),
+    infra: value("technology", "infrastructure"),
   };
 }
 
@@ -38,15 +42,18 @@ function Page() {
 function Macro({ schools }: { schools: School[] }) {
   const [scope, setScope] = useState<"state" | "district">("state");
   const enriched = useMemo(() => schools.map((s) => ({ s, t: techFor(s) })), [schools]);
-  const avg = (k: keyof ReturnType<typeof techFor>) => Math.round(enriched.reduce((a, e) => a + e.t[k], 0) / enriched.length);
+  const avg = (k: keyof ReturnType<typeof techFor>) => {
+    const values = enriched.map((e) => e.t[k]).filter((v): v is number => v !== null);
+    return values.length ? Math.round(values.reduce((a, v) => a + v, 0) / values.length) : null;
+  };
 
   const radial = [
-    { name: "Internet", value: avg("internet"), fill: "oklch(0.86 0.16 200)" },
-    { name: "Smart class", value: avg("smartClass"), fill: "oklch(0.72 0.21 255)" },
-    { name: "Devices", value: avg("devices"), fill: "oklch(0.78 0.14 190)" },
-    { name: "AI readiness", value: avg("aiReadiness"), fill: "oklch(0.62 0.22 285)" },
-    { name: "Digital literacy", value: avg("literacy"), fill: "oklch(0.84 0.2 155)" },
-    { name: "Infra quality", value: avg("infra"), fill: "oklch(0.85 0.18 75)" },
+    { name: "Internet", value: avg("internet") ?? 0, fill: "oklch(0.86 0.16 200)" },
+    { name: "Smart class", value: avg("smartClass") ?? 0, fill: "oklch(0.72 0.21 255)" },
+    { name: "Devices", value: avg("devices") ?? 0, fill: "oklch(0.78 0.14 190)" },
+    { name: "AI readiness", value: avg("aiReadiness") ?? 0, fill: "oklch(0.62 0.22 285)" },
+    { name: "Digital literacy", value: avg("literacy") ?? 0, fill: "oklch(0.84 0.2 155)" },
+    { name: "Infra quality", value: avg("infra") ?? 0, fill: "oklch(0.85 0.18 75)" },
   ];
 
   const byDistrict = useMemo(() => {
@@ -55,10 +62,10 @@ function Macro({ schools }: { schools: School[] }) {
       const k = s.district;
       if (!map.has(k)) map.set(k, { sum: 0, n: 0 });
       const e = map.get(k)!;
-      e.sum += (t.internet + t.smartClass + t.devices + t.aiReadiness + t.literacy + t.infra) / 6;
-      e.n++;
+      const values = [t.internet, t.smartClass, t.devices, t.aiReadiness, t.literacy, t.infra].filter((v): v is number => v !== null);
+      if (values.length) { e.sum += values.reduce((a, v) => a + v, 0) / values.length; e.n++; }
     }
-    return Array.from(map.entries()).map(([d, v]) => ({ d, readiness: Math.round(v.sum / v.n) }))
+    return Array.from(map.entries()).filter(([, v]) => v.n > 0).map(([d, v]) => ({ d, readiness: Math.round(v.sum / v.n) }))
       .sort((a, b) => b.readiness - a.readiness).slice(0, 12);
   }, [enriched]);
 
@@ -93,8 +100,7 @@ function Macro({ schools }: { schools: School[] }) {
               <div className="flex items-center gap-2 mb-2"><Sparkles className="h-4 w-4 text-[var(--aurora)]" /><div className="text-sm font-semibold">AI synthesis</div></div>
               <p className="text-xs leading-relaxed">
                 Odisha's average technology readiness sits at <b className="text-[var(--cyan)]">{Math.round(radial.reduce((s, r) => s + r.value, 0) / radial.length)}%</b>.
-                AI readiness is the smallest gear (<b>{avg("aiReadiness")}%</b>) — accelerate via teacher AI-fluency cohorts in tribal blocks.
-                Smart classrooms and broadband expand fastest with district-led MoUs.
+                 {avg("aiReadiness") === null ? "The connected form does not contain technology-readiness responses yet." : <>AI readiness is currently <b>{avg("aiReadiness")}%</b>; use the source responses to target support.</>}
               </p>
             </div>
           </div>
@@ -165,7 +171,7 @@ function Micro({ schools }: { schools: School[] }) {
                     <td className="px-4 py-2"><div className="font-medium truncate max-w-[26ch]">{s.name}</div><div className="text-[10px] text-muted-foreground">{s.udise}</div></td>
                     <td className="px-3 py-2 text-muted-foreground">{s.district}</td>
                     {(["internet", "smartClass", "devices", "aiReadiness", "literacy", "infra"] as const).map((k) => (
-                      <td key={k} className="px-3 py-2 text-center"><BarCell v={t[k]} /></td>
+                       <td key={k} className="px-3 py-2 text-center"><BarCell v={t[k]} /></td>
                     ))}
                   </tr>
                 ))}
@@ -178,7 +184,8 @@ function Micro({ schools }: { schools: School[] }) {
   );
 }
 
-function BarCell({ v }: { v: number }) {
+function BarCell({ v }: { v: number | null }) {
+  if (v === null) return <span className="text-[10px] text-muted-foreground">NA</span>;
   const color = v >= 70 ? "var(--aurora)" : v >= 50 ? "var(--cyan)" : v >= 30 ? "var(--warn)" : "var(--danger)";
   return (
     <div className="inline-flex items-center gap-2 min-w-[80px]">
