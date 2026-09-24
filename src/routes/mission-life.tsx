@@ -15,15 +15,7 @@ function Page() {
   const { data } = useSchools();
   if (!data) return <LoadingShell title="Mission LiFE" subtitle="Lifestyle for Environment" />;
   const total = data.length;
-  const h = (str: string) => { let x = 0; for (let i = 0; i < str.length; i++) x = (x * 31 + str.charCodeAt(i)) | 0; return Math.abs(x); };
-  const ecoClubs   = data.filter((s) => (h(s.udise) % 100) < 64).length;
-  const carbonCut  = Math.round(data.reduce((a, s) => a + ((h(s.udise) >> 2) % 18), 0) / 1000);
-  const plasticFree= data.filter((s) => ((h(s.udise) >> 4) % 100) < 58).length;
-  const renewables = data.filter((s) => ((h(s.udise) >> 5) % 100) < 31).length;
-  const plantation = data.reduce((a, s) => a + ((h(s.udise) >> 7) % 22), 0);
-  const participate= data.filter((s) => ((h(s.udise) >> 9) % 100) < 73).length;
-  const green      = data.filter((s) => s.hasGreenPlan).length;
-  const drills     = data.filter((s) => s.mockDrills).length;
+  const sectionAverage = (key: keyof typeof data[number][
 
   return (
     <div className="flex flex-col min-h-full">
