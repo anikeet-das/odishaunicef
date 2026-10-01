@@ -95,7 +95,9 @@ function normalize(row: SchoolRaw, headers: string[]): School {
     management: answer(row, headers, "management category"), category: answer(row, headers, "school category"), classification: "", location: "", established: 0, board: "",
     boys: num(answer(row, headers, "boys")), girls: num(answer(row, headers, "girls")), totalStudents: num(answer(row, headers, "boys")) + num(answer(row, headers, "girls")),
     cwsn: 0, maleStaff: 0, femaleStaff: 0, totalStaff: 0,
-    hasGreenPlan: null, hasCRSAP: sectionScores.risk === null ? null : true, hasSAP: null,
+    // The supplied form does not expose a distinct plan-adoption field. Do not
+    // infer plan ownership from a completed risk section.
+    hasGreenPlan: null, hasCRSAP: null, hasSAP: null,
     shvr: STAR_MAP[shvrRaw] ?? 0, shvrAvailable: Boolean(shvrCol && shvrRaw),
     hasSafetyCommittee: bool(answer(row, headers, "safety", "committee")), hasSDMP: bool(answer(row, headers, "disaster management plan")), mockDrills: null,
     hazards, topHazard: top?.[0] ?? null, hazardScore, hazardDataAvailable,

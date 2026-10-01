@@ -417,7 +417,7 @@ function DistrictDrilldown({ district, schools, onClose }: { district: string; s
             <ul className="space-y-1.5 text-xs">
               {exposedSchools.map((s) => (
                 <li key={s.udise} className="glass-soft rounded-lg px-3 py-2 flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full" style={{ background: cellColor(s.hazardScore ?? 0), boxShadow: `0 0 6px ${cellColor(s.hazardScore ?? 0)}` }} />
+                  <span className="h-2 w-2 rounded-full" style={{ background: s.hazardScore === null ? "var(--muted-foreground)" : cellColor(s.hazardScore), boxShadow: s.hazardScore === null ? undefined : `0 0 6px ${cellColor(s.hazardScore)}` }} />
                   <span className="flex-1 truncate">{s.name}</span>
                   <span className="text-[var(--warn)] font-bold tabular-nums">{s.hazardScore === null ? "NA" : `${s.hazardScore}%`}</span>
                 </li>

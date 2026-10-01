@@ -284,8 +284,9 @@ export async function exportScorecardPdf(opts: {
   const statH = gridBottom - statY;
   if (statH >= 60) {
     panel(doc, M, statY, leftW, statH);
-    const riskLabel = school.hazardScore === null ? "NA" : school.hazardScore >= 60 ? "High" : school.hazardScore >= 40 ? "Moderate" : "Low";
-    const riskColor = school.hazardScore === null ? C.sub : school.hazardScore >= 60 ? C.red : school.hazardScore >= 40 ? C.amber : C.green;
+    const risk = school.hazardScore;
+    const riskLabel = risk === null ? "NA" : risk >= 60 ? "High" : risk >= 40 ? "Moderate" : "Low";
+    const riskColor = risk === null ? C.sub : risk >= 60 ? C.red : risk >= 40 ? C.amber : C.green;
     const stats = [
       { label: "Risk Index", value: riskLabel, color: riskColor },
       { label: "Performance", value: sc.total >= 80 ? "Top 20%" : sc.total >= 60 ? "Top 50%" : "Bottom 50%",
