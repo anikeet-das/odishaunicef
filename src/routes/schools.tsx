@@ -46,12 +46,12 @@ function Macro({ data }: { data: School[] }) {
   const cards = [
     { icon: GraduationCap, label: "Schools",       v: k.total.toLocaleString(),    sub: "across 30 districts" },
     { icon: Activity,      label: "Students",      v: k.students.toLocaleString(), sub: "live enrolment" },
-    { icon: Star,          label: "Avg SHVR",      v: `${k.avgShvr}★`,             sub: "2025-26 cycle" },
+    { icon: Star,          label: "Avg SHVR",      v: k.avgShvr ? `${k.avgShvr}★` : "NA",             sub: "2025-26 cycle" },
     { icon: Leaf,          label: "Sustainability",v: `${k.avgSust}%`,             sub: "CCES composite" },
     { icon: Droplets,      label: "Avg WASH",      v: `${k.avgWash}%`,             sub: "water · sanitation · hygiene" },
-    { icon: ShieldAlert,   label: "Climate risk",  v: `${k.avgHazard}%`,           sub: "hazard exposure load" },
-    { icon: Building2,     label: "CR-SAP %",      v: `${k.crsapPct}%`,            sub: "plan adoption" },
-    { icon: Leaf,          label: "Green plan %",  v: `${k.greenPct}%`,            sub: "green-school adopters" },
+    { icon: ShieldAlert,   label: "Climate risk",  v: k.hazardDataAvailable ? `${k.avgHazard}%` : "NA",           sub: "hazard exposure load" },
+    { icon: Building2,     label: "CR-SAP %",      v: k.crsapPct ? `${k.crsapPct}%` : "NA",            sub: "plan adoption" },
+    { icon: Leaf,          label: "Green plan %",  v: k.greenPct ? `${k.greenPct}%` : "NA",            sub: "green-school adopters" },
   ];
   return (
     <div className="flex flex-col min-h-full">
@@ -186,10 +186,10 @@ function Micro({ data }: { data: School[] }) {
                     <td className="py-2 px-2">{"★".repeat(s.shvr) || "—"}</td>
                     <td className="py-2 px-2 tabular-nums">{s.sustainabilityScore}%</td>
                     <td className="py-2 px-2 tabular-nums">{s.washScore}%</td>
-                    <td className="py-2 px-2 text-xs">{s.hasCRSAP ? "✓" : "—"}</td>
+                    <td className="py-2 px-2 text-xs">{s.hasCRSAP === null ? "NA" : s.hasCRSAP ? "✓" : "—"}</td>
                     <td className="py-2 px-2 tabular-nums">{s.hazardScore === null ? "NA" : `${s.hazardScore}%`}</td>
                     <td className="py-2 px-2 text-xs">{s.topHazard ?? "—"}</td>
-                    <td className="py-2 px-2 w-[120px]"><HazardPulse seed={s.udise} top={s.topHazard} /></td>
+                    <td className="py-2 px-2 w-[120px]"><HazardPulse hazardScore={s.hazardScore} top={s.topHazard} /></td>
                   </tr>
                 ))}
               </tbody>
@@ -204,20 +204,17 @@ function Micro({ data }: { data: School[] }) {
   );
 }
 
-/** Tiny inline live hazard pulse — deterministic synthetic series per UDISE. */
-function HazardPulse({ seed, top }: { seed: string; top: string | null }) {
-  const data = useMemo(() => {
-    let h = 0; for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
-    const rng = () => { h = (h * 9301 + 49297) % 233280; return h / 233280; };
-    return Array.from({ length: 20 }, (_, i) => ({ i, v: Math.round(30 + rng() * 70) }));
-  }, [seed]);
+/** A compact, source-based exposure indicator; it is not a time series. */
+function HazardPulse({ hazardScore, top }: { hazardScore: number | null; top: string | null }) {
+  const data = hazardScore === null ? [] : [{ i: 0, v: hazardScore }, { i: 1, v: hazardScore }];
   return (
-    <div className="h-6">
-      <ResponsiveContainer>
+    <div className="h-6 flex items-center gap-2">
+      {hazardScore === null ? <span className="text-[10px] text-muted-foreground">NA</span> : <ResponsiveContainer width={72}>
         <LineChart data={data}>
           <Line type="monotone" dataKey="v" stroke={top ? "oklch(0.85 0.22 25)" : "oklch(0.78 0.18 200)"} strokeWidth={1.4} dot={false} isAnimationActive={false} />
         </LineChart>
-      </ResponsiveContainer>
+      </ResponsiveContainer>}
+      {hazardScore !== null && <span className="text-[10px] tabular-nums text-muted-foreground">{hazardScore}%</span>}
     </div>
   );
 }

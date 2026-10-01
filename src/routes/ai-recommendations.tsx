@@ -17,20 +17,26 @@ export function AiRecommendationsBody() {
     if (!data) return [];
     const k = platformKpis(data);
     const districts = aggregateByDistrict(data);
-    const worst = [...districts].sort((a, b) => a.avgSust - b.avgSust).slice(0, 3);
-    const noSdmp = data.filter((s) => !s.hasSDMP).length;
+    const worst = districts.filter((d) => d.schools > 0).sort((a, b) => a.avgSust - b.avgSust).slice(0, 3);
+    const knownSdmp = data.filter((s) => s.hasSDMP !== null);
+    const noSdmp = knownSdmp.filter((s) => s.hasSDMP === false).length;
     const cyExposed = data.filter((s) => (s.hazards.Cyclone ?? 0) >= 2).length;
     const flExposed = data.filter((s) => (s.hazards.Floods ?? 0) >= 2).length;
-    const noGreen = data.filter((s) => !s.hasGreenPlan).length;
+    const knownGreen = data.filter((s) => s.hasGreenPlan !== null);
+    const noGreen = knownGreen.filter((s) => s.hasGreenPlan === false).length;
     return [
       {
-        title: "Roll out CR-SAP to remaining schools",
-        body: `Only ${k.crsapPct}% of schools have a Climate Resilient Swachhata Action Plan. Prioritise the ${100 - k.crsapPct}% gap with template kits delivered through BRC officers.`,
+        title: "Complete CR-SAP plan coverage",
+        body: k.crsapPct === 0
+          ? "The connected form does not contain a distinct CR-SAP plan-adoption field, so coverage cannot be calculated from this source."
+          : `The source records report ${k.crsapPct}% plan coverage. Prioritise schools without a recorded plan through BRC follow-up.`,
         impact: "High",
       },
       {
-        title: `Activate SDMP in ${noSdmp.toLocaleString()} schools`,
-        body: `Schools lacking a School Disaster Management Plan are 3.2× more likely to suffer infrastructure damage during cyclone season. Convert the ${k.sdmpPct}% baseline upward through district-led workshops.`,
+        title: knownSdmp.length ? `Follow up SDMP gaps in ${noSdmp.toLocaleString()} schools` : "Collect SDMP responses",
+        body: knownSdmp.length
+          ? `${noSdmp.toLocaleString()} schools have an explicit negative SDMP response. Use district-led workshops to close this recorded gap.`
+          : "SDMP responses are not available in the connected records yet; collect the field before ranking schools.",
         impact: "High",
       },
       {
@@ -44,13 +50,15 @@ export function AiRecommendationsBody() {
         impact: "High",
       },
       {
-        title: `Convert ${noGreen.toLocaleString()} schools into Green/Mission LiFE schools`,
-        body: `Pair with composting, solar drinking-water and kitchen gardens. Target SHVR ≥ 4★ in 24 months.`,
+        title: knownGreen.length ? `Follow up green-plan gaps in ${noGreen.toLocaleString()} schools` : "Collect green-plan responses",
+        body: knownGreen.length
+          ? `${noGreen.toLocaleString()} schools have an explicit negative green-plan response. Verify the action plan status with the school authority.`
+          : "Green-plan responses are not available in the connected records yet; collect the field before ranking schools.",
         impact: "Medium",
       },
       {
-        title: `Surge support in ${worst.map((d) => d.district).join(", ")}`,
-        body: `Bottom-3 districts by sustainability (avg ${worst.map((d) => d.avgSust + "%").join(", ")}). Send mobile audit teams and re-rate within the year.`,
+        title: worst.length ? `Surge support in ${worst.map((d) => d.district).join(", ")}` : "Collect district responses",
+        body: worst.length ? `Lowest observed sustainability scores are ${worst.map((d) => `${d.district} ${d.avgSust}%`).join(", ")}. Verify the underlying section responses before assigning support.` : "No district records are available for a ranked recommendation.",
         impact: "Critical",
       },
     ];

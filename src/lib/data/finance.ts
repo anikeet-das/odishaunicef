@@ -291,13 +291,13 @@ export function termStatus(state: StateFinance) {
   return {
     mid: {
       planned: state.required,
-      allocated: Math.round(state.required * 0.92),
-      mobilized: Math.round(state.mobilized * 0.55),
-      utilized: Math.round(state.utilized * 0.5),
+      allocated: state.required,
+      mobilized: state.mobilized,
+      utilized: state.utilized,
     },
     final: {
       planned: state.required,
-      allocated: Math.round(state.required * 0.97),
+      allocated: state.required,
       mobilized: state.mobilized,
       utilized: state.utilized,
     },

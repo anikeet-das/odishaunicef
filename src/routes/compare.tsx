@@ -54,9 +54,9 @@ function Page() {
         sustainability: s.sustainabilityScore,
         wash: s.washScore,
         shvr: s.shvr * 20,
-        risk: s.hazardScore ?? 0,
-        crsap: s.hasCRSAP ? 100 : 0,
-        green: s.hasGreenPlan ? 100 : 0,
+        risk: s.hazardScore,
+        crsap: s.hasCRSAP === null ? null : s.hasCRSAP ? 100 : 0,
+        green: s.hasGreenPlan === null ? null : s.hasGreenPlan ? 100 : 0,
       }));
 
   const radar = ["sustainability", "wash", "shvr", "risk", "crsap", "green"].map((k) => {
@@ -151,7 +151,7 @@ function Page() {
                     Across the selected {picked.length} {mode === "district" ? "districts" : "schools"}, the highest sustainability score is
                     <b className="text-[var(--aurora)]"> {rows.reduce((a, b) => a.sustainability >= b.sustainability ? a : b).name}</b> and the
                     biggest WASH gap is held by <b className="text-[var(--warn)]"> {rows.reduce((a, b) => a.wash <= b.wash ? a : b).name}</b>.
-                    Average climate risk is <b>{rows.some((r) => r.risk !== null) ? `${Math.round(rows.reduce((s, r) => s + (r.risk ?? 0), 0) / rows.filter((r) => r.risk !== null).length)}%` : "NA"}</b>.
+                     Average climate risk is <b>{rows.some((r) => r.risk !== null) ? `${Math.round(rows.reduce((s, r) => s + (r.risk ?? 0), 0) / rows.filter((r) => r.risk !== null).length)}%` : "NA"}</b>.
                     Recommendation: use the comparison to prioritise evidence-backed interventions for the lowest-scoring entities.
                   </p>
                 </div>
