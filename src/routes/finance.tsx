@@ -54,6 +54,21 @@ function Dashboard({ fin }: { fin: NonNullable<ReturnType<typeof useRealFinance>
   const { data: schools } = useSchools();
   const accuracyGood = audit.accuracyPct >= 95;
 
+  if (!fin.financialDataAvailable) {
+    return (
+      <div className="flex flex-col min-h-full">
+        <Topbar title="Financial Intelligence" subtitle="Live · sourced from Google Form responses" />
+        <div className="p-3"><div className="glass rounded-2xl p-8 max-w-3xl">
+          <div className="flex items-start gap-3"><ShieldCheck className="h-5 w-5 text-muted-foreground mt-0.5" /><div>
+            <h2 className="font-semibold">Financial fields are not present in the connected form</h2>
+            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">Capital, operational, mobilized, source, and urgency totals are unavailable for this response dataset. No financial values are estimated or substituted. Add those fields to the form before using this page for cost monitoring.</p>
+            <Link to="/ai-notes" className="inline-flex mt-4 text-xs text-accent hover:underline">Open data-quality notes →</Link>
+          </div></div>
+        </div></div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="flex flex-col min-h-full">

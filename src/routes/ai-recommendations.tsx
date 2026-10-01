@@ -17,7 +17,7 @@ export function AiRecommendationsBody() {
     if (!data) return [];
     const k = platformKpis(data);
     const districts = aggregateByDistrict(data);
-    const worst = [...districts].sort((a, b) => a.avgSust - b.avgSust).slice(0, 3);
+    const worst = districts.filter((d) => d.schools > 0).sort((a, b) => a.avgSust - b.avgSust).slice(0, 3);
     const knownSdmp = data.filter((s) => s.hasSDMP !== null);
     const noSdmp = knownSdmp.filter((s) => s.hasSDMP === false).length;
     const cyExposed = data.filter((s) => (s.hazards.Cyclone ?? 0) >= 2).length;
@@ -57,8 +57,8 @@ export function AiRecommendationsBody() {
         impact: "Medium",
       },
       {
-        title: `Surge support in ${worst.map((d) => d.district).join(", ")}`,
-        body: `Bottom-3 districts by sustainability (avg ${worst.map((d) => d.avgSust + "%").join(", ")}). Send mobile audit teams and re-rate within the year.`,
+        title: worst.length ? `Surge support in ${worst.map((d) => d.district).join(", ")}` : "Collect district responses",
+        body: worst.length ? `Lowest observed sustainability scores are ${worst.map((d) => `${d.district} ${d.avgSust}%`).join(", ")}. Verify the underlying section responses before assigning support.` : "No district records are available for a ranked recommendation.",
         impact: "Critical",
       },
     ];

@@ -251,6 +251,7 @@ function buildSchoolFin(s: School, idx: number): SchoolFin {
 export type RealFinanceState = {
   schools: SchoolFin[];
   notes: AiNote[];
+  financialDataAvailable: boolean;
   totals: {
     capitalTotal: number;
     opexTotal: number;
@@ -315,7 +316,11 @@ function aggregateDistricts(schools: SchoolFin[]): DistrictFin[] {
 
 function build(schools: School[]): RealFinanceState {
   const fin = schools.map((s, i) => buildSchoolFin(s, i));
-  const notes = fin.flatMap((f) => f.notes);
+  const financialDataAvailable = schools.some((s) =>
+    [...ALL_FIELDS].some((field) => findHeader(s.raw ?? {}, COL_MATCH[field])) ||
+    [COL_BUDGET, COL_SOURCE, COL_URGENCY].some((field) => findHeader(s.raw ?? {}, field)),
+  );
+  const notes = financialDataAvailable ? fin.flatMap((f) => f.notes) : [];
 
   const capitalByField = CAPITAL_FIELDS.reduce((acc, f) => {
     acc[f] = fin.reduce((a, s) => a + (s.capital[f] ?? 0), 0); return acc;
@@ -358,6 +363,7 @@ function build(schools: School[]): RealFinanceState {
   return {
     schools: fin,
     notes,
+    financialDataAvailable,
     totals: {
       capitalTotal, opexTotal, capitalByField, opexByField,
       required, mobilized, gap: Math.max(0, required - mobilized),
