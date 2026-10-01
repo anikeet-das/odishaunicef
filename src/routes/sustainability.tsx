@@ -38,8 +38,8 @@ function MacroView({ data, buckets }: { data: School[]; buckets: { range: string
     switch (filter) {
       case "rural":  return data.filter((s) => s.location.toLowerCase().includes("rural"));
       case "urban":  return data.filter((s) => s.location.toLowerCase().includes("urban"));
-      case "crsap":  return data.filter((s) => s.hasCRSAP);
-      case "green":  return data.filter((s) => s.hasGreenPlan);
+      case "crsap":  return data.filter((s) => s.hasCRSAP === true);
+      case "green":  return data.filter((s) => s.hasGreenPlan === true);
       default:       return data;
     }
   }, [data, filter]);
@@ -184,10 +184,10 @@ function MicroView({ data }: { data: School[] }) {
 
 function SchoolNarrative({ s }: { s: School }) {
   const drivers = [
-    s.hasGreenPlan && "active green-school plan",
-    s.hasCRSAP && "CR-SAP integration",
-    s.hasSDMP && "school disaster management plan",
-    s.mockDrills && "regular mock drills",
+    s.hasGreenPlan === true && "active green-school plan",
+    s.hasCRSAP === true && "CR-SAP integration",
+    s.hasSDMP === true && "school disaster management plan",
+    s.mockDrills === true && "regular mock drills",
   ].filter(Boolean);
   const risk = s.topHazard ? `top hazard exposure is ${s.topHazard}` : "no significant hazard signal in CCES data";
   return (

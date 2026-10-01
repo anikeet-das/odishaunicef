@@ -78,10 +78,10 @@ function Index() {
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
             <KPI icon={SchoolIcon} label="Schools" value={kpi.total.toLocaleString()} />
             <KPI icon={Activity} label="Students" value={kpi.students.toLocaleString()} />
-            <KPI icon={Star}     label="Avg SHVR ★" value={kpi.avgShvr.toFixed(2)} />
+            <KPI icon={Star}     label="Avg SHVR ★" value={kpi.avgShvr ? kpi.avgShvr.toFixed(2) : "NA"} />
             <KPI icon={Leaf}     label="Sustainability" value={`${kpi.avgSust}%`} />
             <KPI icon={Droplets} label="WASH Score"  value={`${kpi.avgWash}%`} />
-            <KPI icon={ShieldAlert} label="Climate Risk" value={`${kpi.avgHazard}%`} />
+            <KPI icon={ShieldAlert} label="Climate Risk" value={kpi.hazardDataAvailable ? `${kpi.avgHazard}%` : "NA"} />
           </div>
         </div>
 
