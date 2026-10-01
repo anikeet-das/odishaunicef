@@ -46,12 +46,12 @@ function Macro({ data }: { data: School[] }) {
   const cards = [
     { icon: GraduationCap, label: "Schools",       v: k.total.toLocaleString(),    sub: "across 30 districts" },
     { icon: Activity,      label: "Students",      v: k.students.toLocaleString(), sub: "live enrolment" },
-    { icon: Star,          label: "Avg SHVR",      v: `${k.avgShvr}★`,             sub: "2025-26 cycle" },
+    { icon: Star,          label: "Avg SHVR",      v: k.avgShvr ? `${k.avgShvr}★` : "NA",             sub: "2025-26 cycle" },
     { icon: Leaf,          label: "Sustainability",v: `${k.avgSust}%`,             sub: "CCES composite" },
     { icon: Droplets,      label: "Avg WASH",      v: `${k.avgWash}%`,             sub: "water · sanitation · hygiene" },
-    { icon: ShieldAlert,   label: "Climate risk",  v: `${k.avgHazard}%`,           sub: "hazard exposure load" },
-    { icon: Building2,     label: "CR-SAP %",      v: `${k.crsapPct}%`,            sub: "plan adoption" },
-    { icon: Leaf,          label: "Green plan %",  v: `${k.greenPct}%`,            sub: "green-school adopters" },
+    { icon: ShieldAlert,   label: "Climate risk",  v: k.hazardDataAvailable ? `${k.avgHazard}%` : "NA",           sub: "hazard exposure load" },
+    { icon: Building2,     label: "CR-SAP %",      v: k.crsapPct ? `${k.crsapPct}%` : "NA",            sub: "plan adoption" },
+    { icon: Leaf,          label: "Green plan %",  v: k.greenPct ? `${k.greenPct}%` : "NA",            sub: "green-school adopters" },
   ];
   return (
     <div className="flex flex-col min-h-full">
