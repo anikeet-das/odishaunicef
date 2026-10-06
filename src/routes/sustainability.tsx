@@ -49,10 +49,10 @@ function MacroView({ data, buckets }: { data: School[]; buckets: { range: string
     [filtered],
   );
   const overall = [
-    { name: "Sustainability", value: k.avgSust, fill: "oklch(0.78 0.2 165)" },
-    { name: "WASH",           value: k.avgWash, fill: "oklch(0.78 0.18 210)" },
-    { name: "CR-SAP",         value: k.crsapPct, fill: "oklch(0.78 0.18 280)" },
-    { name: "Green Plan",     value: k.greenPct, fill: "oklch(0.82 0.2 145)" },
+    ...(k.sustainabilityDataAvailable ? [{ name: "Sustainability", value: k.avgSust, fill: "oklch(0.78 0.2 165)" }] : []),
+    ...(k.washDataAvailable ? [{ name: "WASH", value: k.avgWash, fill: "oklch(0.78 0.18 210)" }] : []),
+    ...(k.crsapDataAvailable ? [{ name: "CR-SAP", value: k.crsapPct, fill: "oklch(0.78 0.18 280)" }] : []),
+    ...(k.greenDataAvailable ? [{ name: "Green Plan", value: k.greenPct, fill: "oklch(0.82 0.2 145)" }] : []),
   ];
   return (
     <div className="flex flex-col min-h-full">
@@ -95,10 +95,10 @@ function MacroView({ data, buckets }: { data: School[]; buckets: { range: string
             </ResponsiveContainer>
           </div>
           <div className="grid grid-cols-4 gap-2 mt-2 text-center">
-            <Mini label="Sust." v={`${k.avgSust}%`} />
-            <Mini label="WASH" v={`${k.avgWash}%`} />
-            <Mini label="CR-SAP" v={`${k.crsapPct}%`} />
-            <Mini label="Green" v={`${k.greenPct}%`} />
+            <Mini label="Sust." v={k.sustainabilityDataAvailable ? `${k.avgSust}%` : "NA"} />
+            <Mini label="WASH" v={k.washDataAvailable ? `${k.avgWash}%` : "NA"} />
+            <Mini label="CR-SAP" v={k.crsapDataAvailable ? `${k.crsapPct}%` : "NA"} />
+            <Mini label="Green" v={k.greenDataAvailable ? `${k.greenPct}%` : "NA"} />
           </div>
         </div>
 

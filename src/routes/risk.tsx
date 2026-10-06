@@ -46,12 +46,12 @@ function MacroView({ schools }: { schools: School[] }) {
       .map((d) => ({
         month: d.district.slice(0, 8),
         hazard: d.avgHazard,
-        infraGap: Math.max(0, 100 - d.avgWash),
-        sust: d.avgSust,
+        infraGap: d.washDataAvailable ? Math.max(0, 100 - d.avgWash) : null,
+        sust: d.sustainabilityDataAvailable ? d.avgSust : null,
       }));
   }, [schools]);
 
-  const overallRisk = kpis.hazardDataAvailable
+  const overallRisk = kpis.hazardDataAvailable && kpis.washDataAvailable
     ? Math.round((kpis.avgHazard + (100 - kpis.avgWash) * 0.4) / 1.4)
     : null;
 
@@ -79,13 +79,13 @@ function MacroView({ schools }: { schools: School[] }) {
             </div>
             <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-2">
               <Stat label="Climate Risk" value={kpis.hazardDataAvailable ? `${kpis.avgHazard}%` : "NA"} accent="var(--warn)" />
-              <Stat label="Infra Vulnerability" value={`${100 - kpis.avgWash}%`} accent="var(--danger)" />
-              <Stat label="WASH Strength" value={`${kpis.avgWash}%`} accent="var(--cyan)" />
-              <Stat label="Sustainability" value={`${kpis.avgSust}%`} accent="var(--aurora)" />
-              <Stat label="SDMP Coverage" value={`${kpis.sdmpPct}%`} accent="var(--cyan)" />
-              <Stat label="Drills Coverage" value={`${kpis.drillsPct}%`} accent="var(--aurora)" />
-              <Stat label="CR-SAP Adoption" value={`${kpis.crsapPct}%`} accent="var(--indigo-glow)" />
-              <Stat label="Green Plan" value={`${kpis.greenPct}%`} accent="var(--aurora)" />
+              <Stat label="Infra Vulnerability" value={kpis.washDataAvailable ? `${100 - kpis.avgWash}%` : "NA"} accent="var(--danger)" />
+              <Stat label="WASH Strength" value={kpis.washDataAvailable ? `${kpis.avgWash}%` : "NA"} accent="var(--cyan)" />
+              <Stat label="Sustainability" value={kpis.sustainabilityDataAvailable ? `${kpis.avgSust}%` : "NA"} accent="var(--aurora)" />
+              <Stat label="SDMP Coverage" value={kpis.sdmpDataAvailable ? `${kpis.sdmpPct}%` : "NA"} accent="var(--cyan)" />
+              <Stat label="Drills Coverage" value={kpis.drillsDataAvailable ? `${kpis.drillsPct}%` : "NA"} accent="var(--aurora)" />
+              <Stat label="CR-SAP Adoption" value={kpis.crsapDataAvailable ? `${kpis.crsapPct}%` : "NA"} accent="var(--indigo-glow)" />
+              <Stat label="Green Plan" value={kpis.greenDataAvailable ? `${kpis.greenPct}%` : "NA"} accent="var(--aurora)" />
             </div>
           </div>
         </div>
@@ -193,14 +193,14 @@ function Stat({ label, value, accent }: { label: string; value: string; accent: 
 }
 
 function aiThreats(schools: School[]) {
-  const aggs = aggregateByDistrict(schools);
-  const worstFlood = [...aggs].sort((a, b) => b.avgHazard - a.avgHazard)[0];
-  const lowSust = [...aggs].sort((a, b) => a.avgSust - b.avgSust)[0];
-  const lowWash = [...aggs].sort((a, b) => a.avgWash - b.avgWash)[0];
+  const aggs = aggregateByDistrict(schools).filter((d) => d.schools > 0);
+  const worstFlood = [...aggs].filter((d) => d.hazardDataAvailable).sort((a, b) => b.avgHazard - a.avgHazard)[0];
+  const lowSust = [...aggs].filter((d) => d.sustainabilityDataAvailable).sort((a, b) => a.avgSust - b.avgSust)[0];
+  const lowWash = [...aggs].filter((d) => d.washDataAvailable).sort((a, b) => a.avgWash - b.avgWash)[0];
   return [
-    { tag: "Coastal exposure", text: `${worstFlood.district} shows the highest composite climate risk at ${worstFlood.avgHazard}% — prioritise SDMP rollout.` },
-    { tag: "Sustainability gap", text: `${lowSust.district} trails the state in sustainability (${lowSust.avgSust}%). Schedule Green-Plan workshops.` },
-    { tag: "WASH alert", text: `${lowWash.district} has the lowest WASH composite at ${lowWash.avgWash}%. Audit water and sanitation infrastructure.` },
+    { tag: "Coastal exposure", text: worstFlood ? `${worstFlood.district} shows the highest submitted climate-risk load at ${worstFlood.avgHazard}% — prioritise SDMP rollout.` : "Hazard responses are not available for a district ranking." },
+    { tag: "Sustainability gap", text: lowSust ? `${lowSust.district} has the lowest observed sustainability score (${lowSust.avgSust}%). Schedule Green-Plan workshops.` : "Sustainability section responses are not available for a district ranking." },
+    { tag: "WASH alert", text: lowWash ? `${lowWash.district} has the lowest observed WASH composite at ${lowWash.avgWash}%. Audit water and sanitation infrastructure.` : "Water, sanitation, and hygiene responses are not available for a district ranking." },
      { tag: "Source boundary", text: "This page does not forecast weather. Use submitted hazard responses and official warnings for operational decisions." },
   ];
 }
