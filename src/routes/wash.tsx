@@ -36,9 +36,9 @@ function Macro() {
   const kpis = useMemo(() => (schools ? platformKpis(schools) : null), [schools]);
   const byDistrict = useMemo(() => (schools ? aggregateByDistrict(schools) : []), [schools]);
 
-  const waterData = useMemo(() => byDistrict.filter((d) => d.schools > 0).slice(0, 10).map((d) => ({ name: d.district.slice(0, 10), wash: d.avgWash, sus: d.avgSust })), [byDistrict]);
+  const waterData = useMemo(() => byDistrict.filter((d) => d.schools > 0 && d.washDataAvailable).slice(0, 10).map((d) => ({ name: d.district.slice(0, 10), wash: d.avgWash, sus: d.sustainabilityDataAvailable ? d.avgSust : null })), [byDistrict]);
   const waterDistricts = useMemo(() =>
-    byDistrict.filter((d) => d.schools > 0).slice(0, 10).map((d) => ({ name: d.district.slice(0, 10), water: d.avgWash })),
+    byDistrict.filter((d) => d.schools > 0 && d.washDataAvailable).slice(0, 10).map((d) => ({ name: d.district.slice(0, 10), water: d.avgWash })),
     [byDistrict]);
 
   // Real sanitation readiness buckets, derived from each school's washScore.
@@ -60,7 +60,7 @@ function Macro() {
     const n = list.length || 1;
     const avg = (f: (s: typeof list[number]) => number | null) => {
       const values = list.map(f).filter((value): value is number => value !== null);
-      return values.length ? Math.round(values.reduce((a, value) => a + value, 0) / values.length) : 0;
+      return values.length ? Math.round(values.reduce((a, value) => a + value, 0) / values.length) : null;
     };
     return [
       { k: "Water", v: avg((s) => s.sectionScores.water) },
@@ -88,7 +88,7 @@ function Macro() {
           <div className="min-w-0">
             <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">Aurora · Odisha WASH Synthesis</div>
             <p className="text-sm mt-1 leading-relaxed">
-              State-wide WASH composite sits at <b className="text-[var(--cyan)]">{kpis.avgWash}%</b> across <b>{kpis.total.toLocaleString()}</b> schools.{" "}
+               State-wide WASH composite is <b className="text-[var(--cyan)]">{kpis.washDataAvailable ? `${kpis.avgWash}%` : "NA"}</b> across <b>{kpis.total.toLocaleString()}</b> schools.{" "}
               {donut[0].v.toLocaleString()} schools are functional, {donut[1].v.toLocaleString()} partial and {donut[2].v.toLocaleString()} deficient.{" "}
               {byDistrict.length > 0 && (() => {
                 const sorted = [...byDistrict].filter((d) => d.schools > 0).sort((a, b) => b.avgWash - a.avgWash);

@@ -25,6 +25,8 @@ function Page() {
   const behaviour = sectionAverage("behaviour");
   const green = data.filter((s) => s.hasGreenPlan === true).length;
   const drills = data.filter((s) => s.mockDrills === true).length;
+  const greenValue = data.some((s) => s.hasGreenPlan !== null) ? green : null;
+  const drillsValue = data.some((s) => s.mockDrills !== null) ? drills : null;
 
   return (
     <div className="flex flex-col min-h-full">
@@ -49,20 +51,20 @@ function Page() {
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card icon={<Recycle className="h-5 w-5" />} title="Waste management" value={waste ?? 0} total={waste === null ? undefined : 100} hint="Live score from the form’s Waste Management section." />
-          <Card icon={<Leaf className="h-5 w-5" />} title="Environment" value={environment ?? 0} total={environment === null ? undefined : 100} hint="Live score from the form’s Environment section." />
-          <Card icon={<Zap className="h-5 w-5" />} title="Energy" value={energy ?? 0} total={energy === null ? undefined : 100} hint="Live score from the form’s Energy section." />
-          <Card icon={<GraduationCap className="h-5 w-5" />} title="Behaviour change" value={behaviour ?? 0} total={behaviour === null ? undefined : 100} hint="Live score from the form’s Behaviour section." />
-          <Card icon={<Leaf className="h-5 w-5" />}      title="Green / sustainable plans" value={green} total={total} hint="Schools with a formal clean & sustainable action plan." />
-          <Card icon={<Droplets className="h-5 w-5" />}  title="Mock drills reported"        value={drills}     total={total} hint="Schools regularly running disaster response drills." />
+          <Card icon={<Recycle className="h-5 w-5" />} title="Waste management" value={waste} total={waste === null ? undefined : 100} hint="Live score from the form’s Waste Management section." />
+          <Card icon={<Leaf className="h-5 w-5" />} title="Environment" value={environment} total={environment === null ? undefined : 100} hint="Live score from the form’s Environment section." />
+          <Card icon={<Zap className="h-5 w-5" />} title="Energy" value={energy} total={energy === null ? undefined : 100} hint="Live score from the form’s Energy section." />
+          <Card icon={<GraduationCap className="h-5 w-5" />} title="Behaviour change" value={behaviour} total={behaviour === null ? undefined : 100} hint="Live score from the form’s Behaviour section." />
+          <Card icon={<Leaf className="h-5 w-5" />}      title="Green / sustainable plans" value={greenValue} total={greenValue === null ? undefined : total} hint="Schools with a formal clean & sustainable action plan." />
+          <Card icon={<Droplets className="h-5 w-5" />}  title="Mock drills reported"        value={drillsValue}     total={drillsValue === null ? undefined : total} hint="Schools regularly running disaster response drills." />
         </div>
       </div>
     </div>
   );
 }
 
-function Card({ icon, title, value, total, unit = "", hint }: { icon: React.ReactNode; title: string; value: number; total?: number; unit?: string; hint: string }) {
-  const pct = total ? Math.round((value / total) * 100) : null;
+function Card({ icon, title, value, total, unit = "", hint }: { icon: React.ReactNode; title: string; value: number | null; total?: number; unit?: string; hint: string }) {
+  const pct = total && value !== null ? Math.round((value / total) * 100) : null;
   return (
     <div className="glass rounded-2xl p-4 relative overflow-hidden">
       <div className="absolute -top-8 -right-8 h-24 w-24 rounded-full opacity-25"
@@ -71,7 +73,7 @@ function Card({ icon, title, value, total, unit = "", hint }: { icon: React.Reac
         <div className="h-9 w-9 grid place-items-center rounded-xl text-background" style={{ background: "var(--gradient-aurora)" }}>{icon}</div>
         <div className="min-w-0">
           <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground truncate">{title}</div>
-          <div className="text-2xl font-bold tabular-nums">{value.toLocaleString()}{unit}</div>
+          <div className="text-2xl font-bold tabular-nums">{value === null ? "NA" : `${value.toLocaleString()}${unit}`}</div>
         </div>
       </div>
       {pct !== null && (

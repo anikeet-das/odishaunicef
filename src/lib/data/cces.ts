@@ -118,7 +118,7 @@ export function useSchools() {
   return useQuery({ queryKey: ["cces", "schools"], queryFn: loadSchools, staleTime: 10_000, refetchInterval: 30_000, refetchOnWindowFocus: true });
 }
 
-export type DistrictAgg = { districtId: number; district: string; lat: number; lng: number; schools: number; students: number; avgShvr: number; avgSust: number; avgWash: number; avgHazard: number; hazardDataAvailable: boolean; crsapAdoption: number; greenAdoption: number; topHazard: HazardKey | null };
+export type DistrictAgg = { districtId: number; district: string; lat: number; lng: number; schools: number; students: number; avgShvr: number; avgSust: number; avgWash: number; avgHazard: number; hazardDataAvailable: boolean; shvrDataAvailable: boolean; sustainabilityDataAvailable: boolean; washDataAvailable: boolean; crsapAdoption: number; greenAdoption: number; topHazard: HazardKey | null };
 export function aggregateByDistrict(schools: School[]): DistrictAgg[] {
   const out: DistrictAgg[] = [];
   for (const d of ODISHA_DISTRICTS) {
@@ -126,7 +126,15 @@ export function aggregateByDistrict(schools: School[]): DistrictAgg[] {
     const avg = (values: Array<number | null>) => average(values);
     const risk = list.map((s) => s.hazardScore).filter((v): v is number => v !== null);
     const shvr = list.filter((s) => s.shvrAvailable).map((s) => s.shvr);
-    out.push({ districtId: d.id, district: d.name, lat: d.lat, lng: d.lng, schools: list.length, students: list.reduce((a, s) => a + s.totalStudents, 0), avgShvr: shvr.length ? Number((shvr.reduce((a, v) => a + v, 0) / shvr.length).toFixed(2)) : 0, avgSust: avg(list.map((s) => s.sustainabilityScore)), avgWash: avg(list.map((s) => s.washScore)), avgHazard: risk.length ? Math.round(risk.reduce((a, v) => a + v, 0) / risk.length) : 0, hazardDataAvailable: risk.length > 0, crsapAdoption: list.length ? Math.round(list.filter((s) => s.hasCRSAP === true).length / list.length * 100) : 0, greenAdoption: 0, topHazard: null });
+    const hazardTotals = new Map<HazardKey, number>();
+    for (const school of list) for (const hazard of HAZARDS) {
+      const value = school.hazards[hazard];
+      if (value !== null) hazardTotals.set(hazard, (hazardTotals.get(hazard) ?? 0) + value);
+    }
+    const topHazard = [...hazardTotals.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+    const sustAvailable = list.some((s) => Object.values(s.sectionScores).some((v) => v !== null && v !== undefined));
+    const washAvailable = list.some((s) => [s.sectionScores.water, s.sectionScores.sanitation, s.sectionScores.hygiene].some((v) => v !== null));
+    out.push({ districtId: d.id, district: d.name, lat: d.lat, lng: d.lng, schools: list.length, students: list.reduce((a, s) => a + s.totalStudents, 0), avgShvr: shvr.length ? Number((shvr.reduce((a, v) => a + v, 0) / shvr.length).toFixed(2)) : 0, avgSust: avg(list.map((s) => s.sustainabilityScore)), avgWash: avg(list.map((s) => s.washScore)), avgHazard: risk.length ? Math.round(risk.reduce((a, v) => a + v, 0) / risk.length) : 0, hazardDataAvailable: risk.length > 0, shvrDataAvailable: shvr.length > 0, sustainabilityDataAvailable: sustAvailable, washDataAvailable: washAvailable, crsapAdoption: list.length ? Math.round(list.filter((s) => s.hasCRSAP === true).length / list.length * 100) : 0, greenAdoption: 0, topHazard });
   }
   return out;
 }
@@ -134,7 +142,13 @@ export function platformKpis(schools: School[]) {
   const n = schools.length || 1; const averageValue = (values: number[]) => values.length ? values.reduce((a, v) => a + v, 0) / values.length : 0;
   const risks = schools.map((s) => s.hazardScore).filter((v): v is number => v !== null);
   const rated = schools.filter((s) => s.shvrAvailable).map((s) => s.shvr);
-  return { total: schools.length, students: schools.reduce((a, s) => a + s.totalStudents, 0), staff: schools.reduce((a, s) => a + s.totalStaff, 0), avgShvr: Number(averageValue(rated).toFixed(2)), avgSust: Math.round(averageValue(schools.map((s) => s.sustainabilityScore))), avgWash: Math.round(averageValue(schools.map((s) => s.washScore))), avgHazard: risks.length ? Math.round(averageValue(risks)) : 0, crsapPct: Math.round(schools.filter((s) => s.hasCRSAP === true).length / n * 100), greenPct: 0, sdmpPct: Math.round(schools.filter((s) => s.hasSDMP === true).length / n * 100), drillsPct: 0, hazardDataAvailable: risks.length > 0 };
+  const sustainabilityDataAvailable = schools.some((s) => Object.values(s.sectionScores).some((v) => v !== null && v !== undefined));
+  const washDataAvailable = schools.some((s) => [s.sectionScores.water, s.sectionScores.sanitation, s.sectionScores.hygiene].some((v) => v !== null));
+  const crsapKnown = schools.some((s) => s.hasCRSAP !== null);
+  const greenKnown = schools.some((s) => s.hasGreenPlan !== null);
+  const sdmpKnown = schools.some((s) => s.hasSDMP !== null);
+  const drillsKnown = schools.some((s) => s.mockDrills !== null);
+  return { total: schools.length, students: schools.reduce((a, s) => a + s.totalStudents, 0), staff: schools.reduce((a, s) => a + s.totalStaff, 0), avgShvr: Number(averageValue(rated).toFixed(2)), avgSust: Math.round(averageValue(schools.map((s) => s.sustainabilityScore))), avgWash: Math.round(averageValue(schools.map((s) => s.washScore))), avgHazard: risks.length ? Math.round(averageValue(risks)) : 0, crsapPct: Math.round(schools.filter((s) => s.hasCRSAP === true).length / n * 100), greenPct: greenKnown ? Math.round(schools.filter((s) => s.hasGreenPlan === true).length / n * 100) : 0, sdmpPct: sdmpKnown ? Math.round(schools.filter((s) => s.hasSDMP === true).length / n * 100) : 0, drillsPct: drillsKnown ? Math.round(schools.filter((s) => s.mockDrills === true).length / n * 100) : 0, hazardDataAvailable: risks.length > 0, shvrDataAvailable: rated.length > 0, sustainabilityDataAvailable, washDataAvailable, crsapDataAvailable: crsapKnown, greenDataAvailable: greenKnown, sdmpDataAvailable: sdmpKnown, drillsDataAvailable: drillsKnown };
 }
 export function hazardBreakdown(schools: School[]) {
   return HAZARDS.map((hazard) => { const samples = schools.filter((s) => s.hazards[hazard] !== null); const exposed = samples.filter((s) => (s.hazards[hazard] ?? 0) > 0).length; return { hazard, exposed, high: samples.filter((s) => (s.hazards[hazard] ?? 0) >= 2).length, exposedPct: samples.length ? Math.round(exposed / samples.length * 100) : null, available: samples.length > 0 }; }).sort((a, b) => b.exposed - a.exposed);

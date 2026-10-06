@@ -156,10 +156,10 @@ function MacroView({ rows, schools }: { rows: DistrictAgg[]; schools: School[] }
                     <td className="px-3 py-2 font-medium">{d.district}</td>
                     <td className="px-3 py-2 tabular-nums">{d.schools}</td>
                     <td className="px-3 py-2 tabular-nums">{d.students.toLocaleString()}</td>
-                    <td className="px-3 py-2 tabular-nums">{d.avgShvr.toFixed(2)}</td>
-                    <td className="px-3 py-2 tabular-nums">{d.avgSust}%</td>
-                    <td className="px-3 py-2 tabular-nums">{d.avgWash}%</td>
-                    <td className="px-3 py-2 tabular-nums">{d.avgHazard}%</td>
+                    <td className="px-3 py-2 tabular-nums">{d.shvrDataAvailable ? d.avgShvr.toFixed(2) : "NA"}</td>
+                    <td className="px-3 py-2 tabular-nums">{d.sustainabilityDataAvailable ? `${d.avgSust}%` : "NA"}</td>
+                    <td className="px-3 py-2 tabular-nums">{d.washDataAvailable ? `${d.avgWash}%` : "NA"}</td>
+                    <td className="px-3 py-2 tabular-nums">{d.hazardDataAvailable ? `${d.avgHazard}%` : "NA"}</td>
                     <td className="px-3 py-2 tabular-nums">{d.crsapAdoption}%</td>
                     <td className="px-3 py-2 text-muted-foreground">{d.topHazard ?? "—"}</td>
                   </tr>
@@ -175,10 +175,10 @@ function MacroView({ rows, schools }: { rows: DistrictAgg[]; schools: School[] }
 
 function comparisonNarrative(rows: DistrictAgg[]): string {
   if (rows.length === 0) return "Select districts on the sunburst to compare.";
-  const best = [...rows].sort((a, b) => b.avgSust - a.avgSust)[0];
-  const worst = [...rows].sort((a, b) => b.avgHazard - a.avgHazard)[0];
-  const washLeader = [...rows].sort((a, b) => b.avgWash - a.avgWash)[0];
-  return `Across the ${rows.length} highlighted districts, ${best.district} leads sustainability at ${best.avgSust}%, while ${worst.district} carries the heaviest climate-risk load (${worst.avgHazard}%, top hazard: ${worst.topHazard ?? "n/a"}). ${washLeader.district} sets the WASH benchmark at ${washLeader.avgWash}% — replicate its operational playbook. Recommended action: priority CR-SAP rollout in the bottom-half by sustainability with paired drills in the high-risk cohort.`;
+  const best = [...rows].filter((r) => r.sustainabilityDataAvailable).sort((a, b) => b.avgSust - a.avgSust)[0];
+  const worst = [...rows].filter((r) => r.hazardDataAvailable).sort((a, b) => b.avgHazard - a.avgHazard)[0];
+  const washLeader = [...rows].filter((r) => r.washDataAvailable).sort((a, b) => b.avgWash - a.avgWash)[0];
+  return `Across the ${rows.length} highlighted districts, ${best ? `${best.district} leads sustainability at ${best.avgSust}%` : "sustainability is NA"}, while ${worst ? `${worst.district} carries the heaviest submitted climate-risk load (${worst.avgHazard}%, top hazard: ${worst.topHazard ?? "n/a"})` : "climate risk is NA"}. ${washLeader ? `${washLeader.district} sets the WASH benchmark at ${washLeader.avgWash}%` : "WASH is NA"}.`;
 }
 
 /* ========================= MICRO — 30x1 flight-ticket matrix ========================= */
