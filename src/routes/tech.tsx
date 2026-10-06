@@ -48,13 +48,13 @@ function Macro({ schools }: { schools: School[] }) {
   };
 
   const radial = [
-    { name: "Internet", value: avg("internet") ?? 0, fill: "oklch(0.86 0.16 200)" },
-    { name: "Smart class", value: avg("smartClass") ?? 0, fill: "oklch(0.72 0.21 255)" },
-    { name: "Devices", value: avg("devices") ?? 0, fill: "oklch(0.78 0.14 190)" },
-    { name: "AI readiness", value: avg("aiReadiness") ?? 0, fill: "oklch(0.62 0.22 285)" },
-    { name: "Digital literacy", value: avg("literacy") ?? 0, fill: "oklch(0.84 0.2 155)" },
-    { name: "Infra quality", value: avg("infra") ?? 0, fill: "oklch(0.85 0.18 75)" },
-  ];
+    { name: "Internet", value: avg("internet"), fill: "oklch(0.86 0.16 200)" },
+    { name: "Smart class", value: avg("smartClass"), fill: "oklch(0.72 0.21 255)" },
+    { name: "Devices", value: avg("devices"), fill: "oklch(0.78 0.14 190)" },
+    { name: "AI readiness", value: avg("aiReadiness"), fill: "oklch(0.62 0.22 285)" },
+    { name: "Digital literacy", value: avg("literacy"), fill: "oklch(0.84 0.2 155)" },
+    { name: "Infra quality", value: avg("infra"), fill: "oklch(0.85 0.18 75)" },
+  ].filter((item): item is { name: string; value: number; fill: string } => item.value !== null);
 
   const byDistrict = useMemo(() => {
     const map = new Map<string, { sum: number; n: number }>();
@@ -99,7 +99,7 @@ function Macro({ schools }: { schools: School[] }) {
             <div className="glass-strong rounded-2xl p-5">
               <div className="flex items-center gap-2 mb-2"><Sparkles className="h-4 w-4 text-[var(--aurora)]" /><div className="text-sm font-semibold">AI synthesis</div></div>
               <p className="text-xs leading-relaxed">
-                Odisha's average technology readiness sits at <b className="text-[var(--cyan)]">{Math.round(radial.reduce((s, r) => s + r.value, 0) / radial.length)}%</b>.
+                 {radial.length ? <>Odisha's average technology readiness across reported fields is <b className="text-[var(--cyan)]">{Math.round(radial.reduce((s, r) => s + r.value, 0) / radial.length)}%</b>.</> : <>The connected form does not contain technology-readiness responses yet.</>}
                  {avg("aiReadiness") === null ? "The connected form does not contain technology-readiness responses yet." : <>AI readiness is currently <b>{avg("aiReadiness")}%</b>; use the source responses to target support.</>}
               </p>
             </div>
