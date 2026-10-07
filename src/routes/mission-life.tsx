@@ -30,8 +30,7 @@ function Page() {
 
   return (
     <div className="flex flex-col min-h-full">
-      <Topbar title="Mission LiFE" subtitle="Lifestyle for Environment · Adoption Intelligence"
-              uploadTab="Mission LiFE" uploadRecommendedColumns={["School_Name", "Eco_Club_Yes_No", "Carbon_kgCO2", "Plastic_Free", "Solar_kW", "Trees_Planted"]} />
+      <Topbar title="Mission LiFE" subtitle="Lifestyle for Environment · Adoption Intelligence" />
       <div className="p-3 space-y-3">
         {/* AI synthesis */}
         <div className="glass-strong rounded-2xl p-5">
