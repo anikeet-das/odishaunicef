@@ -1,4 +1,5 @@
-- [ ] Align live response parsing with the provided 11-section CR-SAP Google Form
-- [ ] Recalculate WASH, risk, sustainability, SHVR, scorecard, finance, and AI notes from real form fields only
-- [ ] Update existing infographics and labels to match the form without changing the overall dashboard structure
-- [ ] Validate the live response path and preview build
+- [x] Align live response parsing with the provided 11-section CR-SAP Google Form
+- [x] Recalculate WASH, risk, sustainability, SHVR, scorecard, finance, and AI notes from real form fields only
+- [x] Update existing infographics and labels to match the form without changing the overall dashboard structure
+- [x] Validate the live response path and preview build
+- [x] Package a clean source-code ZIP in Files

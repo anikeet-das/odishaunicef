@@ -71,8 +71,7 @@ function Macro({ schools }: { schools: School[] }) {
 
   return (
     <div className="flex flex-col min-h-full">
-      <Topbar title="Tech Analysis" subtitle="Technology readiness · MacroView"
-              uploadTab="Tech Analysis" uploadRecommendedColumns={["School_Name", "UDISE", "Internet_Mbps", "Smart_Class", "Device_Count", "AI_Readiness"]} />
+      <Topbar title="Tech Analysis" subtitle="Technology readiness · MacroView" />
       <div className="p-3 space-y-3">
         <div className="glass rounded-2xl p-3 flex flex-wrap items-center gap-2">
           <div className="inline-flex rounded-full glass-soft p-1 text-xs">
@@ -135,8 +134,7 @@ function Micro({ schools }: { schools: School[] }) {
 
   return (
     <div className="flex flex-col min-h-full">
-      <Topbar title="Tech Analysis" subtitle="Per-school readiness · MicroView"
-              uploadTab="Tech Analysis" uploadRecommendedColumns={["School_Name", "UDISE", "Internet_Mbps", "Smart_Class", "Device_Count", "AI_Readiness"]} />
+      <Topbar title="Tech Analysis" subtitle="Per-school readiness · MicroView" />
       <div className="p-3 space-y-3">
         <div className="glass rounded-2xl p-3 flex flex-wrap items-center gap-2">
           <div className="relative flex-1 min-w-[200px]">
