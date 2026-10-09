@@ -3,3 +3,6 @@
 - [x] Update existing infographics and labels to match the form without changing the overall dashboard structure
 - [x] Validate the live response path and preview build
 - [x] Package a clean source-code ZIP in Files
+- [ ] Repair shared mobile navigation, page headers, scrolling and overlays without changing desktop
+- [ ] Fix mobile/tablet page controls, maps, charts and settings layouts
+- [ ] Verify mobile, tablet and desktop navigation and content accessibility

@@ -434,3 +434,47 @@ html[data-theme="cream"] .recharts-cartesian-axis-tick-line { stroke: oklch(0.6 
   fill: var(--foreground) !important;
   opacity: 0.85;
 }
+
+/* Small-screen shell: scrolling content owns the navigation clearance. */
+@media (max-width: 1023px) {
+  .app-shell { height: 100dvh; }
+  .app-main {
+    height: 100dvh;
+    padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px));
+    scroll-padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px));
+    overscroll-behavior-y: contain;
+  }
+  .section-navigation { padding-right: 64px; }
+  .mobile-bottom-nav { bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
+  .mobile-nav-sheet { bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
+  .ai-chat-trigger { bottom: calc(112px + env(safe-area-inset-bottom, 0px)); right: 16px; }
+  .ai-chat-panel {
+    bottom: calc(112px + env(safe-area-inset-bottom, 0px));
+    right: 12px;
+    width: min(720px, calc(100vw - 24px)) !important;
+    height: min(560px, calc(100dvh - 140px)) !important;
+  }
+  .app-main :where(.grid > *, .flex > *) { min-width: 0; }
+  .app-main :where(.glass, .glass-soft, .glass-strong) { max-width: 100%; }
+  .app-main :where(h1, h2, h3, p) { overflow-wrap: anywhere; }
+  .app-main :where(input:not([type="range"]):not([type="checkbox"]), select, textarea) { max-width: 100%; }
+  .app-main :where(.overflow-x-auto, .overflow-auto) { max-width: 100%; overscroll-behavior-x: contain; }
+  .app-main :where(.overflow-x-auto, .overflow-auto) > table { min-width: 640px; }
+  .app-main :where(.recharts-responsive-container) { min-width: 0; }
+  .app-main .recharts-legend-item { margin-bottom: 4px !important; }
+  .app-main :where(.flex.items-baseline.justify-between, .flex.items-center.justify-between.mb-3) { gap: 8px; flex-wrap: wrap; }
+  .odisha-map-legend { position: relative; top: auto; left: auto; margin: 12px; width: calc(100% - 24px); }
+  .odisha-map-legend ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+  .odisha-map-stage { height: calc(100% - 190px); }
+  .odisha-map-canvas { height: auto !important; aspect-ratio: 10 / 7; }
+  .odisha-map-tooltip { left: 50% !important; top: auto !important; bottom: 8px; transform: translateX(-50%) !important; }
+}
+@media (max-width: 639px) {
+  .mobile-unicef-disc { width: 64px !important; height: 64px !important; }
+  .mobile-unicef-disc img { height: 36px; }
+  .app-main :where(.glass.p-6, .glass.p-5, .glass-strong.p-6) { padding: 16px; }
+  .app-main :where(input:not([type="range"]):not([type="checkbox"]), select, textarea) { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-main { scroll-behavior: auto; }
+}

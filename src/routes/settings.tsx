@@ -19,12 +19,12 @@ export const Route = createFileRoute("/settings")({
 
 function Row({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-6 py-4 border-b border-border/40 last:border-0">
+    <div className="grid grid-cols-1 lg:flex lg:items-center lg:justify-between gap-3 lg:gap-6 py-4 border-b border-border/40 last:border-0">
       <div className="min-w-0">
         <div className="text-sm font-medium">{label}</div>
         {hint && <div className="text-xs text-muted-foreground mt-0.5">{hint}</div>}
       </div>
-      <div className="shrink-0 w-[260px] flex items-center justify-end gap-3">{children}</div>
+      <div className="min-w-0 w-full lg:shrink-0 lg:w-[260px] flex items-center justify-end gap-3">{children}</div>
     </div>
   );
 }

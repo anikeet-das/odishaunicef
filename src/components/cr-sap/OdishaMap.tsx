@@ -74,7 +74,7 @@ export function OdishaMap({
   return (
     <div className="relative w-full h-full rounded-2xl overflow-hidden glass-strong">
       {/* Legend — sustainability index from live responses */}
-      <div className="absolute left-3 top-3 z-20 glass rounded-xl p-2.5 w-44">
+      <div className="odisha-map-legend absolute left-3 top-3 z-20 glass rounded-xl p-2.5 w-44">
         <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground mb-1.5">
           Sustainability index
         </div>
@@ -102,11 +102,11 @@ export function OdishaMap({
         ref={ref}
         onPointerMove={onMove}
         onPointerLeave={() => setTilt(is3D ? { x: 18, y: -8 } : { x: 0, y: 0 })}
-        className="relative h-full w-full flex items-center justify-center"
+         className="odisha-map-stage relative h-full w-full flex items-center justify-center"
         style={{ perspective: "1400px" }}
       >
         <motion.div
-          className="relative"
+           className="odisha-map-canvas relative"
           style={{
             transformStyle: "preserve-3d",
             transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(${zoom})`,
@@ -179,7 +179,7 @@ export function OdishaMap({
               <motion.div
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="absolute glass-strong rounded-xl p-3 pointer-events-none"
+                 className="odisha-map-tooltip absolute glass-strong rounded-xl p-3 pointer-events-none"
                 style={{
                   left: `${(cx / W) * 100}%`,
                   top: `${(cy / H) * 100}%`,

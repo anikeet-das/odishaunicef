@@ -8,6 +8,7 @@ import {
   X, ChevronUp, Settings,
 } from "lucide-react";
 import unicefLogo from "@/assets/unicef-logo.png";
+import { Button } from "@/components/ui/button";
 
 /**
  * Apple-style frosted glass bottom navigation for tablet & mobile.
@@ -83,14 +84,11 @@ export function MobileBottomNav() {
 
   return (
     <>
-      {/* Spacer so page content never sits under the bar */}
-      <div className="lg:hidden h-[96px]" aria-hidden />
-
       {/* Floating Settings disc (top-right, mobile/tablet only) — hides on scroll */}
       <Link
         to="/settings"
         aria-label="Settings"
-        className={`lg:hidden fixed top-3 right-3 z-[55] h-10 w-10 grid place-items-center rounded-full transition-all duration-300 active:scale-95 ${
+        className={`mobile-settings lg:hidden fixed top-3 right-3 z-[55] h-10 w-10 grid place-items-center rounded-full transition-all duration-300 active:scale-95 ${
           atTop ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 -translate-y-3 pointer-events-none"
         }`}
         style={{
@@ -122,7 +120,8 @@ export function MobileBottomNav() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 240, opacity: 0 }}
               transition={{ type: "spring", stiffness: 320, damping: 32 }}
-              className="lg:hidden fixed left-3 right-3 bottom-[108px] z-[56] rounded-3xl overflow-hidden"
+              role="dialog" aria-label={openGroup.label}
+              className="mobile-nav-sheet lg:hidden fixed left-3 right-3 z-[56] rounded-3xl overflow-hidden"
               style={{
                 background: "color-mix(in oklab, var(--background) 70%, transparent)",
                 backdropFilter: "blur(28px) saturate(160%)",
@@ -136,9 +135,9 @@ export function MobileBottomNav() {
                   <openGroup.icon className="h-4 w-4" style={{ color: openGroup.accent }} />
                   <div className="text-sm font-semibold">{openGroup.label}</div>
                 </div>
-                <button onClick={() => setOpenGroup(null)} className="h-7 w-7 grid place-items-center rounded-full bg-white/5 text-muted-foreground">
+                <Button variant="ghost" size="icon" aria-label="Close navigation" onClick={() => setOpenGroup(null)} className="h-9 w-9 rounded-full bg-secondary/50 text-muted-foreground">
                   <X className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
               <div className="grid grid-cols-2 gap-2 px-4 pb-4 max-h-[55vh] overflow-y-auto scroll-invisible">
                 {openGroup.items.map((it) => {
@@ -148,7 +147,7 @@ export function MobileBottomNav() {
                       key={it.to}
                       to={it.to}
                       onClick={() => setOpenGroup(null)}
-                      className="flex items-center gap-3 rounded-2xl px-3 py-3 transition"
+                      className="flex min-w-0 items-center gap-2 rounded-2xl px-2.5 py-3 transition"
                       style={{
                         background: active
                           ? `color-mix(in oklab, ${openGroup.accent} 18%, transparent)`
@@ -156,11 +155,11 @@ export function MobileBottomNav() {
                         border: `1px solid ${active ? openGroup.accent : "transparent"}`,
                       }}
                     >
-                      <span className="h-9 w-9 grid place-items-center rounded-xl"
+                      <span className="h-9 w-9 shrink-0 grid place-items-center rounded-xl"
                             style={{ background: "color-mix(in oklab, var(--foreground) 8%, transparent)", color: openGroup.accent }}>
                         <it.icon className="h-4 w-4" />
                       </span>
-                      <span className="text-sm font-medium truncate">{it.label}</span>
+                      <span className="min-w-0 text-xs sm:text-sm font-medium break-words">{it.label}</span>
                     </Link>
                   );
                 })}
@@ -172,7 +171,8 @@ export function MobileBottomNav() {
 
       {/* Bottom bar */}
       <nav
-        className="lg:hidden fixed left-3 right-3 bottom-3 z-[60] h-[88px] rounded-[36px] flex items-center px-3"
+        aria-label="Main navigation"
+        className="mobile-bottom-nav lg:hidden fixed left-2 right-2 sm:left-3 sm:right-3 z-[60] h-[76px] sm:h-[88px] rounded-[30px] flex items-center px-1 sm:px-3"
         style={{
           background: "color-mix(in oklab, var(--background) 62%, transparent)",
           backdropFilter: "blur(26px) saturate(170%)",
@@ -193,7 +193,7 @@ export function MobileBottomNav() {
             <Link
               to="/admin"
               aria-label="Admin panel"
-              className="relative -mt-10 grid place-items-center rounded-full"
+              className="mobile-unicef-disc relative -mt-6 sm:-mt-10 grid place-items-center rounded-full"
               style={{
                 width: 84, height: 84,
                 background: "radial-gradient(circle at 30% 28%, #ffffff 0%, #f3faff 55%, #d6ecff 100%)",
@@ -229,10 +229,11 @@ export function MobileBottomNav() {
 function SideButton({ group, active, onClick }: { group: Group; active: boolean; onClick: () => void }) {
   const Icon = group.icon;
   return (
-    <button
+    <Button variant="ghost"
       type="button"
       onClick={onClick}
-      className="relative flex flex-col items-center justify-center gap-0.5 py-2 transition active:scale-95"
+      aria-expanded={false}
+      className="relative h-auto min-w-0 flex flex-col items-center justify-center gap-0.5 px-0 py-2 transition active:scale-95 hover:bg-transparent"
     >
       <span
         className="h-9 w-9 grid place-items-center rounded-2xl transition"
@@ -246,12 +247,12 @@ function SideButton({ group, active, onClick }: { group: Group; active: boolean;
       >
         <Icon className="h-4 w-4" />
       </span>
-      <span className="text-[10px] font-medium" style={{ color: active ? group.accent : "var(--muted-foreground)" }}>
+      <span className="text-[9px] sm:text-[10px] font-medium" style={{ color: active ? group.accent : "var(--muted-foreground)" }}>
         {group.label}
       </span>
       {active && (
         <ChevronUp className="absolute -top-1 h-3 w-3 opacity-70" style={{ color: group.accent }} />
       )}
-    </button>
+    </Button>
   );
 }

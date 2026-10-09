@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  type ErrorComponentProps,
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
@@ -42,7 +43,7 @@ function NotFoundComponent() {
   );
 }
 
-function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
   const router = useRouter();
 
@@ -92,8 +93,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
       { name: "twitter:title", content: "UNICEF WASH by ANIKET" },
       { name: "twitter:description", content: "Futuristic AI command center for climate-resilient WASH & sustainable schools across Odisha." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lC3zIBYxHxcHQuVu6MiYsrKGMnW2/social-images/social-1780818505793-ChatGPT_Image_Jun_7,_2026,_01_17_56_PM.webp" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/lC3zIBYxHxcHQuVu6MiYsrKGMnW2/social-images/social-1780818505793-ChatGPT_Image_Jun_7,_2026,_01_17_56_PM.webp" },
     ],
     links: [
       {

@@ -18,8 +18,8 @@ export function SectionTabs() {
   }
 
   return (
-    <div className="px-3 pt-3">
-      <div className="glass-soft rounded-2xl p-1.5 flex gap-1 overflow-x-auto scroll-invisible">
+    <nav aria-label={`${t(activeGroup.items[0].labelKey)} section navigation`} className="section-navigation px-3 pt-3">
+      <div className="glass-soft rounded-2xl p-1.5 grid grid-cols-2 gap-1 lg:flex lg:overflow-x-auto lg:scroll-invisible">
         {activeGroup.items.map((it) => {
           const active = pathname === it.to;
           const Icon = it.icon;
@@ -27,18 +27,19 @@ export function SectionTabs() {
             <Link
               key={it.to}
               to={it.to}
-              className={`shrink-0 inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm transition-all ${
+              aria-current={active ? "page" : undefined}
+              className={`min-w-0 lg:shrink-0 inline-flex items-center gap-2 px-2.5 lg:px-3.5 py-2.5 lg:py-2 rounded-xl text-xs lg:text-sm transition-all ${
                 active
-                  ? "bg-[oklch(0.85_0.2_195/0.12)] text-foreground neon-ring"
-                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                   ? "bg-primary/10 text-foreground neon-ring"
+                   : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
               }`}
             >
               <Icon className={`h-4 w-4 shrink-0 ${active ? "text-[var(--cyan)]" : ""}`} />
-              <span className="whitespace-nowrap font-medium">{t(it.labelKey)}</span>
+              <span className="min-w-0 break-words lg:whitespace-nowrap font-medium">{t(it.labelKey)}</span>
             </Link>
           );
         })}
       </div>
-    </div>
+    </nav>
   );
 }

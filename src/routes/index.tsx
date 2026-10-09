@@ -13,7 +13,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Overview · CR-SAP Odisha" },
-      { name: "description", content: "Live AI command center for 10,000 climate-resilient sustainable schools across Odisha." },
+       { name: "description", content: "Live school WASH, sustainability and climate resilience overview for CR-SAP Odisha." },
+       { property: "og:title", content: "Overview · CR-SAP Odisha" },
+       { property: "og:description", content: "Live school WASH, sustainability and climate resilience overview for CR-SAP Odisha." },
+       { property: "og:type", content: "website" },
+       { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Index,
@@ -21,8 +25,8 @@ export const Route = createFileRoute("/")({
 
 function KPI({ icon: Icon, label, value, accent }: { icon: any; label: string; value: string; accent?: string }) {
   return (
-    <div className="glass-soft rounded-2xl p-4 flex items-center gap-4 hover:neon-ring transition">
-      <div className="h-11 w-11 rounded-xl grid place-items-center" style={{ background: accent ?? "var(--gradient-aurora)" }}>
+    <div className="glass-soft rounded-2xl p-3 lg:p-4 flex flex-col items-start sm:flex-row sm:items-center gap-2 lg:gap-4 hover:neon-ring transition min-w-0">
+      <div className="h-11 w-11 shrink-0 rounded-xl grid place-items-center" style={{ background: accent ?? "var(--gradient-aurora)" }}>
         <Icon className="h-5 w-5 text-primary-foreground" />
       </div>
       <div className="min-w-0">
@@ -64,13 +68,13 @@ function Index() {
       <div className="p-3 grid gap-3">
         {/* Hero KPI strip */}
         <div className="glass rounded-2xl p-6">
-          <div className="flex items-center gap-4 mb-5">
-            <img src={unicefLogo} alt="UNICEF" className="h-10" />
-            <div>
+          <div className="grid grid-cols-[auto_minmax(0,1fr)] lg:flex items-center gap-3 lg:gap-4 mb-5">
+            <img src={unicefLogo} alt="UNICEF" className="h-10 shrink-0" />
+            <div className="min-w-0">
               <div className="text-[10px] uppercase tracking-[0.28em] text-muted-foreground">CR-SAP Odisha · Live</div>
-              <h2 className="text-2xl font-semibold neon-text">{kpi.total.toLocaleString()} Schools Intelligence Stream</h2>
+               <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold neon-text">{kpi.total.toLocaleString()} Schools Intelligence Stream</h2>
             </div>
-            <span className="ml-auto inline-flex items-center gap-2 text-xs glass-soft rounded-full px-3 py-1.5">
+            <span className="col-span-2 justify-self-start lg:ml-auto inline-flex items-center gap-2 text-xs glass-soft rounded-full px-3 py-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-[oklch(0.84_0.2_155)] pulse-dot" />
               tick #{tick} · every {settings.liveRefreshSec}s
             </span>
