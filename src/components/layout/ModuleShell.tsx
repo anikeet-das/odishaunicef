@@ -17,8 +17,8 @@ export function ModuleShell({
   return (
     <div className="flex flex-col min-h-full">
       <Topbar title={title} subtitle={subtitle} />
-      <div className="p-3 flex-1">
-        <div className="glass rounded-2xl p-6 min-h-[calc(100vh-9rem)]">
+      <div className="p-3 flex-1 min-w-0">
+        <div className="glass rounded-2xl p-3 sm:p-4 lg:p-6 min-w-0 lg:min-h-[calc(100vh-9rem)]">
           {mode === "macro" ? macro : micro}
         </div>
       </div>

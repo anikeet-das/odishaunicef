@@ -6,6 +6,7 @@ import { UploadDataButton } from "@/components/admin/UploadDataButton";
 import { useI18n } from "@/lib/i18n";
 import { useRouterState } from "@tanstack/react-router";
 import { tabFor } from "@/lib/tabs/config";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   title: string;
@@ -27,18 +28,18 @@ export function Topbar({ title, subtitle, hasViewToggle, uploadTab, uploadRecomm
     ? { tab: cfg.upload.tab, cols: cfg.upload.cols }
     : null;
   return (
-    <header className="glass-soft rounded-2xl mx-3 mt-3 px-4 sm:px-6 py-3 sm:py-4">
+    <header className="page-topbar glass-soft rounded-2xl mx-3 mt-3 px-4 sm:px-6 py-3 sm:py-4">
       {/* Top row: title (always) + desktop chips */}
-      <div className="flex items-start sm:items-center justify-between gap-3">
-        <div className="min-w-0 flex-1 pr-10 sm:pr-0">
-          <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground truncate">
+      <div className="grid grid-cols-1 lg:flex items-start lg:items-center justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground lg:truncate">
             {subtitle ?? t("common.commandCenter")}
           </div>
-          <h1 className="text-lg sm:text-xl font-semibold truncate">{title}</h1>
+          <h1 className="text-lg sm:text-xl font-semibold break-words lg:truncate">{title}</h1>
         </div>
 
         {/* Desktop: full chip strip */}
-        <div className="hidden md:flex items-center gap-2 flex-wrap justify-end">
+        <div className="hidden lg:flex items-center gap-2 flex-wrap justify-end">
           <LiveChip t={t} />
           <ViewToggle viewEnabled={viewEnabled} mode={mode} setMode={setMode} t={t} />
           {upload && <UploadDataButton tab={upload.tab} recommendedColumns={upload.cols} />}
@@ -48,7 +49,7 @@ export function Topbar({ title, subtitle, hasViewToggle, uploadTab, uploadRecomm
       </div>
 
       {/* Mobile row: compact, single line, scrollable */}
-      <div className="md:hidden mt-2 flex items-center gap-1.5 overflow-x-auto scroll-invisible -mx-1 px-1 pb-0.5">
+      <div className="lg:hidden mt-3 flex flex-wrap items-center gap-2">
         <LiveChip t={t} compact />
         <ViewToggle viewEnabled={viewEnabled} mode={mode} setMode={setMode} t={t} compact />
         {upload && <UploadDataButton tab={upload.tab} recommendedColumns={upload.cols} />}
@@ -81,22 +82,22 @@ function ViewToggle({
   }
   return (
     <div className="shrink-0 inline-flex rounded-full glass-soft p-1 text-[11px]">
-      <button
+      <Button variant="ghost"
         onClick={() => setMode("macro")}
         className={`flex items-center gap-1 ${compact ? "px-2 py-1" : "px-3 py-1.5"} rounded-full transition-all ${
           mode === "macro" ? "bg-primary/20 text-foreground neon-ring" : "text-muted-foreground"
         }`}
       >
         <Maximize2 className="h-3 w-3" /> {t("view.macro")}
-      </button>
-      <button
+      </Button>
+      <Button variant="ghost"
         onClick={() => setMode("micro")}
         className={`flex items-center gap-1 ${compact ? "px-2 py-1" : "px-3 py-1.5"} rounded-full transition-all ${
           mode === "micro" ? "bg-primary/20 text-foreground neon-ring" : "text-muted-foreground"
         }`}
       >
         <Minimize2 className="h-3 w-3" /> {t("view.micro")}
-      </button>
+      </Button>
     </div>
   );
 }
