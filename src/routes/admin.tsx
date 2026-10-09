@@ -92,7 +92,7 @@ function Page() {
           <div className="space-y-3">
             <div className="glass rounded-2xl p-2 flex flex-wrap items-center gap-2">
               {/* Core admin tabs */}
-              <div className="inline-flex items-center gap-1">
+               <div className="grid grid-cols-2 sm:grid-cols-3 lg:inline-flex items-center gap-1 w-full lg:w-auto">
                 {([
                   { id: "overview", label: "Overview", icon: ShieldCheck },
                   { id: "data-upload", label: "Data Upload", icon: Database },
@@ -122,9 +122,9 @@ function Page() {
               <div className="h-7 w-px bg-border mx-1 hidden md:block" />
 
               {/* AI SYSTEMS — separate category cluster, in-panel tabs */}
-              <div className="inline-flex items-center gap-1.5 rounded-2xl px-2 py-1"
+               <div className="grid grid-cols-2 sm:grid-cols-3 lg:inline-flex items-center gap-1.5 rounded-2xl px-2 py-1 w-full lg:w-auto"
                    style={{ background: "oklch(0.7 0.18 285 / 0.10)", boxShadow: "inset 0 0 0 1px oklch(0.7 0.18 285 / 0.30)" }}>
-                <span className="inline-flex items-center gap-1 pl-1.5 pr-1 text-[9px] uppercase tracking-[0.2em] text-[var(--indigo-glow)] font-semibold">
+                <span className="col-span-2 sm:col-span-3 inline-flex items-center gap-1 pl-1.5 pr-1 text-[9px] uppercase tracking-[0.2em] text-[var(--indigo-glow)] font-semibold">
                   <Sparkles className="h-3 w-3" /> AI Systems
                 </span>
                 {AI_TABS.map((l) => {
@@ -229,7 +229,7 @@ function Overview() {
       })}
 
       <div className="md:col-span-2 lg:col-span-4 glass rounded-2xl p-5 flex items-start gap-4 flex-wrap">
-        <div className="flex-1 min-w-[260px]">
+        <div className="flex-1 min-w-0 sm:min-w-[260px]">
           <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">Quick start</div>
           <p className="text-sm">
             All numbers above are <b>live</b> — pulled directly from the attached Google Form spreadsheet, refreshed every 30 seconds.

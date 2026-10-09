@@ -71,7 +71,7 @@ function Page() {
         <Topbar title="Odisha Live Map" subtitle="Cinematic Spatial Intelligence"
                 uploadTab="Odisha Live Map" uploadRecommendedColumns={["UDISE", "School_Name", "District", "Locality", "Lat", "Lng"]} />
         <div className="p-3 grid lg:grid-cols-4 gap-3">
-          <div className="lg:col-span-3 h-[78vh]">
+          <div className="lg:col-span-3 h-[560px] sm:h-[640px] lg:h-[78vh] min-w-0">
             <OdishaMap selected={selectedDistrict} onSelect={openDistrict} stats={stats} />
           </div>
           <div className="space-y-3">
@@ -189,7 +189,7 @@ function MicroView({
       <Topbar title="Odisha Live Map" subtitle={`Operational Spatial Intelligence · ${current ?? "—"}`} />
       <div className="p-3 grid lg:grid-cols-12 gap-3">
         {/* Scrollable district list */}
-        <aside className="lg:col-span-3 glass rounded-2xl p-3 flex flex-col h-[82vh]">
+        <aside className="lg:col-span-3 glass rounded-2xl p-3 flex flex-col h-[280px] sm:h-[320px] lg:h-[82vh] min-w-0">
           <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
             Districts · {aggs.length}
           </div>
@@ -241,8 +241,8 @@ function MicroView({
         </aside>
 
         {/* Isolated district map */}
-        <section className="lg:col-span-6 glass rounded-2xl p-3 relative h-[82vh]">
-          <div className="absolute top-4 left-4 z-10 flex gap-2">
+        <section className="lg:col-span-6 glass rounded-2xl p-3 relative h-[480px] sm:h-[560px] lg:h-[82vh] min-w-0">
+          <div className="absolute top-4 left-4 right-4 z-10 flex flex-wrap gap-2">
             {(["sustainability", "hazard", "shvr"] as Overlay[]).map((o) => (
               <button key={o} onClick={() => setOverlay(o)}
                 className={`px-3 py-1.5 rounded-full text-xs glass-soft transition ${overlay === o ? "neon-ring bg-primary/25" : "text-muted-foreground hover:text-foreground"}`}>

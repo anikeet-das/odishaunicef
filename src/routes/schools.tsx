@@ -145,7 +145,7 @@ function Micro({ data }: { data: School[] }) {
         <div className="glass rounded-2xl p-5">
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or UDISE…"
-              className="bg-secondary/60 rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring w-72" />
+              className="bg-secondary/60 rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring w-full sm:w-72 min-w-0" />
             <select value={district} onChange={(e) => setDistrict(e.target.value)}
               className="bg-secondary/60 rounded-full px-4 py-2 text-sm outline-none">
               <option value="all">All districts</option>
@@ -221,15 +221,15 @@ function HazardPulse({ hazardScore, top }: { hazardScore: number | null; top: st
 
 function Drawer({ school, onClose }: { school: School; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex" onClick={onClose}>
+    <div className="fixed inset-0 z-[70] flex" role="dialog" aria-label="School details" onClick={onClose}>
       <div className="flex-1 bg-black/50" />
-      <aside className="w-[min(520px,90vw)] h-full bg-background border-l border-border shadow-2xl overflow-y-auto p-6" onClick={(e) => e.stopPropagation()}>
+      <aside className="w-full sm:w-[min(520px,90vw)] h-full bg-background border-l border-border shadow-2xl overflow-y-auto p-4 sm:p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-4">
-          <div>
+          <div className="min-w-0">
             <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">UDISE {school.udise}</div>
             <h3 className="text-xl font-semibold neon-text">{school.name}</h3>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
+          <button aria-label="Close school details" onClick={onClose} className="h-10 w-10 shrink-0 grid place-items-center text-muted-foreground hover:text-foreground"><X className="h-4 w-4" /></button>
         </div>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <Info k="District" v={school.district} />
@@ -279,7 +279,7 @@ function Drawer({ school, onClose }: { school: School; onClose: () => void }) {
   );
 }
 function Info({ k, v }: { k: string; v: string }) {
-  return <div className="glass-soft rounded-lg px-3 py-2"><div className="text-[10px] uppercase tracking-wider text-muted-foreground">{k}</div><div className="truncate">{v || "—"}</div></div>;
+  return <div className="glass-soft rounded-lg px-3 py-2 min-w-0"><div className="text-[10px] uppercase tracking-wider text-muted-foreground">{k}</div><div className="break-words lg:truncate">{v || "—"}</div></div>;
 }
 function Pill({ on, children }: { on: boolean; children: React.ReactNode }) {
   return <span className={`px-3 py-1 rounded-full border ${on ? "border-accent/60 bg-accent/15 text-foreground" : "border-border text-muted-foreground"}`}>{on ? "✓ " : "✗ "}{children}</span>;

@@ -80,7 +80,7 @@ export function AIChatFab() {
     <>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-40 h-16 w-16 rounded-full grid place-items-center text-background animate-orb transition-transform hover:scale-105"
+        className="ai-chat-trigger fixed bottom-6 right-6 z-40 h-12 w-12 lg:h-16 lg:w-16 rounded-full grid place-items-center text-background animate-orb transition-transform hover:scale-105"
         style={{
           background: "radial-gradient(circle at 30% 30%, oklch(0.95 0.13 200), oklch(0.72 0.21 255) 55%, oklch(0.62 0.22 285))",
           boxShadow: "0 0 0 1px oklch(0.85 0.2 195 / 0.55), 0 12px 40px -10px oklch(0.62 0.22 285 / 0.7), 0 0 28px oklch(0.86 0.16 200 / 0.55)",
@@ -91,7 +91,7 @@ export function AIChatFab() {
       </button>
       {open && (
         <div
-          className="fixed bottom-24 right-6 z-50 rounded-2xl flex flex-col overflow-hidden border"
+          className="ai-chat-panel fixed bottom-24 right-6 z-[70] rounded-2xl flex flex-col overflow-hidden border"
           style={{
             width: panelW,
             height: panelH,
@@ -103,22 +103,22 @@ export function AIChatFab() {
           }}
         >
           <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap min-w-0 items-center gap-2">
               <Sparkles className="h-4 w-4 text-accent" />
               <span className="text-sm font-semibold neon-text">Aurora · CR-SAP AI</span>
               <span className="text-[10px] text-muted-foreground">· {context?.ready ? "live data linked" : "loading data…"}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex shrink-0 items-center gap-1">
               <button onClick={() => setExpanded((e) => !e)} title={expanded ? "Shrink" : "Expand"}
                       className="h-7 w-7 grid place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5">
                 {expanded ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
               </button>
-              <button onClick={() => setOpen(false)} className="h-7 w-7 grid place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5">
+              <button aria-label="Close AI assistant" onClick={() => setOpen(false)} className="h-7 w-7 grid place-items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-white/5">
                 <X className="h-4 w-4" />
               </button>
             </div>
           </div>
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3 text-sm scroll-invisible">
+          <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-4 space-y-3 text-sm scroll-invisible">
             {messages.map((m, i) => (
               <div key={i} className={`flex flex-col gap-2 ${m.role === "user" ? "items-end" : "items-start"}`}>
                 <div
@@ -142,7 +142,7 @@ export function AIChatFab() {
                 {m.dashboard && (
                   <div className="w-full max-w-[95%] space-y-1">
                     <MiniDashboard spec={m.dashboard} />
-                    <button onClick={() => openDashboardWindow(m.dashboard!)}
+                    <button onClick={() => { if (m.dashboard) openDashboardWindow(m.dashboard); }}
                             className="text-[10px] text-[var(--cyan)] hover:underline">
                       ⤴ Open dashboard in new window (local)
                     </button>
@@ -162,7 +162,7 @@ export function AIChatFab() {
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
               placeholder="Ask anything · type ‘dashboard’ for live charts"
-              className="flex-1 bg-secondary/60 rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+              className="flex-1 min-w-0 bg-secondary/60 rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
               disabled={loading}
             />
             <button type="submit" disabled={loading || !msg.trim()}

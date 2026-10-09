@@ -166,15 +166,15 @@ export function KeyDistrictsPanel({
         style={{ background: focusHalo(focus) }}
       />
 
-      <header className="flex flex-wrap items-center gap-3 mb-3 relative">
+      <header className="grid grid-cols-[auto_minmax(0,1fr)] lg:flex lg:flex-wrap items-center gap-3 mb-3 relative">
         <div className="h-9 w-9 rounded-xl grid place-items-center bg-gradient-to-br from-[var(--cyan)] to-[var(--aurora)] shrink-0">
           <Star className="h-4 w-4 text-background" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground truncate">{cfg.eyebrow}</div>
-          <h3 className="text-sm font-semibold truncate">{cfg.title}</h3>
+          <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground lg:truncate">{cfg.eyebrow}</div>
+          <h3 className="text-sm font-semibold lg:truncate">{cfg.title}</h3>
         </div>
-        <div className="text-right shrink-0">
+        <div className="col-span-2 justify-self-end text-right shrink-0">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Avg · 7 districts</div>
           <div className="text-lg font-black tabular-nums text-gradient-cyan leading-none">
             {avgPrimary}{cfg.unit}
@@ -220,7 +220,8 @@ export function KeyDistrictsPanel({
       <div className="grid lg:grid-cols-2 gap-4">
         <div className="rounded-xl bg-secondary/30 p-3">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Head-to-head · {cfg.primaryLabel} vs {cfg.secondaryLabel}</div>
-          <div className="h-[220px]">
+          <div className="chart-scroll-region overflow-x-auto">
+          <div className="h-[240px] min-w-[460px] lg:min-w-0 lg:h-[220px]">
             <ResponsiveContainer>
               <BarChart data={barData} margin={{ top: 6, right: 8, left: -18, bottom: 4 }}>
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-18} textAnchor="end" height={50} />
@@ -241,11 +242,12 @@ export function KeyDistrictsPanel({
               </BarChart>
             </ResponsiveContainer>
           </div>
+          </div>
         </div>
 
         <div className="rounded-xl bg-secondary/30 p-3">
           <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Multi-metric radar</div>
-          <div className="h-[220px]">
+          <div className="h-[300px] sm:h-[260px] lg:h-[220px]">
             <ResponsiveContainer>
               <RadarChart data={radarData}>
                 <PolarGrid stroke="var(--border)" />
@@ -325,7 +327,7 @@ function InsightCard({ tone, label, value }: { tone: "up" | "down" | "flat"; lab
       </span>
       <div className="min-w-0">
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className="text-[12px] font-semibold truncate">{value}</div>
+        <div className="text-[12px] font-semibold break-words lg:truncate">{value}</div>
       </div>
     </div>
   );
