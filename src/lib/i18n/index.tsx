@@ -437,16 +437,21 @@ const Ctx = createContext<{
 }>({ lang: "en", setLang: () => {}, t: (k) => k });
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>(() => {
-    if (typeof window === "undefined") return "en";
-    return (window.localStorage.getItem("crsap.lang") as Lang) || "en";
-  });
+  const [lang, setLang] = useState<Lang>("en");
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem("crsap.lang", lang);
+    try {
+      const saved = window.localStorage.getItem("crsap.lang");
+      if (saved === "en" || saved === "hi" || saved === "or") setLang(saved);
+    } catch {}
+    setReady(true);
+  }, []);
+  useEffect(() => {
+    if (!ready) return;
+    try { window.localStorage.setItem("crsap.lang", lang); } catch {}
     document.documentElement.lang = lang;
     document.documentElement.dataset.lang = lang;
-  }, [lang]);
+  }, [lang, ready]);
   const t = (key: string) => DICT[lang]?.[key] ?? DICT.en[key] ?? key;
   return <Ctx.Provider value={{ lang, setLang, t }}>{children}</Ctx.Provider>;
 }
