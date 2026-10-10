@@ -7,15 +7,17 @@ const Ctx = createContext<{ mode: ViewMode; setMode: (m: ViewMode) => void }>({
 });
 
 export function ViewModeProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<ViewMode>(() => {
-    if (typeof window === "undefined") return "macro";
-    const v = window.localStorage.getItem("crsap.viewMode");
-    return v === "micro" ? "micro" : "macro";
-  });
+  const [mode, setMode] = useState<ViewMode>("macro");
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    if (typeof window !== "undefined") window.localStorage.setItem("crsap.viewMode", mode);
-    if (typeof document !== "undefined") document.documentElement.dataset.view = mode;
-  }, [mode]);
+    try { setMode(window.localStorage.getItem("crsap.viewMode") === "micro" ? "micro" : "macro"); } catch {}
+    setReady(true);
+  }, []);
+  useEffect(() => {
+    if (!ready) return;
+    try { window.localStorage.setItem("crsap.viewMode", mode); } catch {}
+    document.documentElement.dataset.view = mode;
+  }, [mode, ready]);
   return <Ctx.Provider value={{ mode, setMode }}>{children}</Ctx.Provider>;
 }
 

@@ -10,14 +10,17 @@ export function Sidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { t } = useI18n();
   const activeGroup = groupForPath(pathname);
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("crsap.sidebar.collapsed") === "1";
-  });
+  const [collapsed, setCollapsed] = useState(false);
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    if (typeof window !== "undefined")
-      window.localStorage.setItem("crsap.sidebar.collapsed", collapsed ? "1" : "0");
-  }, [collapsed]);
+    try { setCollapsed(window.localStorage.getItem("crsap.sidebar.collapsed") === "1"); } catch {}
+    setReady(true);
+  }, []);
+  useEffect(() => {
+    if (!ready) return;
+    try { window.localStorage.setItem("crsap.sidebar.collapsed", collapsed ? "1" : "0"); } catch {}
+    window.dispatchEvent(new CustomEvent("crsap:sidebar", { detail: collapsed }));
+  }, [collapsed, ready]);
 
   const width = collapsed ? 76 : 280;
 
@@ -142,16 +145,14 @@ export function Sidebar() {
 
 /** Width consumed by the sidebar — kept in sync with the spring above (collapsed/expanded). */
 export function useSidebarWidth() {
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("crsap.sidebar.collapsed") === "1";
-  });
+  const [collapsed, setCollapsed] = useState(false);
   useEffect(() => {
-    const i = setInterval(() => {
-      const c = window.localStorage.getItem("crsap.sidebar.collapsed") === "1";
-      setCollapsed((prev) => (prev === c ? prev : c));
-    }, 200);
-    return () => clearInterval(i);
+    try { setCollapsed(window.localStorage.getItem("crsap.sidebar.collapsed") === "1"); } catch {}
+    const sync = (event: Event) => {
+      if (event instanceof CustomEvent && typeof event.detail === "boolean") setCollapsed(event.detail);
+    };
+    window.addEventListener("crsap:sidebar", sync);
+    return () => window.removeEventListener("crsap:sidebar", sync);
   }, []);
   return collapsed ? 76 : 280;
 }

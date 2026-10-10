@@ -7,3 +7,4 @@
 - [x] Fix mobile/tablet page controls, maps, charts and settings layouts
 - [x] Verify mobile, tablet and desktop navigation and content accessibility
 - [x] Replace mobile/tablet top section navigation with CR SAP ODISHA, retaining Settings and the remaining page
+- [ ] Repair theme initialization and verify mobile/tablet content, navigation and theme switching after reported script-loading failure
