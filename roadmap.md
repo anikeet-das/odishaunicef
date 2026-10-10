@@ -6,3 +6,4 @@
 - [ ] Repair shared mobile navigation, page headers, scrolling and overlays without changing desktop
 - [ ] Fix mobile/tablet page controls, maps, charts and settings layouts
 - [ ] Verify mobile, tablet and desktop navigation and content accessibility
+- [ ] Replace mobile/tablet top section navigation with CR SAP ODISHA, retaining Settings and the remaining page

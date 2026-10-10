@@ -444,7 +444,6 @@ html[data-theme="cream"] .recharts-cartesian-axis-tick-line { stroke: oklch(0.6 
     scroll-padding-bottom: calc(124px + env(safe-area-inset-bottom, 0px));
     overscroll-behavior-y: contain;
   }
-  .section-navigation { padding-right: 64px; }
   .mobile-bottom-nav { bottom: calc(8px + env(safe-area-inset-bottom, 0px)); }
   .mobile-nav-sheet { bottom: calc(112px + env(safe-area-inset-bottom, 0px)); }
   .ai-chat-trigger { bottom: calc(112px + env(safe-area-inset-bottom, 0px)); right: 16px; }
