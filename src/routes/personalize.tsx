@@ -6,7 +6,16 @@ import { useAdminSession } from "@/lib/admin/session";
 import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/personalize")({
-  head: () => ({ meta: [{ title: "Data Personalization · CR-SAP Odisha" }] }),
+  head: () => ({
+    meta: [
+      {"title": "Data Personalization · CR-SAP Odisha"},
+      {"name": "description", "content": "Data Personalization for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:title", "content": "Data Personalization · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Data Personalization for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

@@ -7,7 +7,16 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/mission-life")({
-  head: () => ({ meta: [{ title: "Mission LiFE · CR-SAP Odisha" }, { name: "description", content: "Lifestyle for Environment — eco-clubs, carbon reduction, plastic-free, renewables." }] }),
+  head: () => ({
+    meta: [
+      {"title": "Mission LiFE · CR-SAP Odisha"},
+      {"name": "description", "content": "Lifestyle for Environment — eco-clubs, carbon reduction, plastic-free, renewables."},
+      {"property": "og:title", "content": "Mission LiFE · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Lifestyle for Environment — eco-clubs, carbon reduction, plastic-free, renewables."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

@@ -15,8 +15,12 @@ import {
 export const Route = createFileRoute("/schools")({
   head: () => ({
     meta: [
-      { title: "School Explorer · CR-SAP Odisha" },
-      { name: "description", content: "Search, filter and inspect every one of the 10,000 schools across Odisha." },
+      {"title": "School Explorer · CR-SAP Odisha"},
+      {"name": "description", "content": "Search, filter and inspect every one of the 10,000 schools across Odisha."},
+      {"property": "og:title", "content": "School Explorer · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Search, filter and inspect every one of the 10,000 schools across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

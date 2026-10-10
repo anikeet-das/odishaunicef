@@ -12,7 +12,16 @@ import { Search, Sparkles, ExternalLink, Filter } from "lucide-react";
 import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/sustainability")({
-  head: () => ({ meta: [{ title: "Sustainability Index · CR-SAP Odisha" }, { name: "description", content: "Live distribution of sustainability scores across 10,000 schools." }] }),
+  head: () => ({
+    meta: [
+      {"title": "Sustainability Index · CR-SAP Odisha"},
+      {"name": "description", "content": "Live distribution of sustainability scores across 10,000 schools."},
+      {"property": "og:title", "content": "Sustainability Index · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Live distribution of sustainability scores across 10,000 schools."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

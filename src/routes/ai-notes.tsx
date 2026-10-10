@@ -9,8 +9,12 @@ import { Sparkles, Search, Download, AlertOctagon, AlertTriangle, Info } from "l
 export const Route = createFileRoute("/ai-notes")({
   head: () => ({
     meta: [
-      { title: "AI Notes Center · CR-SAP Odisha" },
-      { name: "description", content: "Auto-classified follow-up notes for non-numeric or missing financial entries in form responses." },
+      {"title": "AI Notes Center · CR-SAP Odisha"},
+      {"name": "description", "content": "Auto-classified follow-up notes for non-numeric or missing financial entries in form responses."},
+      {"property": "og:title", "content": "AI Notes Center · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Auto-classified follow-up notes for non-numeric or missing financial entries in form responses."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

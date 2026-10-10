@@ -15,8 +15,12 @@ export const Route = createFileRoute("/districts")({
   }),
   head: () => ({
     meta: [
-      { title: "District Intelligence · CR-SAP Odisha" },
-      { name: "description", content: "Live leaderboard for all 30 districts — sustainability, SHVR, climate risk, plan adoption." },
+      {"title": "District Intelligence · CR-SAP Odisha"},
+      {"name": "description", "content": "Live leaderboard for all 30 districts — sustainability, SHVR, climate risk, plan adoption."},
+      {"property": "og:title", "content": "District Intelligence · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Live leaderboard for all 30 districts — sustainability, SHVR, climate risk, plan adoption."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

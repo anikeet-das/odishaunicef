@@ -17,8 +17,12 @@ import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 export const Route = createFileRoute("/risk")({
   head: () => ({
     meta: [
-      { title: "Risk Analytics · CR-SAP Odisha" },
-      { name: "description", content: "Cinematic state-wide risk intelligence with district drill-down matrix." },
+      {"title": "Risk Analytics · CR-SAP Odisha"},
+      {"name": "description", "content": "Cinematic state-wide risk intelligence with district drill-down matrix."},
+      {"property": "og:title", "content": "Risk Analytics · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Cinematic state-wide risk intelligence with district drill-down matrix."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,
@@ -92,12 +96,13 @@ function MacroView({ schools }: { schools: School[] }) {
 
         {/* Wide trend graphs */}
         <div className="grid lg:grid-cols-3 gap-3">
-          <div className="glass rounded-2xl p-5 lg:col-span-2 h-[44vh] flex flex-col">
+          <div className="glass rounded-2xl p-5 lg:col-span-2 h-[340px] lg:h-[44vh] flex flex-col">
             <div className="flex items-center gap-2 mb-2">
               <Activity className="h-4 w-4 text-[var(--cyan)]" />
               <div className="text-sm font-semibold">Climate Risk Profile · top districts</div>
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-h-0 overflow-x-auto">
+              <div className="h-full min-w-[560px] lg:min-w-0">
               <ResponsiveContainer>
                 <AreaChart data={trend}>
                   <defs>
@@ -123,9 +128,10 @@ function MacroView({ schools }: { schools: School[] }) {
                   <Area type="monotone" dataKey="infraGap" name="Infra gap" stroke="oklch(0.85 0.18 75)" strokeWidth={2} fill="url(#heat)" />
                 </AreaChart>
               </ResponsiveContainer>
+              </div>
             </div>
           </div>
-          <div className="glass-strong rounded-2xl p-5 h-[44vh] flex flex-col">
+          <div className="glass-strong rounded-2xl p-5 lg:h-[44vh] flex flex-col">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="h-4 w-4 text-[var(--aurora)]" />
               <div className="text-sm font-semibold">AI Threat Summary</div>
@@ -143,9 +149,10 @@ function MacroView({ schools }: { schools: School[] }) {
 
         {/* Two wide bottom charts */}
         <div className="grid lg:grid-cols-2 gap-3">
-          <div className="glass rounded-2xl p-5 h-[40vh] flex flex-col">
+          <div className="glass rounded-2xl p-5 h-[340px] lg:h-[40vh] flex flex-col">
             <div className="text-sm font-semibold mb-2">Infrastructure Gap vs Sustainability · by district</div>
-            <div className="flex-1">
+            <div className="flex-1 min-h-0 overflow-x-auto">
+              <div className="h-full min-w-[560px] lg:min-w-0">
               <ResponsiveContainer>
                 <LineChart data={trend}>
                   <CartesianGrid strokeDasharray="3 6" />
@@ -157,11 +164,13 @@ function MacroView({ schools }: { schools: School[] }) {
                   <Line type="monotone" dataKey="sust" name="Sustainability" stroke="oklch(0.86 0.16 200)" strokeWidth={2.5} dot={{ r: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
+              </div>
             </div>
           </div>
-          <div className="glass rounded-2xl p-5 h-[40vh] flex flex-col">
+          <div className="glass rounded-2xl p-5 h-[340px] lg:h-[40vh] flex flex-col">
             <div className="text-sm font-semibold mb-2">Schools exposed by hazard</div>
-            <div className="flex-1">
+            <div className="flex-1 min-h-0 overflow-x-auto">
+              <div className="h-full min-w-[560px] lg:min-w-0">
               <ResponsiveContainer>
                 <BarChart data={hz}>
                   <CartesianGrid strokeDasharray="3 6" />
@@ -173,6 +182,7 @@ function MacroView({ schools }: { schools: School[] }) {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </div>

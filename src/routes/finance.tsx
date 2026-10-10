@@ -23,8 +23,12 @@ import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 export const Route = createFileRoute("/finance")({
   head: () => ({
     meta: [
-      { title: "Financial Intelligence · CR-SAP Odisha" },
-      { name: "description", content: "Real-time capital, operational cost & resource convergence from live Google Form responses." },
+      {"title": "Financial Intelligence · CR-SAP Odisha"},
+      {"name": "description", "content": "Real-time capital, operational cost & resource convergence from live Google Form responses."},
+      {"property": "og:title", "content": "Financial Intelligence · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Real-time capital, operational cost & resource convergence from live Google Form responses."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

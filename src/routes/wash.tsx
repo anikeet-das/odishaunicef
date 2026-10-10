@@ -13,7 +13,16 @@ import { Droplets, Sparkles, Search, Download, Filter, Loader2 } from "lucide-re
 import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 
 export const Route = createFileRoute("/wash")({
-  head: () => ({ meta: [{ title: "WASH Board · CR-SAP Odisha" }] }),
+  head: () => ({
+    meta: [
+      {"title": "WASH Board · CR-SAP Odisha"},
+      {"name": "description", "content": "WASH Board for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:title", "content": "WASH Board · CR-SAP Odisha"},
+      {"property": "og:description", "content": "WASH Board for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

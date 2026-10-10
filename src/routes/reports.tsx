@@ -5,7 +5,16 @@ import { LoadingShell } from "@/components/data/LoadingShell";
 import { Download } from "lucide-react";
 
 export const Route = createFileRoute("/reports")({
-  head: () => ({ meta: [{ title: "Reports · CR-SAP Odisha" }, { name: "description", content: "Generate and export live reports as CSV." }] }),
+  head: () => ({
+    meta: [
+      {"title": "Reports · CR-SAP Odisha"},
+      {"name": "description", "content": "Generate and export live reports as CSV."},
+      {"property": "og:title", "content": "Reports · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Generate and export live reports as CSV."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

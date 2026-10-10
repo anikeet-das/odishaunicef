@@ -9,8 +9,12 @@ import { LifeBuoy, ImageIcon, LinkIcon, MapPin, AlertTriangle } from "lucide-rea
 export const Route = createFileRoute("/resources")({
   head: () => ({
     meta: [
-      { title: "Resource Records · CR-SAP Odisha" },
-      { name: "description", content: "Live record of school-reported problems, proof and nearby resources to solve them." },
+      {"title": "Resource Records · CR-SAP Odisha"},
+      {"name": "description", "content": "Live record of school-reported problems, proof and nearby resources to solve them."},
+      {"property": "og:title", "content": "Resource Records · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Live record of school-reported problems, proof and nearby resources to solve them."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

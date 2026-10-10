@@ -11,8 +11,12 @@ import { useViewMode } from "@/components/layout/view-mode";
 export const Route = createFileRoute("/shvr")({
   head: () => ({
     meta: [
-      { title: "SHVR Ratings · CR-SAP Odisha" },
-      { name: "description", content: "Real-time school-wise SHVR intelligence with district and locality filters." },
+      {"title": "SHVR Ratings · CR-SAP Odisha"},
+      {"name": "description", "content": "Real-time school-wise SHVR intelligence with district and locality filters."},
+      {"property": "og:title", "content": "SHVR Ratings · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Real-time school-wise SHVR intelligence with district and locality filters."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,
@@ -147,7 +151,7 @@ function MicroView({ schools }: { schools: School[] }) {
       <Topbar title="SHVR Ratings" subtitle={`MicroView · ${filtered.length.toLocaleString()} schools`} />
       <div className="p-3 grid lg:grid-cols-12 gap-3">
         {/* LEFT: filters */}
-        <aside className="lg:col-span-3 glass rounded-2xl p-4 space-y-4 h-[84vh] overflow-y-auto scroll-invisible">
+        <aside className="lg:col-span-3 glass rounded-2xl p-4 space-y-4 lg:h-[84vh] lg:overflow-y-auto scroll-invisible">
           <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
             <Filter className="h-3 w-3" /> Filters
           </div>
@@ -174,7 +178,7 @@ function MicroView({ schools }: { schools: School[] }) {
         </aside>
 
         {/* CENTER: table */}
-        <section className="lg:col-span-6 glass rounded-2xl p-3 h-[84vh] flex flex-col">
+        <section className="lg:col-span-6 glass rounded-2xl p-3 h-[560px] lg:h-[84vh] flex flex-col min-w-0">
           <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
@@ -201,7 +205,7 @@ function MicroView({ schools }: { schools: School[] }) {
         </section>
 
         {/* RIGHT: AI insights */}
-        <aside className="lg:col-span-3 space-y-3 h-[84vh] overflow-y-auto scroll-invisible">
+        <aside className="lg:col-span-3 space-y-3 lg:h-[84vh] lg:overflow-y-auto scroll-invisible">
           <div className="glass-strong rounded-2xl p-4">
             <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2 flex items-center gap-1.5">
               <Sparkles className="h-3 w-3 text-[var(--aurora)]" /> AI Insight Panel
@@ -382,7 +386,7 @@ function buildInsights(list: School[]): string[] {
 
 function SchoolDetail({ school, onClose }: { school: School; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm grid place-items-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[75] bg-black/60 backdrop-blur-sm grid place-items-center p-4" onClick={onClose}>
       <motion.div
         initial={{ scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
         onClick={(e) => e.stopPropagation()}
@@ -395,7 +399,7 @@ function SchoolDetail({ school, onClose }: { school: School; onClose: () => void
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">SHVR Micro Dashboard</div>
-            <h2 className="text-xl font-bold truncate">{school.name}</h2>
+            <h2 className="text-xl font-bold break-words lg:truncate">{school.name}</h2>
             <div className="text-xs text-muted-foreground">UDISE+ {school.udise} · {school.district} · {school.location}</div>
           </div>
           <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>

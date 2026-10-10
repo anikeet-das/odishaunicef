@@ -25,8 +25,12 @@ import { NotesPanel } from "@/components/finance/NotesPanel";
 export const Route = createFileRoute("/finance-sum")({
   head: () => ({
     meta: [
-      { title: "Finance Sum · CR-SAP Odisha" },
-      { name: "description", content: "Consolidated state, district and school-wise money summary." },
+      {"title": "Finance Sum · CR-SAP Odisha"},
+      {"name": "description", "content": "Consolidated state, district and school-wise money summary."},
+      {"property": "og:title", "content": "Finance Sum · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Consolidated state, district and school-wise money summary."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

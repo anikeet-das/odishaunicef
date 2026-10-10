@@ -7,7 +7,16 @@ import { AwaitingData } from "@/components/data/AwaitingData";
 import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/ai-recommendations")({
-  head: () => ({ meta: [{ title: "AI Recommendations · CR-SAP Odisha" }, { name: "description", content: "Data-driven actionable recommendations generated live from CCES responses." }] }),
+  head: () => ({
+    meta: [
+      {"title": "AI Recommendations · CR-SAP Odisha"},
+      {"name": "description", "content": "Data-driven actionable recommendations generated live from CCES responses."},
+      {"property": "og:title", "content": "AI Recommendations · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Data-driven actionable recommendations generated live from CCES responses."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

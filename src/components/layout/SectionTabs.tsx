@@ -13,12 +13,13 @@ export function SectionTabs() {
   const { t } = useI18n();
   const activeGroup = groupForPath(pathname);
 
-  if (!activeGroup || activeGroup.items.length <= 1) {
-    return <div className="px-3 pt-3" />;
-  }
-
   return (
-    <nav aria-label={`${t(activeGroup.items[0].labelKey)} section navigation`} className="section-navigation px-3 pt-3">
+    <>
+    <div className="lg:hidden h-14 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 pl-4 pr-16">
+      <span className="min-w-0 text-sm font-semibold text-foreground">CR SAP ODISHA</span>
+    </div>
+    {activeGroup && activeGroup.items.length > 1 ? (
+    <nav aria-label={`${t(activeGroup.items[0].labelKey)} section navigation`} className="section-navigation hidden lg:block px-3 pt-3">
       <div className="glass-soft rounded-2xl p-1.5 grid grid-cols-2 gap-1 lg:flex lg:overflow-x-auto lg:scroll-invisible">
         {activeGroup.items.map((it) => {
           const active = pathname === it.to;
@@ -41,5 +42,7 @@ export function SectionTabs() {
         })}
       </div>
     </nav>
+    ) : <div className="hidden lg:block px-3 pt-3" />}
+    </>
   );
 }

@@ -5,7 +5,16 @@ import { useSchools, platformKpis } from "@/lib/data/cces";
 
 
 export const Route = createFileRoute("/simulation")({
-  head: () => ({ meta: [{ title: "Simulation Lab · CR-SAP Odisha" }, { name: "description", content: "What-if simulator: roll out CR-SAP, SDMP and drills and watch the platform recompute." }] }),
+  head: () => ({
+    meta: [
+      {"title": "Simulation Lab · CR-SAP Odisha"},
+      {"name": "description", "content": "What-if simulator: roll out CR-SAP, SDMP and drills and watch the platform recompute."},
+      {"property": "og:title", "content": "Simulation Lab · CR-SAP Odisha"},
+      {"property": "og:description", "content": "What-if simulator: roll out CR-SAP, SDMP and drills and watch the platform recompute."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

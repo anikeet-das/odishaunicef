@@ -10,7 +10,16 @@ import {
 import { GitCompare, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/compare")({
-  head: () => ({ meta: [{ title: "Compare · CR-SAP Odisha" }] }),
+  head: () => ({
+    meta: [
+      {"title": "Compare · CR-SAP Odisha"},
+      {"name": "description", "content": "Compare for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:title", "content": "Compare · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Compare for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 
@@ -86,7 +95,7 @@ function Page() {
         </div>
 
         <div className="grid lg:grid-cols-4 gap-3">
-          <aside className="glass rounded-2xl p-3 lg:col-span-1 max-h-[68vh] overflow-y-auto scroll-invisible">
+          <aside className="glass rounded-2xl p-3 lg:col-span-1 max-h-[280px] sm:max-h-[320px] lg:max-h-[68vh] overflow-y-auto scroll-invisible">
             <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-2">Pick {mode === "district" ? "districts" : "schools"}</div>
             <ul className="space-y-1">
               {options.map((n) => {
@@ -112,9 +121,9 @@ function Page() {
               </div>
             ) : (
               <>
-                <div className="glass rounded-2xl p-4 h-[44vh]">
+                <div className="glass rounded-2xl p-4 h-[360px] lg:h-[44vh] flex flex-col">
                   <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1">Radar comparison</div>
-                  <ResponsiveContainer>
+                  <ResponsiveContainer className="flex-1 min-h-0">
                     <RadarChart data={radar} outerRadius="75%">
                       <PolarGrid stroke="oklch(0.85 0.2 195 / 0.18)" />
                       <PolarAngleAxis dataKey="metric" tick={{ fontSize: 10 }} />
@@ -127,9 +136,9 @@ function Page() {
                     </RadarChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="glass rounded-2xl p-4 h-[36vh]">
+                <div className="glass rounded-2xl p-4 h-[340px] lg:h-[36vh] flex flex-col">
                   <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground mb-1">Parallel metrics</div>
-                  <ResponsiveContainer>
+                  <ResponsiveContainer className="flex-1 min-h-0">
                     <BarChart data={radar}>
                       <CartesianGrid strokeDasharray="3 6" />
                       <XAxis dataKey="metric" tick={{ fontSize: 10 }} />

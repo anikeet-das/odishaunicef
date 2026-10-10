@@ -20,8 +20,12 @@ import { FinanceSumBody } from "@/routes/finance-sum";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin Panel · CR-SAP Odisha" },
-      { name: "description", content: "Passcode-gated admin control with live data, uploads, responses and AI Systems." },
+      {"title": "Admin Panel · CR-SAP Odisha"},
+      {"name": "description", "content": "Passcode-gated admin control with live data, uploads, responses and AI Systems."},
+      {"property": "og:title", "content": "Admin Panel · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Passcode-gated admin control with live data, uploads, responses and AI Systems."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

@@ -8,7 +8,16 @@ const OPEN_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSe1v8RWC6U483d2O7gZfGDA4OnP8c1HtjSq5rChZkprjYNprA/viewform?usp=header";
 
 export const Route = createFileRoute("/google-form")({
-  head: () => ({ meta: [{ title: "Google Form · CR-SAP Odisha" }] }),
+  head: () => ({
+    meta: [
+      {"title": "Google Form · CR-SAP Odisha"},
+      {"name": "description", "content": "Google Form for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:title", "content": "Google Form · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Google Form for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

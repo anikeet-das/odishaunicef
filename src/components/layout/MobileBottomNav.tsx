@@ -123,7 +123,7 @@ export function MobileBottomNav() {
               role="dialog" aria-label={openGroup.label}
               className="mobile-nav-sheet lg:hidden fixed left-3 right-3 z-[56] rounded-3xl overflow-hidden"
               style={{
-                background: "color-mix(in oklab, var(--background) 70%, transparent)",
+                background: "var(--panel-solid)",
                 backdropFilter: "blur(28px) saturate(160%)",
                 WebkitBackdropFilter: "blur(28px) saturate(160%)",
                 border: "1px solid color-mix(in oklab, var(--foreground) 12%, transparent)",
@@ -184,9 +184,9 @@ export function MobileBottomNav() {
       >
         <div className="grid grid-cols-5 items-center w-full">
           {/* Intelligence */}
-          <SideButton group={GROUPS[0]} active={activeGroupId === "intel"} onClick={() => setOpenGroup(GROUPS[0])} />
+           <SideButton group={GROUPS[0]} expanded={openGroup?.id === "intel"} active={activeGroupId === "intel"} onClick={() => setOpenGroup(GROUPS[0])} />
           {/* Analytics */}
-          <SideButton group={GROUPS[1]} active={activeGroupId === "analytics"} onClick={() => setOpenGroup(GROUPS[1])} />
+           <SideButton group={GROUPS[1]} expanded={openGroup?.id === "analytics"} active={activeGroupId === "analytics"} onClick={() => setOpenGroup(GROUPS[1])} />
 
           {/* Centre UNICEF disc → admin */}
           <div className="flex justify-center">
@@ -217,22 +217,22 @@ export function MobileBottomNav() {
           </div>
 
           {/* Evaluation */}
-          <SideButton group={GROUPS[2]} active={activeGroupId === "eval"} onClick={() => setOpenGroup(GROUPS[2])} />
+           <SideButton group={GROUPS[2]} expanded={openGroup?.id === "eval"} active={activeGroupId === "eval"} onClick={() => setOpenGroup(GROUPS[2])} />
           {/* Form */}
-          <SideButton group={GROUPS[3]} active={activeGroupId === "form"} onClick={() => setOpenGroup(GROUPS[3])} />
+           <SideButton group={GROUPS[3]} expanded={openGroup?.id === "form"} active={activeGroupId === "form"} onClick={() => setOpenGroup(GROUPS[3])} />
         </div>
       </nav>
     </>
   );
 }
 
-function SideButton({ group, active, onClick }: { group: Group; active: boolean; onClick: () => void }) {
+function SideButton({ group, active, expanded, onClick }: { group: Group; active: boolean; expanded: boolean; onClick: () => void }) {
   const Icon = group.icon;
   return (
     <Button variant="ghost"
       type="button"
       onClick={onClick}
-      aria-expanded={false}
+      aria-expanded={expanded}
       className="relative h-auto min-w-0 flex flex-col items-center justify-center gap-0.5 px-0 py-2 transition active:scale-95 hover:bg-transparent"
     >
       <span
