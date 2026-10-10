@@ -468,6 +468,9 @@ html[data-theme="cream"] .recharts-cartesian-axis-tick-line { stroke: oklch(0.6 
   .odisha-map-stage { height: calc(100% - 190px); }
   .odisha-map-canvas { height: auto !important; aspect-ratio: 10 / 7; }
   .odisha-map-tooltip { left: 50% !important; top: auto !important; bottom: 8px; transform: translateX(-50%) !important; }
+  .mobile-nav-sheet { max-height: calc(100dvh - 148px); }
+  .mobile-nav-sheet > div:last-child { max-height: calc(100dvh - 212px); }
+  .page-topbar { position: relative; z-index: 30; }
 }
 @media (max-width: 639px) {
   .mobile-unicef-disc { width: 64px !important; height: 64px !important; }
