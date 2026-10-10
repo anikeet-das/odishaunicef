@@ -11,8 +11,12 @@ import { DistrictMap } from "@/components/cr-sap/DistrictMap";
 export const Route = createFileRoute("/map")({
   head: () => ({
     meta: [
-      { title: "Odisha Live Map · CR-SAP Odisha" },
-      { name: "description", content: "Spatial intelligence — every school in Odisha plotted live with risk and sustainability overlays." },
+      {"title": "Odisha Live Map · CR-SAP Odisha"},
+      {"name": "description", "content": "Spatial intelligence — every school in Odisha plotted live with risk and sustainability overlays."},
+      {"property": "og:title", "content": "Odisha Live Map · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Spatial intelligence — every school in Odisha plotted live with risk and sustainability overlays."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

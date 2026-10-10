@@ -6,7 +6,16 @@ import { Mail, Send, MessageCircle, ExternalLink, Copy, Check } from "lucide-rea
 const RECIPIENT = "bsdsai25aniketd@iimsambalpur.ac.in";
 
 export const Route = createFileRoute("/feedback")({
-  head: () => ({ meta: [{ title: "Feedback · CR-SAP Odisha" }] }),
+  head: () => ({
+    meta: [
+      {"title": "Feedback · CR-SAP Odisha"},
+      {"name": "description", "content": "Feedback for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:title", "content": "Feedback · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Feedback for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

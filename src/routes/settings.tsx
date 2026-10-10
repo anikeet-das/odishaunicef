@@ -10,8 +10,12 @@ import { wipeAllData, ADMIN_KEY } from "@/lib/data/reset";
 export const Route = createFileRoute("/settings")({
   head: () => ({
     meta: [
-      { title: "Settings · CR-SAP Odisha" },
-      { name: "description", content: "Real live personalisation: theme hue, neon, glass, density, motion, language." },
+      {"title": "Settings · CR-SAP Odisha"},
+      {"name": "description", "content": "Real live personalisation: theme hue, neon, glass, density, motion, language."},
+      {"property": "og:title", "content": "Settings · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Real live personalisation: theme hue, neon, glass, density, motion, language."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

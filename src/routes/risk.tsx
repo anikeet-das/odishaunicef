@@ -17,8 +17,12 @@ import { KeyDistrictsPanel } from "@/components/cr-sap/KeyDistrictsPanel";
 export const Route = createFileRoute("/risk")({
   head: () => ({
     meta: [
-      { title: "Risk Analytics · CR-SAP Odisha" },
-      { name: "description", content: "Cinematic state-wide risk intelligence with district drill-down matrix." },
+      {"title": "Risk Analytics · CR-SAP Odisha"},
+      {"name": "description", "content": "Cinematic state-wide risk intelligence with district drill-down matrix."},
+      {"property": "og:title", "content": "Risk Analytics · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Cinematic state-wide risk intelligence with district drill-down matrix."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

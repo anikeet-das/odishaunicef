@@ -5,7 +5,16 @@ import { ShieldCheck, AlertTriangle, Check, Upload, Sparkles, ExternalLink } fro
 import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/truth-check")({
-  head: () => ({ meta: [{ title: "Truth Check · CR-SAP Odisha" }] }),
+  head: () => ({
+    meta: [
+      {"title": "Truth Check · CR-SAP Odisha"},
+      {"name": "description", "content": "Truth Check for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:title", "content": "Truth Check · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Truth Check for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

@@ -10,7 +10,16 @@ import { Award, Search, Download, Sparkles, ChevronLeft, Loader2 } from "lucide-
 import { exportScorecardPdf } from "@/lib/scoring/scorecard-pdf";
 
 export const Route = createFileRoute("/scorecard")({
-  head: () => ({ meta: [{ title: "Scorecard · CR-SAP Odisha" }] }),
+  head: () => ({
+    meta: [
+      {"title": "Scorecard · CR-SAP Odisha"},
+      {"name": "description", "content": "Scorecard for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:title", "content": "Scorecard · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Scorecard for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

@@ -11,8 +11,12 @@ import { useViewMode } from "@/components/layout/view-mode";
 export const Route = createFileRoute("/shvr")({
   head: () => ({
     meta: [
-      { title: "SHVR Ratings · CR-SAP Odisha" },
-      { name: "description", content: "Real-time school-wise SHVR intelligence with district and locality filters." },
+      {"title": "SHVR Ratings · CR-SAP Odisha"},
+      {"name": "description", "content": "Real-time school-wise SHVR intelligence with district and locality filters."},
+      {"property": "og:title", "content": "SHVR Ratings · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Real-time school-wise SHVR intelligence with district and locality filters."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
     ],
   }),
   component: Page,

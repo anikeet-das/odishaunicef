@@ -10,7 +10,16 @@ import {
 import { Sparkles, Search } from "lucide-react";
 
 export const Route = createFileRoute("/tech")({
-  head: () => ({ meta: [{ title: "Tech Analysis · CR-SAP Odisha" }] }),
+  head: () => ({
+    meta: [
+      {"title": "Tech Analysis · CR-SAP Odisha"},
+      {"name": "description", "content": "Tech Analysis for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:title", "content": "Tech Analysis · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Tech Analysis for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

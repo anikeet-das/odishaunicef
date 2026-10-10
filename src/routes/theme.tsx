@@ -5,7 +5,16 @@ import { Moon, Check, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 export const Route = createFileRoute("/theme")({
-  head: () => ({ meta: [{ title: "Theme · CR-SAP Odisha" }] }),
+  head: () => ({
+    meta: [
+      {"title": "Theme · CR-SAP Odisha"},
+      {"name": "description", "content": "Theme for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:title", "content": "Theme · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Theme for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 

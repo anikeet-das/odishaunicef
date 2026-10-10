@@ -10,7 +10,16 @@ import {
 import { GitCompare, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/compare")({
-  head: () => ({ meta: [{ title: "Compare · CR-SAP Odisha" }] }),
+  head: () => ({
+    meta: [
+      {"title": "Compare · CR-SAP Odisha"},
+      {"name": "description", "content": "Compare for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:title", "content": "Compare · CR-SAP Odisha"},
+      {"property": "og:description", "content": "Compare for school WASH and climate-resilience monitoring across Odisha."},
+      {"property": "og:type", "content": "website"},
+      {"name": "twitter:card", "content": "summary"},
+    ],
+  }),
   component: Page,
 });
 
