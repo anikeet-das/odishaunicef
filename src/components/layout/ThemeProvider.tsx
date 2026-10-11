@@ -23,6 +23,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!ready) return;
     document.documentElement.dataset.theme = theme;
+    document.documentElement.classList.toggle("dark", theme === "dark");
     document.documentElement.style.colorScheme = theme === "dark" ? "dark" : "light";
     try { window.localStorage.setItem("crsap.theme", theme); } catch {}
   }, [theme, ready]);
