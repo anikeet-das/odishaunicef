@@ -8,5 +8,5 @@
 - [x] Verify mobile, tablet and desktop navigation and content accessibility
 - [x] Replace mobile/tablet top section navigation with CR SAP ODISHA, retaining Settings and the remaining page
 - [x] Repair theme initialization and verify mobile/tablet content, navigation and theme switching after reported script-loading failure
-- [ ] Enlarge mobile/tablet branding, update the contextual AI icon and enable desktop hover sidebar
-- [ ] Verify branding, chat opening and hover/focus sidebar on mobile, tablet and desktop
+- [x] Enlarge mobile/tablet branding, update the contextual AI icon and enable desktop hover sidebar
+- [x] Verify branding, chat opening and hover/focus sidebar on mobile, tablet and desktop
