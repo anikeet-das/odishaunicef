@@ -1,7 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bot, PanelLeftClose, PanelLeftOpen, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
+import { WashAssistantIcon } from "@/components/ai/WashAssistantIcon";
+import { Button } from "@/components/ui/button";
 import unicefLogo from "@/assets/unicef-logo.png";
 import { useI18n } from "@/lib/i18n";
 import { NAV_GROUPS, groupForPath } from "./nav-config";
@@ -10,22 +12,24 @@ export function Sidebar() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { t } = useI18n();
   const activeGroup = groupForPath(pathname);
-  const [collapsed, setCollapsed] = useState(false);
-  const [ready, setReady] = useState(false);
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const collapsed = !hovered && !focused;
   useEffect(() => {
-    try { setCollapsed(window.localStorage.getItem("crsap.sidebar.collapsed") === "1"); } catch {}
-    setReady(true);
-  }, []);
-  useEffect(() => {
-    if (!ready) return;
-    try { window.localStorage.setItem("crsap.sidebar.collapsed", collapsed ? "1" : "0"); } catch {}
     window.dispatchEvent(new CustomEvent("crsap:sidebar", { detail: collapsed }));
-  }, [collapsed, ready]);
+  }, [collapsed]);
 
   const width = collapsed ? 76 : 280;
 
   return (
     <motion.aside
+      aria-label="Desktop navigation"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocusCapture={() => setFocused(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);
+      }}
       initial={false}
       animate={{ width }}
       transition={{ type: "spring", stiffness: 220, damping: 28 }}
@@ -52,13 +56,6 @@ export function Sidebar() {
             </motion.div>
           )}
         </AnimatePresence>
-        <button
-          onClick={() => setCollapsed((c) => !c)}
-          title={collapsed ? "Expand" : "Collapse"}
-          className="ml-auto h-7 w-7 grid place-items-center rounded-lg glass-soft text-muted-foreground hover:text-foreground transition"
-        >
-          {collapsed ? <PanelLeftOpen className="h-3.5 w-3.5" /> : <PanelLeftClose className="h-3.5 w-3.5" />}
-        </button>
       </div>
 
       {/* Category-only navigation */}
@@ -123,13 +120,13 @@ export function Sidebar() {
       {/* AI orb */}
       <div className="relative px-3 py-3">
 
-        <button
+        <Button variant="ghost" title="Open CR-SAP WASH assistant" aria-label="Open CR-SAP WASH assistant"
           className={`w-full flex items-center gap-3 rounded-xl glass-soft px-3 py-2.5 text-left transition hover:bg-[oklch(0.82_0.19_175/0.10)]`}
           onClick={() => window.dispatchEvent(new CustomEvent("crsap:open-ai"))}
         >
-          <span className="relative inline-grid h-9 w-9 place-items-center rounded-full animate-orb"
-                style={{ background: "radial-gradient(circle at 30% 30%, oklch(0.95 0.13 200), oklch(0.62 0.22 285))" }}>
-            <Bot className="h-4 w-4 text-background" />
+          <span className="relative inline-grid h-9 w-9 shrink-0 place-items-center rounded-full text-assistant-ink"
+                style={{ background: "var(--assistant-surface)" }}>
+            <WashAssistantIcon className="scale-75" />
           </span>
           {!collapsed && (
             <div className="min-w-0">
@@ -137,7 +134,7 @@ export function Sidebar() {
               <div className="text-[10px] text-muted-foreground truncate">Ask anything · context-aware</div>
             </div>
           )}
-        </button>
+        </Button>
       </div>
     </motion.aside>
   );
@@ -145,9 +142,8 @@ export function Sidebar() {
 
 /** Width consumed by the sidebar — kept in sync with the spring above (collapsed/expanded). */
 export function useSidebarWidth() {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   useEffect(() => {
-    try { setCollapsed(window.localStorage.getItem("crsap.sidebar.collapsed") === "1"); } catch {}
     const sync = (event: Event) => {
       if (event instanceof CustomEvent && typeof event.detail === "boolean") setCollapsed(event.detail);
     };

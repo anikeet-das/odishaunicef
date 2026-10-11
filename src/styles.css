@@ -34,6 +34,10 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-deep: var(--brand-deep);
+  --color-assistant-ink: var(--assistant-ink);
+  --color-assistant-paper: var(--assistant-paper);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -64,6 +68,12 @@
 :root {
   /* CR-SAP — Futuristic dark glassmorphism (default). */
   --radius: 0.875rem;
+  --brand-blue: oklch(0.76 0.15 245);
+  --brand-deep: oklch(0.65 0.18 260);
+  --assistant-ink: oklch(0.35 0.12 252);
+  --assistant-paper: oklch(0.99 0.005 240);
+  --assistant-surface: linear-gradient(145deg, oklch(0.96 0.025 230), oklch(0.83 0.08 242));
+  --assistant-shadow: 0 8px 26px -8px oklch(0.45 0.15 245 / 0.45);
   --background: oklch(0.16 0.03 260);
   --foreground: oklch(0.97 0.01 240);
   --card: oklch(0.21 0.035 262 / 0.55);
@@ -320,6 +330,8 @@ html { transition: background-color .35s ease, color .35s ease; }
  * Active when html[data-theme="cream"].
  * ============================================================= */
 html[data-theme="cream"] {
+  --brand-blue: oklch(0.52 0.19 248);
+  --brand-deep: oklch(0.34 0.12 258);
   /* Canvas: crisp cool white with the faintest azure breath. */
   --background: oklch(0.992 0.005 240);
   /* Ink: deep slate-navy for strong contrast on white. */
