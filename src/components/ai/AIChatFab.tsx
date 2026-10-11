@@ -4,6 +4,8 @@ import ReactMarkdown from "react-markdown";
 import { useSchools } from "@/lib/data/cces";
 import { buildAIContext } from "@/lib/ai/context";
 import { MiniDashboard, type DashboardSpec } from "@/components/cr-sap/MiniDashboard";
+import { WashAssistantIcon } from "./WashAssistantIcon";
+import { Button } from "@/components/ui/button";
 
 type ChatMsg = {
   role: "user" | "assistant";
@@ -30,6 +32,11 @@ export function AIChatFab() {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
+  useEffect(() => {
+    const show = () => setOpen(true);
+    window.addEventListener("crsap:open-ai", show);
+    return () => window.removeEventListener("crsap:open-ai", show);
+  }, []);
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
@@ -78,17 +85,18 @@ export function AIChatFab() {
 
   return (
     <>
-      <button
+      <Button variant="ghost" size="icon"
         onClick={() => setOpen((o) => !o)}
-        className="ai-chat-trigger fixed bottom-6 right-6 z-40 h-12 w-12 lg:h-16 lg:w-16 rounded-full grid place-items-center text-background animate-orb transition-transform hover:scale-105"
+        className="ai-chat-trigger fixed bottom-6 right-6 z-40 h-12 w-12 lg:h-16 lg:w-16 rounded-full grid place-items-center text-assistant-ink transition-transform hover:scale-105"
         style={{
-          background: "radial-gradient(circle at 30% 30%, oklch(0.95 0.13 200), oklch(0.72 0.21 255) 55%, oklch(0.62 0.22 285))",
-          boxShadow: "0 0 0 1px oklch(0.85 0.2 195 / 0.55), 0 12px 40px -10px oklch(0.62 0.22 285 / 0.7), 0 0 28px oklch(0.86 0.16 200 / 0.55)",
+          background: "var(--assistant-surface)",
+          boxShadow: "var(--assistant-shadow)",
         }}
         aria-label="Open AI assistant"
+        title="CR-SAP WASH & school resilience assistant"
       >
-        <Sparkles className="h-6 w-6" />
-      </button>
+        <WashAssistantIcon />
+      </Button>
       {open && (
         <div
           className="ai-chat-panel fixed bottom-24 right-6 z-[70] rounded-2xl flex flex-col overflow-hidden border"

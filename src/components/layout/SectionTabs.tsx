@@ -16,7 +16,9 @@ export function SectionTabs() {
   return (
     <>
     <div className="lg:hidden h-14 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 pl-4 pr-16">
-      <span className="min-w-0 text-sm font-semibold text-foreground">CR SAP ODISHA</span>
+      <span className="min-w-0 whitespace-nowrap text-xl sm:text-2xl font-bold leading-tight" aria-label="CR SAP ODISHA">
+        <span className="text-brand-blue">CR</span>{" "}<span className="text-brand-deep">SAP</span>{" "}<span className="text-foreground">ODISHA</span>
+      </span>
     </div>
     {activeGroup && activeGroup.items.length > 1 ? (
     <nav aria-label={`${t(activeGroup.items[0].labelKey)} section navigation`} className="section-navigation hidden lg:block px-3 pt-3">
